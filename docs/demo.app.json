@@ -1,0 +1,13 @@
+{
+  "name": "rslocal",
+  "intro": "A http server echo hello.",
+  "image": "saltbo/rslocald",
+  "port": [
+    8422,
+    8423
+  ],
+  "configMount": "/etc/rslocal",
+  "depends": {
+    "middlewares": []
+  }
+}

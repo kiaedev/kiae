@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/saltbo/zos/apiserver/cmd"
+import "github.com/openkos/openkos/cmd"
 
 func main() {
 	cmd.Execute()

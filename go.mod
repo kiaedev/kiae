@@ -1,4 +1,4 @@
-module github.com/saltbo/zos/apiserver
+module github.com/openkos/openkos
 
 go 1.17
 
