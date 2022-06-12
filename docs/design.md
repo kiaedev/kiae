@@ -62,12 +62,4 @@ kos-app-devops：一个基于kos的devops系统
 - secret
 - 权限控制
 
-应用定义：
-name，
-image，
-port，
-config，每个应用提供一个，可配置路径
-env，注入用户在系统内定义的所有环境变量，运行跨应用访问
-secret，每个应用一个，不允许跨应用访问
-volume，挂载一个标准地址，每个应用一个
 

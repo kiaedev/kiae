@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "github.com/openkos/openkos/api/settings";
+package settings;
+
+service Settings {
+  rpc List(ListRequest) returns(ListReply){}
+  rpc Update(UpdateRequest) returns (UpdateReply) {}
+}
+
+message ListRequest {
+  System system = 1;
+  Volume volume = 2;
+}
+
+message ListReply {
+  string name = 1;
+}
+
+message UpdateRequest {
+
+}
+
+message UpdateReply {
+  string message = 1;
+}
+
+message System {
+
+}
+
+message Volume {
+
+}

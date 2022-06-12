@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option go_package = "github.com/openkos/openkos/api/app";
+package app;
+
+service App {
+  rpc List(AppListRequest) returns(AppList){}
+  rpc Install (AppOpRequest) returns (AppOpReply) {}
+  rpc Uninstall (AppOpRequest) returns (AppOpReply) {}
+  rpc Start (AppStatusRequest) returns (AppStatusReply) {}
+  rpc Stop (AppStatusRequest) returns (AppStatusReply) {}
+}
+
+message Application {
+  string uid = 1;
+  string name = 2;
+  string intro = 3;
+  string image = 4;
+  repeated int32 port = 5;
+  string config = 6;
+  string depends = 7;
+}
+
+message AppListRequest {
+  string name = 1;
+}
+
+message AppList {
+  repeated Application items = 1;
+  int64 total = 2;
+}
+
+message AppOpRequest{
+  uint64 id = 1;
+  enum Operation {
+    Install = 0;
+    Uninstall = 1;
+    Upgrade = 2;
+  }
+  Operation op = 4;
+}
+
+message AppOpReply {
+
+}
+
+message AppStatusRequest{
+  uint64 id = 1;
+  enum AppStatus {
+    Running = 0;
+    Stopped = 1;
+    Upgrading = 2;
+  }
+  AppStatus status = 2;
+}
+
+message AppStatusReply {
+
+}
