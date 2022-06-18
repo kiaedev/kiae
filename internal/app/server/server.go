@@ -1,20 +1,24 @@
 package server
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"path/filepath"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 
-	"github.com/openkos/openkos/api/app"
-	"github.com/openkos/openkos/api/settings"
+	"github.com/openkos/openkos/api/gen/go/app"
+	"github.com/openkos/openkos/api/gen/go/settings"
 	"github.com/openkos/openkos/internal/app/server/service"
 )
 
@@ -57,11 +61,35 @@ func Run() {
 	}
 
 	s := grpc.NewServer()
-	app.RegisterAppServer(s, service.NewAppStore(oamClientSet))
-	settings.RegisterSettingsServer(s, service.NewSettings(clientset))
+	app.RegisterAppServiceServer(s, service.NewAppStore(oamClientSet))
+	settings.RegisterSettingsServiceServer(s, service.NewSettings(clientset))
 
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
+	go func() {
+		log.Printf("server listening at %v", lis.Addr())
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	if err := run(); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func run() error {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Register gRPC server endpoint
+	// Note: Make sure the gRPC server is running properly and accessible
+	mux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	err := app.RegisterAppServiceHandlerFromEndpoint(ctx, mux, "localhost:8888", opts)
+	if err != nil {
+		return err
+	}
+
+	// Start HTTP server (and proxy calls to gRPC server endpoint)
+	return http.ListenAndServe(":8081", mux)
 }

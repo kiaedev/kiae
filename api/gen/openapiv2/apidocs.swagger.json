@@ -1,0 +1,197 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "app/app.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "AppService"
+    },
+    {
+      "name": "SettingsService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/apps": {
+      "get": {
+        "operationId": "AppService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "SettingsService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/settingsListReply"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "SettingsService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AppOpRequestOperation": {
+      "type": "string",
+      "enum": [
+        "OPERATION_UNSPECIFIED",
+        "OPERATION_INSTALL",
+        "OPERATION_UNINSTALL",
+        "OPERATION_UPGRADE"
+      ],
+      "default": "OPERATION_UNSPECIFIED"
+    },
+    "AppStatusRequestAppStatus": {
+      "type": "string",
+      "enum": [
+        "APP_STATUS_UNSPECIFIED",
+        "APP_STATUS_RUNNING",
+        "APP_STATUS_STOPPED",
+        "APP_STATUS_UPGRADING"
+      ],
+      "default": "APP_STATUS_UNSPECIFIED"
+    },
+    "appAppOpReply": {
+      "type": "object"
+    },
+    "appAppStatusReply": {
+      "type": "object"
+    },
+    "appApplication": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "port": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "config": {
+          "type": "string"
+        },
+        "depends": {
+          "type": "string"
+        }
+      }
+    },
+    "appListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/appApplication"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "settingsListReply": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "settingsSystem": {
+      "type": "object"
+    },
+    "settingsUpdateReply": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "settingsVolume": {
+      "type": "object"
+    }
+  }
+}

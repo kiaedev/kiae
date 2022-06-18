@@ -1,10 +1,15 @@
 syntax = "proto3";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/openkos/openkos/api/settings";
 package settings;
 
-service Settings {
-  rpc List(ListRequest) returns(ListReply){}
+service SettingsService {
+  rpc List(ListRequest) returns(ListReply){
+    option (google.api.http) = {
+      get: "/api/v1/settings"
+    };
+  }
   rpc Update(UpdateRequest) returns (UpdateReply) {}
 }
 

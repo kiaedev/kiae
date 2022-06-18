@@ -7,11 +7,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/openkos/openkos/api/settings"
+	"github.com/openkos/openkos/api/gen/go/settings"
 )
 
 type Settings struct {
-	settings.UnimplementedSettingsServer
+	settings.UnimplementedSettingsServiceServer
 
 	cs *kubernetes.Clientset
 }

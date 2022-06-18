@@ -1,10 +1,15 @@
 syntax = "proto3";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/openkos/openkos/api/app";
 package app;
 
-service App {
-  rpc List(AppListRequest) returns(AppList){}
+service AppService {
+  rpc List(ListRequest) returns(ListResponse){
+    option (google.api.http) = {
+      get: "/api/v1/apps"
+    };
+  }
   rpc Install (AppOpRequest) returns (AppOpReply) {}
   rpc Uninstall (AppOpRequest) returns (AppOpReply) {}
   rpc Start (AppStatusRequest) returns (AppStatusReply) {}
@@ -21,11 +26,11 @@ message Application {
   string depends = 7;
 }
 
-message AppListRequest {
+message ListRequest {
   string name = 1;
 }
 
-message AppList {
+message ListResponse {
   repeated Application items = 1;
   int64 total = 2;
 }
@@ -33,9 +38,10 @@ message AppList {
 message AppOpRequest{
   uint64 id = 1;
   enum Operation {
-    Install = 0;
-    Uninstall = 1;
-    Upgrade = 2;
+    OPERATION_UNSPECIFIED = 0;
+    OPERATION_INSTALL = 1;
+    OPERATION_UNINSTALL = 2;
+    OPERATION_UPGRADE = 3;
   }
   Operation op = 4;
 }
@@ -47,9 +53,10 @@ message AppOpReply {
 message AppStatusRequest{
   uint64 id = 1;
   enum AppStatus {
-    Running = 0;
-    Stopped = 1;
-    Upgrading = 2;
+    APP_STATUS_UNSPECIFIED = 0;
+    APP_STATUS_RUNNING = 1;
+    APP_STATUS_STOPPED = 2;
+    APP_STATUS_UPGRADING = 3;
   }
   AppStatus status = 2;
 }
