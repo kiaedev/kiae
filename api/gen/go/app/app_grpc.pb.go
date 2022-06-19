@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppServiceClient interface {
+	Sync(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Install(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error)
 	Uninstall(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error)
@@ -35,6 +37,15 @@ type appServiceClient struct {
 
 func NewAppServiceClient(cc grpc.ClientConnInterface) AppServiceClient {
 	return &appServiceClient{cc}
+}
+
+func (c *appServiceClient) Sync(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/app.AppService/Sync", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *appServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
@@ -86,6 +97,7 @@ func (c *appServiceClient) Stop(ctx context.Context, in *AppStatusRequest, opts 
 // All implementations must embed UnimplementedAppServiceServer
 // for forward compatibility
 type AppServiceServer interface {
+	Sync(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Install(context.Context, *AppOpRequest) (*AppOpReply, error)
 	Uninstall(context.Context, *AppOpRequest) (*AppOpReply, error)
@@ -98,6 +110,9 @@ type AppServiceServer interface {
 type UnimplementedAppServiceServer struct {
 }
 
+func (UnimplementedAppServiceServer) Sync(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Sync not implemented")
+}
 func (UnimplementedAppServiceServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
@@ -124,6 +139,24 @@ type UnsafeAppServiceServer interface {
 
 func RegisterAppServiceServer(s grpc.ServiceRegistrar, srv AppServiceServer) {
 	s.RegisterService(&AppService_ServiceDesc, srv)
+}
+
+func _AppService_Sync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).Sync(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/Sync",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).Sync(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _AppService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -223,6 +256,10 @@ var AppService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "app.AppService",
 	HandlerType: (*AppServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Sync",
+			Handler:    _AppService_Sync_Handler,
+		},
 		{
 			MethodName: "List",
 			Handler:    _AppService_List_Handler,

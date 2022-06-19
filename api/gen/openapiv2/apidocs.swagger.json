@@ -114,6 +114,9 @@
         "image": {
           "type": "string"
         },
+        "version": {
+          "type": "string"
+        },
         "port": {
           "type": "array",
           "items": {
