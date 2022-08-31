@@ -13,6 +13,6 @@ func NewApplication() *Application {
 }
 
 func (app *Application) Render() {
-	// tpl := template.New()
+	// tpl := templates.New()
 	// tpl.Execute(os.Stdout, app)
 }

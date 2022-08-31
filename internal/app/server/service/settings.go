@@ -3,11 +3,10 @@ package service
 import (
 	"context"
 
+	"github.com/openkos/openkos/api/settings"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/openkos/openkos/api/gen/go/settings"
 )
 
 type Settings struct {

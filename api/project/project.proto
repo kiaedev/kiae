@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package project;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/openkos/openkos/api/project";
+
+message Project {
+    int32 id = 1;
+    string name = 2 [(validate.rules).string = {max_len: 32, min_len: 3}];
+    string intro = 3 [(validate.rules).string = {max_len: 150, min_len: 5}];
+    optional string git = 4;
+    optional string image = 5;
+    repeated Port ports = 6;
+    repeated Configuration configs = 7;
+    repeated Middleware middlewares = 8;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp created_by = 102;
+    google.protobuf.Timestamp updated_at = 103;
+    google.protobuf.Timestamp updated_by = 104;
+}
+
+message Port {
+    uint32 port = 1 [(validate.rules).uint32 = {gt: 0, lte: 65535}];
+    optional string protocol = 2 [(validate.rules).string = {in: ["http", "http2", "tcp"]}];
+}
+
+message Configuration {
+    string name = 1 [(validate.rules).string = {max_len: 16,min_len: 2}];
+    string content = 2;
+    string mount_path = 3 [(validate.rules).string = {max_len: 255,min_len: 2}];
+}
+
+message Middleware {
+    string name = 1;
+    string type = 2 [(validate.rules).string = {in: ["MySQL", "MongoDB", "Redis", "Memcached", "Kafka", "RabbitMQ", "iNotify"]}];
+    map<string, google.protobuf.Any> properties = 3 [(validate.rules).map = {}];
+}

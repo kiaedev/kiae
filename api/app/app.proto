@@ -19,14 +19,15 @@ service AppService {
 }
 
 message Application {
-  string uid = 1;
-  string name = 2;
-  string intro = 3;
-  string image = 4;
-  string version = 5;
-  repeated int32 port = 6;
-  string config = 7;
-  string depends = 8;
+  string id = 1;
+  string pid = 2;
+  string name = 3;
+  string intro = 4;
+  string image = 5;
+  string version = 6;
+  repeated int32 port = 7;
+//  string config = 8;
+//  string depends = 8;
 }
 
 message ListRequest {

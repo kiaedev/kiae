@@ -9,13 +9,12 @@ import (
 
 	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
+	"github.com/openkos/openkos/api/app"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/json"
-
-	"github.com/openkos/openkos/api/gen/go/app"
 )
 
 const (

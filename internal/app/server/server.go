@@ -11,14 +11,14 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
+	"github.com/openkos/openkos/api/app"
+	"github.com/openkos/openkos/api/settings"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 
-	"github.com/openkos/openkos/api/gen/go/app"
-	"github.com/openkos/openkos/api/gen/go/settings"
 	"github.com/openkos/openkos/internal/app/server/service"
 )
 

@@ -1,0 +1,34 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: {{ .Name }}
+spec:
+  components:
+    - name: app
+      type: open-app-engine
+      dependsOn: {{ .Depends }}
+      properties:
+        image: {{ .Image }}
+        ports:
+          {{ range .Ports }}
+          - port: {{ .Port }}
+            protocol: {{ .Protocol }}
+          {{ end}}
+        volumeMounts:
+          configMap:
+          {{ range .Configs }}
+            - name: {{ .Name }}
+              cmName: {{ .Name }}
+              mountPath: {{ .MountPath }}
+          {{ end}}
+
+      traits:
+        {{ range .Traits }}
+        - type: {{ .Type }}
+          properties: {{ .Properties }}
+        {{ end}}
+    {{ range .Middlewares }}
+    - name: {{ .Name }}
+      type: {{ .Type }}
+      properties: {{ .Properties }}
+    {{ end}}

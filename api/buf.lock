@@ -2,9 +2,13 @@
 version: v1
 deps:
   - remote: buf.build
+    owner: envoyproxy
+    repository: protoc-gen-validate
+    commit: 45685e052c7e406b9fbd441fc7a568a5
+  - remote: buf.build
     owner: googleapis
     repository: googleapis
-    commit: ddb1e81d80b14d739df183805e242abc
+    commit: 80720a488c9a414bb8d4a9f811084989
   - remote: buf.build
     owner: grpc-ecosystem
     repository: grpc-gateway
