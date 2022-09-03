@@ -4,22 +4,26 @@ metadata:
   name: {{ .Name }}
 spec:
   components:
-    - name: app
-      type: open-app-engine
+    - name: {{ .Name }}
+      type: webservice
+      {{ if .Middlewares }}
       dependsOn: {{ .Depends }}
+      {{ end }}
       properties:
         image: {{ .Image }}
         ports:
           {{ range .Ports }}
           - port: {{ .Port }}
-            protocol: {{ .Protocol }}
+            name: {{ .Protocol }}-{{ .Port }}
+            expose: true
+            appProtocol: {{ .Protocol }}
           {{ end}}
         volumeMounts:
           configMap:
-          {{ range .Configs }}
-            - name: {{ .Name }}
-              cmName: {{ .Name }}
-              mountPath: {{ .MountPath }}
+          {{ range $idx, $path := .ConfigPaths }}
+            - name: kiaeapp-{{ $.Name }}-{{ add1 $idx }}
+              cmName: kiaeapp-{{ $.Name }}
+              mountPath: {{ $path }}
           {{ end}}
 
       traits:

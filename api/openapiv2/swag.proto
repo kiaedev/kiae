@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package openapiv2;
+
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/kiaedev/kiae/api/openapiv2";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+        title: "kiae";
+        version: "v0.0.1";
+        contact: {
+            name: "kiae";
+            url: "https://github.com/kiaedev/kiae";
+        };
+    };
+};

@@ -22,9 +22,14 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"flag"
+	"path/filepath"
 
-	"github.com/openkos/openkos/internal/app/server"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"k8s.io/client-go/util/homedir"
+
+	"github.com/kiaedev/kiae/internal/app/server"
 )
 
 // serverCmd represents the server command
@@ -37,21 +42,31 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		server.Run()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var kubeconfig *string
+		if home := homedir.HomeDir(); home != "" {
+			kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "conf.d/cce.dev.me.conf"), "(optional) absolute path to the kubeconfig file")
+		} else {
+			kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+		}
+		flag.Parse()
+
+		s, err := server.NewServer(*kubeconfig)
+		if err != nil {
+			return err
+		}
+
+		return s.Run()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
-	// Here you will define your flags and configuration settings.
+	serverCmd.Flags().Bool("debug", false, "specify the debug")
+	serverCmd.Flags().String("dsn", "mongodb://root:admin@localhost:27017", "specify the dsn of the database")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// serverCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	_ = viper.BindPFlag("debug", serverCmd.Flags().Lookup("debug"))
+	_ = viper.BindPFlag("dsn", serverCmd.Flags().Lookup("dsn"))
+	viper.MustBindEnv("DSN")
 }

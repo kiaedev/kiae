@@ -2,34 +2,34 @@ import (
 	"strconv"
 )
 
-webservice: {
+kiaeWebservice: {
 	type: "component"
 	annotations: {}
 	attributes: {
 		status: {
 			customStatus: """
-        import \"strconv\"
-        ready: {
-        \tif context.output.status.readyReplicas == _|_ {
-        \t\treplica: \"0\"
-        \t}
-        \tif context.output.status.readyReplicas != _|_ {
-        \t\treplica:  strconv.FormatInt(context.output.status.readyReplicas, 10)
-        \t}
-        }
-        message: \"Ready:\" + ready.replica + \"/\" + strconv.FormatInt(context.output.spec.replicas, 10)
-        """
+				import \"strconv\"
+				ready: {
+				\tif context.output.status.readyReplicas == _|_ {
+				\t\treplica: \"0\"
+				\t}
+				\tif context.output.status.readyReplicas != _|_ {
+				\t\treplica:  strconv.FormatInt(context.output.status.readyReplicas, 10)
+				\t}
+				}
+				message: \"Ready:\" + ready.replica + \"/\" + strconv.FormatInt(context.output.spec.replicas, 10)
+				"""
 			healthPolicy: """
-        ready: {
-        \tif context.output.status.readyReplicas == _|_ {
-        \t\treplica: 0
-        \t}
-        \tif context.output.status.readyReplicas != _|_ {
-        \t\treplica:  context.output.status.readyReplicas
-        \t}
-        }
-        isHealth: context.output.spec.replicas == ready.replica
-        """
+				ready: {
+				\tif context.output.status.readyReplicas == _|_ {
+				\t\treplica: 0
+				\t}
+				\tif context.output.status.readyReplicas != _|_ {
+				\t\treplica:  context.output.status.readyReplicas
+				\t}
+				}
+				isHealth: context.output.spec.replicas == ready.replica
+				"""
 		}
 		workload: {
 			definition: {
@@ -299,8 +299,9 @@ template: {
 	}
 	exposePorts: [
 		for v in parameter.ports if v.expose == true {
-			port:       v.port
-			targetPort: v.port
+			port:        v.port
+			targetPort:  v.port
+			appProtocol: v.protocol
 			if v.name != _|_ {
 				name: v.name
 			}
@@ -531,4 +532,3 @@ template: {
 		}]
 	}
 }
-

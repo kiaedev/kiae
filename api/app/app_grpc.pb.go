@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,12 +22,22 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppServiceClient interface {
-	Sync(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
-	Install(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error)
-	Uninstall(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error)
-	Start(ctx context.Context, in *AppStatusRequest, opts ...grpc.CallOption) (*AppStatusReply, error)
-	Stop(ctx context.Context, in *AppStatusRequest, opts ...grpc.CallOption) (*AppStatusReply, error)
+	Create(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error)
+	Update(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error)
+	//    rpc Start (AppStatusRequest) returns (AppStatusReply) {
+	//        option (google.api.http) = {
+	//            patch: "/api/v1/apps/{id}/status"
+	//            body: "*"
+	//        };
+	//    }
+	//    rpc Stop (AppStatusRequest) returns (AppStatusReply) {
+	//        option (google.api.http) = {
+	//            patch: "/api/v1/apps/{id}/status"
+	//            body: "*"
+	//        };
+	//    }
+	Delete(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error)
 }
 
 type appServiceClient struct {
@@ -37,15 +46,6 @@ type appServiceClient struct {
 
 func NewAppServiceClient(cc grpc.ClientConnInterface) AppServiceClient {
 	return &appServiceClient{cc}
-}
-
-func (c *appServiceClient) Sync(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/app.AppService/Sync", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *appServiceClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
@@ -57,36 +57,27 @@ func (c *appServiceClient) List(ctx context.Context, in *ListRequest, opts ...gr
 	return out, nil
 }
 
-func (c *appServiceClient) Install(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error) {
+func (c *appServiceClient) Create(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error) {
+	out := new(Application)
+	err := c.cc.Invoke(ctx, "/app.AppService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) Update(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error) {
+	out := new(Application)
+	err := c.cc.Invoke(ctx, "/app.AppService/Update", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) Delete(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error) {
 	out := new(AppOpReply)
-	err := c.cc.Invoke(ctx, "/app.AppService/Install", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appServiceClient) Uninstall(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error) {
-	out := new(AppOpReply)
-	err := c.cc.Invoke(ctx, "/app.AppService/Uninstall", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appServiceClient) Start(ctx context.Context, in *AppStatusRequest, opts ...grpc.CallOption) (*AppStatusReply, error) {
-	out := new(AppStatusReply)
-	err := c.cc.Invoke(ctx, "/app.AppService/Start", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appServiceClient) Stop(ctx context.Context, in *AppStatusRequest, opts ...grpc.CallOption) (*AppStatusReply, error) {
-	out := new(AppStatusReply)
-	err := c.cc.Invoke(ctx, "/app.AppService/Stop", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/app.AppService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,12 +88,22 @@ func (c *appServiceClient) Stop(ctx context.Context, in *AppStatusRequest, opts 
 // All implementations must embed UnimplementedAppServiceServer
 // for forward compatibility
 type AppServiceServer interface {
-	Sync(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	List(context.Context, *ListRequest) (*ListResponse, error)
-	Install(context.Context, *AppOpRequest) (*AppOpReply, error)
-	Uninstall(context.Context, *AppOpRequest) (*AppOpReply, error)
-	Start(context.Context, *AppStatusRequest) (*AppStatusReply, error)
-	Stop(context.Context, *AppStatusRequest) (*AppStatusReply, error)
+	Create(context.Context, *Application) (*Application, error)
+	Update(context.Context, *Application) (*Application, error)
+	//    rpc Start (AppStatusRequest) returns (AppStatusReply) {
+	//        option (google.api.http) = {
+	//            patch: "/api/v1/apps/{id}/status"
+	//            body: "*"
+	//        };
+	//    }
+	//    rpc Stop (AppStatusRequest) returns (AppStatusReply) {
+	//        option (google.api.http) = {
+	//            patch: "/api/v1/apps/{id}/status"
+	//            body: "*"
+	//        };
+	//    }
+	Delete(context.Context, *AppOpRequest) (*AppOpReply, error)
 	mustEmbedUnimplementedAppServiceServer()
 }
 
@@ -110,23 +111,17 @@ type AppServiceServer interface {
 type UnimplementedAppServiceServer struct {
 }
 
-func (UnimplementedAppServiceServer) Sync(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Sync not implemented")
-}
 func (UnimplementedAppServiceServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedAppServiceServer) Install(context.Context, *AppOpRequest) (*AppOpReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Install not implemented")
+func (UnimplementedAppServiceServer) Create(context.Context, *Application) (*Application, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedAppServiceServer) Uninstall(context.Context, *AppOpRequest) (*AppOpReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Uninstall not implemented")
+func (UnimplementedAppServiceServer) Update(context.Context, *Application) (*Application, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedAppServiceServer) Start(context.Context, *AppStatusRequest) (*AppStatusReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
-}
-func (UnimplementedAppServiceServer) Stop(context.Context, *AppStatusRequest) (*AppStatusReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Stop not implemented")
+func (UnimplementedAppServiceServer) Delete(context.Context, *AppOpRequest) (*AppOpReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedAppServiceServer) mustEmbedUnimplementedAppServiceServer() {}
 
@@ -139,24 +134,6 @@ type UnsafeAppServiceServer interface {
 
 func RegisterAppServiceServer(s grpc.ServiceRegistrar, srv AppServiceServer) {
 	s.RegisterService(&AppService_ServiceDesc, srv)
-}
-
-func _AppService_Sync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServiceServer).Sync(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/app.AppService/Sync",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Sync(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _AppService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -177,74 +154,56 @@ func _AppService_List_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AppService_Install_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AppService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Application)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).Create(ctx, req.(*Application))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Application)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).Update(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/Update",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).Update(ctx, req.(*Application))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AppOpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AppServiceServer).Install(ctx, in)
+		return srv.(AppServiceServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/app.AppService/Install",
+		FullMethod: "/app.AppService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Install(ctx, req.(*AppOpRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AppService_Uninstall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AppOpRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServiceServer).Uninstall(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/app.AppService/Uninstall",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Uninstall(ctx, req.(*AppOpRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AppService_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AppStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServiceServer).Start(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/app.AppService/Start",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Start(ctx, req.(*AppStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AppService_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AppStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppServiceServer).Stop(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/app.AppService/Stop",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Stop(ctx, req.(*AppStatusRequest))
+		return srv.(AppServiceServer).Delete(ctx, req.(*AppOpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -257,28 +216,20 @@ var AppService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AppServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Sync",
-			Handler:    _AppService_Sync_Handler,
-		},
-		{
 			MethodName: "List",
 			Handler:    _AppService_List_Handler,
 		},
 		{
-			MethodName: "Install",
-			Handler:    _AppService_Install_Handler,
+			MethodName: "Create",
+			Handler:    _AppService_Create_Handler,
 		},
 		{
-			MethodName: "Uninstall",
-			Handler:    _AppService_Uninstall_Handler,
+			MethodName: "Update",
+			Handler:    _AppService_Update_Handler,
 		},
 		{
-			MethodName: "Start",
-			Handler:    _AppService_Start_Handler,
-		},
-		{
-			MethodName: "Stop",
-			Handler:    _AppService_Stop_Handler,
+			MethodName: "Delete",
+			Handler:    _AppService_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

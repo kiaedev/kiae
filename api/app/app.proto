@@ -1,68 +1,115 @@
 syntax = "proto3";
-import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
 
-option go_package = "github.com/openkos/openkos/api/app";
+option go_package = "github.com/kiaedev/kiae/api/app";
+
 package app;
 
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "project/project.proto";
+import "validate/validate.proto";
+
 service AppService {
-  rpc Sync(google.protobuf.Empty) returns (google.protobuf.Empty);
-  rpc List(ListRequest) returns(ListResponse){
-    option (google.api.http) = {
-      get: "/api/v1/apps"
-    };
-  }
-  rpc Install (AppOpRequest) returns (AppOpReply) {}
-  rpc Uninstall (AppOpRequest) returns (AppOpReply) {}
-  rpc Start (AppStatusRequest) returns (AppStatusReply) {}
-  rpc Stop (AppStatusRequest) returns (AppStatusReply) {}
+    rpc List (ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/apps"
+        };
+    }
+    rpc Create (Application) returns (Application) {
+        option (google.api.http) = {
+            post: "/api/v1/apps"
+            body: "*"
+        };
+    }
+    rpc Update (Application) returns (Application) {
+        option (google.api.http) = {
+            put: "/api/v1/apps/{id}",
+            body: "*",
+            additional_bindings: {
+                patch: "/api/v1/apps/{id}"
+                body: "*"
+            }
+        };
+    }
+    //    rpc Start (AppStatusRequest) returns (AppStatusReply) {
+    //        option (google.api.http) = {
+    //            patch: "/api/v1/apps/{id}/status"
+    //            body: "*"
+    //        };
+    //    }
+    //    rpc Stop (AppStatusRequest) returns (AppStatusReply) {
+    //        option (google.api.http) = {
+    //            patch: "/api/v1/apps/{id}/status"
+    //            body: "*"
+    //        };
+    //    }
+    rpc Delete (AppOpRequest) returns (AppOpReply) {
+        option (google.api.http) = {
+            delete: "/api/v1/apps/{id}"
+        };
+    }
 }
 
 message Application {
-  string id = 1;
-  string pid = 2;
-  string name = 3;
-  string intro = 4;
-  string image = 5;
-  string version = 6;
-  repeated int32 port = 7;
-//  string config = 8;
-//  string depends = 8;
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string pid = 2 [(validate.rules).string = {len: 24}];
+    string env = 3 [(validate.rules).string = {min_len: 3, max_len: 16}];
+    string name = 4;
+    string image = 5 [(validate.rules).string = {min_len: 3, max_len: 128}];
+    repeated project.Port ports = 6;
+    Status status = 7;
+    Size size = 8;
+    repeated project.Configuration configs = 9;
+    //    string depends = 8;
+    google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
+    google.protobuf.Timestamp created_by = 102; // @gotags: bson:"created_by,omitempty"
+    google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
+    google.protobuf.Timestamp updated_by = 104; // @gotags: bson:"updated_by,omitempty"
 }
 
 message ListRequest {
-  string name = 1;
+    string pid = 1;
 }
 
 message ListResponse {
-  repeated Application items = 1;
-  int64 total = 2;
+    repeated Application items = 1;
+    int64 total = 2;
 }
 
-message AppOpRequest{
-  uint64 id = 1;
-  enum Operation {
-    OPERATION_UNSPECIFIED = 0;
-    OPERATION_INSTALL = 1;
-    OPERATION_UNINSTALL = 2;
-    OPERATION_UPGRADE = 3;
-  }
-  Operation op = 4;
+message AppOpRequest {
+    string id = 1;
+    enum Operation {
+        OPERATION_UNSPECIFIED = 0;
+        OPERATION_INSTALL = 1;
+        OPERATION_UNINSTALL = 2;
+        OPERATION_UPGRADE = 3;
+    }
+    Operation op = 4;
 }
 
 message AppOpReply {
 
 }
 
-message AppStatusRequest{
-  uint64 id = 1;
-  enum AppStatus {
-    APP_STATUS_UNSPECIFIED = 0;
-    APP_STATUS_RUNNING = 1;
-    APP_STATUS_STOPPED = 2;
-    APP_STATUS_UPGRADING = 3;
-  }
-  AppStatus status = 2;
+enum Size {
+    SIZE_NANO = 0;
+    SIZE_MIRCO = 1;
+    SIZE_MINI = 2;
+    SIZE_SMALL = 3;
+    SIZE_MEDIUM = 4;
+    SIZE_LARGE = 5;
+    SIZE_XLARGE = 6;
+    SIZE_XXLARGE = 7;
+}
+enum Status {
+    STATUS_PENDING = 0;
+    STATUS_RUNNING = 1;
+    STATUS_STOPPED = 2;
+}
+
+message AppStatusRequest {
+    uint64 id = 1;
+    Status status = 2;
 }
 
 message AppStatusReply {

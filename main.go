@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/openkos/openkos/cmd"
+import "github.com/kiaedev/kiae/cmd"
 
 func main() {
 	cmd.Execute()
