@@ -8,9 +8,11 @@ package app
 
 import (
 	context "context"
+	kiae "github.com/kiaedev/kiae/api/kiae"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -37,7 +39,7 @@ type AppServiceClient interface {
 	//            body: "*"
 	//        };
 	//    }
-	Delete(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error)
+	Delete(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type appServiceClient struct {
@@ -75,8 +77,8 @@ func (c *appServiceClient) Update(ctx context.Context, in *Application, opts ...
 	return out, nil
 }
 
-func (c *appServiceClient) Delete(ctx context.Context, in *AppOpRequest, opts ...grpc.CallOption) (*AppOpReply, error) {
-	out := new(AppOpReply)
+func (c *appServiceClient) Delete(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/app.AppService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -103,7 +105,7 @@ type AppServiceServer interface {
 	//            body: "*"
 	//        };
 	//    }
-	Delete(context.Context, *AppOpRequest) (*AppOpReply, error)
+	Delete(context.Context, *kiae.DeleteRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedAppServiceServer()
 }
 
@@ -120,7 +122,7 @@ func (UnimplementedAppServiceServer) Create(context.Context, *Application) (*App
 func (UnimplementedAppServiceServer) Update(context.Context, *Application) (*Application, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedAppServiceServer) Delete(context.Context, *AppOpRequest) (*AppOpReply, error) {
+func (UnimplementedAppServiceServer) Delete(context.Context, *kiae.DeleteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedAppServiceServer) mustEmbedUnimplementedAppServiceServer() {}
@@ -191,7 +193,7 @@ func _AppService_Update_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _AppService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AppOpRequest)
+	in := new(kiae.DeleteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -203,7 +205,7 @@ func _AppService_Delete_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/app.AppService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Delete(ctx, req.(*AppOpRequest))
+		return srv.(AppServiceServer).Delete(ctx, req.(*kiae.DeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

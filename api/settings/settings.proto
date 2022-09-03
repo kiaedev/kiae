@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "google/api/annotations.proto";
 
-option go_package = "github.com/kiae/kiae/api/settings";
+option go_package = "github.com/kiaeudev/kiae/api/settings";
 package settings;
 
 service SettingsService {

@@ -6,17 +6,18 @@ import (
 	"strings"
 
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
-	"github.com/kiaedev/kiae/api/trait"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/pkg/templates"
-	"github.com/kiaedev/kiae/pkg/kiae"
+	"github.com/kiaedev/kiae/pkg/kiaeutil"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -60,7 +61,7 @@ func (as *AppStore) Create(ctx context.Context, in *app.Application) (*app.Appli
 		return nil, status.Errorf(codes.AlreadyExists, "该环境已存在")
 	}
 
-	traits := []*trait.Trait{}
+	traits := []*kiae.Trait{}
 
 	in.Name = strings.ToLower(fmt.Sprintf("%s-%s", proj.Name, strutil.RandomText(4)))
 	oApp, err := templates.NewApplication(in, proj, traits)
@@ -68,7 +69,7 @@ func (as *AppStore) Create(ctx context.Context, in *app.Application) (*app.Appli
 		return nil, status.Errorf(codes.Internal, "rendering app failed: %v", err)
 	}
 
-	ns := kiae.BuildAppNs(in.Env)
+	ns := kiaeutil.BuildAppNs(in.Env)
 	if _, err := as.k8sClient.CoreV1().ConfigMaps(ns).Create(ctx, buildConfigs(proj, in), metav1.CreateOptions{}); err != nil {
 		return nil, status.Errorf(codes.Internal, "creating app-config failed: %v", err)
 	}
@@ -81,7 +82,7 @@ func (as *AppStore) Create(ctx context.Context, in *app.Application) (*app.Appli
 }
 
 func buildConfigs(proj *project.Project, app *app.Application) *v1.ConfigMap {
-	configs := kiae.ConfigsMerge(proj.Configs, app.Configs)
+	configs := kiaeutil.ConfigsMerge(proj.Configs, app.Configs)
 	data := make(map[string]string)
 
 	for _, config := range configs {
@@ -97,7 +98,16 @@ func buildConfigs(proj *project.Project, app *app.Application) *v1.ConfigMap {
 }
 
 func (as *AppStore) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
+	proj, err := as.daoProj.Get(ctx, req.Pid)
+	if err != nil {
+		return nil, err
+	}
+
 	results, total, err := as.daoApp.List(ctx, bson.M{"pid": req.Pid})
+	for _, rt := range results {
+		rt.Configs = kiaeutil.ConfigsMerge(proj.Configs, rt.Configs)
+	}
+
 	return &app.ListResponse{Items: results, Total: total}, err
 }
 
@@ -118,7 +128,7 @@ func (as *AppStore) Install(ctx context.Context, req *app.AppOpRequest) (*app.Ap
 	// 	return nil, err
 	// }
 
-	// _, err = as.cs.CoreV1beta1().Applications("kiae").Create(ctx, &application, metav1.CreateOptions{})
+	// _, err = as.cs.CoreV1beta1().Applications("kiaeutil").Create(ctx, &application, metav1.CreateOptions{})
 	return &app.AppOpReply{}, nil
 }
 
@@ -147,12 +157,16 @@ func (as *AppStore) Install(ctx context.Context, req *app.AppOpRequest) (*app.Ap
 // 	return &app.AppStatusReply{}, err
 // }
 
-func (as *AppStore) Delete(ctx context.Context, req *app.AppOpRequest) (*app.AppOpReply, error) {
-	// rt := new(app.Application)
-	// if err := as.collection.FindOneAndDelete(ctx, bson.M{"id": req.Id}).Decode(rt); err != nil {
-	// 	return nil, err
-	// }
+func (as *AppStore) Delete(ctx context.Context, in *kiae.DeleteRequest) (*emptypb.Empty, error) {
+	rt, err := as.daoApp.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
 
-	// err := as.oamClientSet.CoreV1beta1().Applications(rt.Env).Delete(ctx, rt.Name, metav1.DeleteOptions{})
-	return &app.AppOpReply{}, nil
+	ns := kiaeutil.BuildAppNs(rt.Env)
+	if err := as.oamClient.CoreV1beta1().Applications(ns).Delete(ctx, rt.Name, metav1.DeleteOptions{}); err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, as.daoApp.Delete(ctx, in.Id)
 }

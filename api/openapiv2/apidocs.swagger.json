@@ -94,7 +94,8 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/appAppOpReply"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -110,19 +111,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "op",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "OPERATION_UNSPECIFIED",
-              "OPERATION_INSTALL",
-              "OPERATION_UNINSTALL",
-              "OPERATION_UPGRADE"
-            ],
-            "default": "OPERATION_UNSPECIFIED"
           }
         ],
         "tags": [
@@ -361,6 +349,35 @@
       }
     },
     "/api/v1/projects/{id}": {
+      "delete": {
+        "operationId": "ProjectService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      },
       "put": {
         "operationId": "ProjectService_Update",
         "responses": {
@@ -554,19 +571,6 @@
     }
   },
   "definitions": {
-    "appAppOpReply": {
-      "type": "object"
-    },
-    "appAppOpRequestOperation": {
-      "type": "string",
-      "enum": [
-        "OPERATION_UNSPECIFIED",
-        "OPERATION_INSTALL",
-        "OPERATION_UNINSTALL",
-        "OPERATION_UPGRADE"
-      ],
-      "default": "OPERATION_UNSPECIFIED"
-    },
     "appApplication": {
       "type": "object",
       "properties": {
@@ -678,6 +682,15 @@
         }
       }
     },
+    "projectConfigLevel": {
+      "type": "string",
+      "enum": [
+        "CONFIG_LEVEL_TEAM",
+        "CONFIG_LEVEL_PROJECT",
+        "CONFIG_LEVEL_APP"
+      ],
+      "default": "CONFIG_LEVEL_TEAM"
+    },
     "projectConfiguration": {
       "type": "object",
       "properties": {
@@ -689,6 +702,17 @@
         },
         "mountPath": {
           "type": "string"
+        },
+        "level": {
+          "$ref": "#/definitions/projectConfigLevel"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },

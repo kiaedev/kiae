@@ -6,6 +6,8 @@ package app;
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "kiae/request.proto";
 import "project/project.proto";
 import "validate/validate.proto";
 
@@ -43,7 +45,7 @@ service AppService {
     //            body: "*"
     //        };
     //    }
-    rpc Delete (AppOpRequest) returns (AppOpReply) {
+    rpc Delete (kiae.DeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/api/v1/apps/{id}"
         };

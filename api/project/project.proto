@@ -5,7 +5,9 @@ package project;
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
 import "validate/validate.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "github.com/kiaedev/kiae/api/project";
 
@@ -32,11 +34,11 @@ service ProjectService {
         };
     }
 
-    //    rpc Delete (AppOpRequest) returns (AppOpReply) {
-    //        option (google.api.http) = {
-    //            delete: "/api/v1/projects/{id}"
-    //        };
-    //    }
+    rpc Delete (kiae.DeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/projects/{id}"
+        };
+    }
 }
 
 message Project {
@@ -64,6 +66,15 @@ message Configuration {
     string filename = 1 [(validate.rules).string = {max_len: 16,min_len: 2}];
     string content = 2;
     string mount_path = 3 [(validate.rules).string = {max_len: 255,min_len: 2}];
+    ConfigLevel level = 4;
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 102;
+}
+
+enum ConfigLevel {
+    CONFIG_LEVEL_TEAM = 0;
+    CONFIG_LEVEL_PROJECT = 1;
+    CONFIG_LEVEL_APP = 2;
 }
 
 message Middleware {

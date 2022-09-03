@@ -2,9 +2,9 @@ package templates
 
 import (
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
-	"github.com/kiaedev/kiae/api/trait"
-	"github.com/kiaedev/kiae/pkg/kiae"
+	"github.com/kiaedev/kiae/pkg/kiaeutil"
 	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela-core-api/pkg/oam/util"
@@ -20,12 +20,12 @@ type Application struct {
 	Middlewares []common.ApplicationComponent
 }
 
-func NewApplication(app *app.Application, proj *project.Project, traits []*trait.Trait) (*v1beta1.Application, error) {
+func NewApplication(app *app.Application, proj *project.Project, traits []*kiae.Trait) (*v1beta1.Application, error) {
 	appTmplModel := &Application{
 		Name:        app.Name,
 		Image:       app.Image,
 		Ports:       proj.Ports,
-		ConfigPaths: buildMountPaths(kiae.ConfigsMerge(proj.Configs, app.Configs)),
+		ConfigPaths: buildMountPaths(kiaeutil.ConfigsMerge(proj.Configs, app.Configs)),
 		Traits:      buildTraits(traits),
 		Middlewares: buildMiddlewares(proj.Middlewares),
 	}
@@ -52,7 +52,7 @@ func buildMountPaths(configs []*project.Configuration) []string {
 	return paths
 }
 
-func buildTraits(traits []*trait.Trait) []common.ApplicationTrait {
+func buildTraits(traits []*kiae.Trait) []common.ApplicationTrait {
 	finalTraits := make([]common.ApplicationTrait, 0)
 	for _, traitItem := range traits {
 		finalTraits = append(finalTraits, common.ApplicationTrait{
