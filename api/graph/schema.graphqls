@@ -1,0 +1,29 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Mutation {
+    createTodo(input: NewTodo!): Pod!
+}
+
+type Pod {
+    name: String!
+    namespace: String!
+}
+
+type Query {
+    pods(ns: String!): [Pod!]!
+}
+
+type User {
+    id: ID!
+    name: String!
+}
+
+input NewTodo {
+    text: String!
+    userId: String!
+}

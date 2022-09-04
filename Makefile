@@ -1,6 +1,6 @@
 
 build-api:
-	cd api && buf generate
+	cd api && buf generate && gqlgen generate
 	protoc-go-inject-tag -input="api/*/*.pb.go"
 
 build: build-api

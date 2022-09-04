@@ -7,8 +7,11 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/graph"
+	"github.com/kiaedev/kiae/api/graph/generated"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
@@ -58,6 +61,8 @@ func (s *Server) Run() error {
 	// }
 
 	// use the current context in kubeconfig
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: graph.NewResolver(s.ss.K8sClient)}))
+	http.Handle("/graphql", srv)
 
 	port := 8888
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
@@ -94,5 +99,6 @@ func (s *Server) runGateway() error {
 	// }
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
-	return http.ListenAndServe(":8081", mux)
+	http.Handle("/", mux)
+	return http.ListenAndServe(":8081", nil)
 }
