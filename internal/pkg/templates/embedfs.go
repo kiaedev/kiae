@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"sigs.k8s.io/yaml"
 )
 
@@ -34,6 +35,9 @@ func (tpl *Template) Render(m any, dest any) error {
 		}
 
 		return fmt.Sprintf("[\"%s\"]", strings.Join(items, "\",\""))
+	}
+	funcMap["cpu2number"] = func(cpu resource.Quantity) float64 {
+		return cpu.AsApproximateFloat64()
 	}
 
 	t, err := template.New(tpl.name).Funcs(funcMap).ParseFS(FS, tpl.name)

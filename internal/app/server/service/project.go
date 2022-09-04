@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,4 +32,8 @@ func (p *ProjectService) Create(ctx context.Context, in *project.Project) (*proj
 
 func (p *ProjectService) Update(ctx context.Context, in *project.Project) (*project.Project, error) {
 	return p.daoProj.Update(ctx, in)
+}
+
+func (p *ProjectService) Read(ctx context.Context, in *kiae.DeleteRequest) (*project.Project, error) {
+	return p.daoProj.Get(ctx, in.Id)
 }

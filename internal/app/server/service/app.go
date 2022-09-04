@@ -27,7 +27,7 @@ const (
 	APPSTORE_REPO_PATH = "../appstore/apps"
 )
 
-type AppStore struct {
+type App struct {
 	app.UnimplementedAppServiceServer
 
 	daoApp    *dao.AppDao
@@ -36,8 +36,8 @@ type AppStore struct {
 	oamClient *versioned.Clientset
 }
 
-func NewAppStore(cs *Service) *AppStore {
-	return &AppStore{
+func NewAppStore(cs *Service) *App {
+	return &App{
 		daoApp:    dao.NewApp(cs.DB),
 		daoProj:   dao.NewProject(cs.DB),
 		k8sClient: cs.K8sClient,
@@ -45,24 +45,25 @@ func NewAppStore(cs *Service) *AppStore {
 	}
 }
 
-func (as *AppStore) Create(ctx context.Context, in *app.Application) (*app.Application, error) {
+func (s *App) Create(ctx context.Context, in *app.Application) (*app.Application, error) {
 	if err := in.ValidateAll(); err != nil {
 		return nil, err
 	}
 
-	proj, err := as.daoProj.Get(ctx, in.Pid)
+	proj, err := s.daoProj.Get(ctx, in.Pid)
 	if err == mongo.ErrNoDocuments {
 		return nil, status.Errorf(codes.NotFound, "project not found by the pid %v", in.Pid)
 	} else if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err)
 	}
 
-	if _, count, _ := as.daoApp.List(ctx, bson.M{"env": in.Env, "pid": proj.Id}); count > 0 {
+	if _, count, _ := s.daoApp.List(ctx, bson.M{"env": in.Env, "pid": proj.Id}); count > 0 {
 		return nil, status.Errorf(codes.AlreadyExists, "该环境已存在")
 	}
 
 	traits := []*kiae.Trait{}
 
+	in.Replicas = 2
 	in.Name = strings.ToLower(fmt.Sprintf("%s-%s", proj.Name, strutil.RandomText(4)))
 	oApp, err := templates.NewApplication(in, proj, traits)
 	if err != nil {
@@ -70,15 +71,15 @@ func (as *AppStore) Create(ctx context.Context, in *app.Application) (*app.Appli
 	}
 
 	ns := kiaeutil.BuildAppNs(in.Env)
-	if _, err := as.k8sClient.CoreV1().ConfigMaps(ns).Create(ctx, buildConfigs(proj, in), metav1.CreateOptions{}); err != nil {
+	if _, err := s.k8sClient.CoreV1().ConfigMaps(ns).Create(ctx, buildConfigs(proj, in), metav1.CreateOptions{}); err != nil {
 		return nil, status.Errorf(codes.Internal, "creating app-config failed: %v", err)
 	}
 
-	if _, err := as.oamClient.CoreV1beta1().Applications(ns).Create(ctx, oApp, metav1.CreateOptions{}); err != nil {
+	if _, err := s.oamClient.CoreV1beta1().Applications(ns).Create(ctx, oApp, metav1.CreateOptions{}); err != nil {
 		return nil, status.Errorf(codes.Internal, "creating app failed: %v", err)
 	}
 
-	return as.daoApp.Create(ctx, in)
+	return s.daoApp.Create(ctx, in)
 }
 
 func buildConfigs(proj *project.Project, app *app.Application) *v1.ConfigMap {
@@ -97,13 +98,13 @@ func buildConfigs(proj *project.Project, app *app.Application) *v1.ConfigMap {
 	return cm
 }
 
-func (as *AppStore) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
-	proj, err := as.daoProj.Get(ctx, req.Pid)
+func (s *App) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
+	proj, err := s.daoProj.Get(ctx, req.Pid)
 	if err != nil {
 		return nil, err
 	}
 
-	results, total, err := as.daoApp.List(ctx, bson.M{"pid": req.Pid})
+	results, total, err := s.daoApp.List(ctx, bson.M{"pid": req.Pid})
 	for _, rt := range results {
 		rt.Configs = kiaeutil.ConfigsMerge(proj.Configs, rt.Configs)
 	}
@@ -111,28 +112,7 @@ func (as *AppStore) List(ctx context.Context, req *app.ListRequest) (*app.ListRe
 	return &app.ListResponse{Items: results, Total: total}, err
 }
 
-func (as *AppStore) Install(ctx context.Context, req *app.AppOpRequest) (*app.AppOpReply, error) {
-	// item, exist := as.apps.Load(req.Name)
-	// if !exist {
-	// 	return nil, fmt.Errorf("app %s not exist", req.Name)
-	// }
-
-	// appProto := item.(*app.Application)
-	// buf, err := template.Render("app", appProto)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// var application v1beta1.Application
-	// if err := yaml.Unmarshal(buf.Bytes(), &application); err != nil {
-	// 	return nil, err
-	// }
-
-	// _, err = as.cs.CoreV1beta1().Applications("kiaeutil").Create(ctx, &application, metav1.CreateOptions{})
-	return &app.AppOpReply{}, nil
-}
-
-// func (as *AppStore) Start(ctx context.Context, req *app.AppStatusRequest) (*app.AppStatusReply, error) {
+// func (as *App) Start(ctx context.Context, req *app.AppStatusRequest) (*app.AppStatusReply, error) {
 // 	result := new(app.Application)
 // 	if err := as.collection.FindOneAndDelete(ctx, bson.M{"id": req.Id}).Decode(result); err != nil {
 // 		return nil, err
@@ -147,7 +127,7 @@ func (as *AppStore) Install(ctx context.Context, req *app.AppOpRequest) (*app.Ap
 // 	return &app.AppStatusReply{}, err
 // }
 //
-// func (as *AppStore) Stop(ctx context.Context, req *app.AppStatusRequest) (*app.AppStatusReply, error) {
+// func (as *App) Stop(ctx context.Context, req *app.AppStatusRequest) (*app.AppStatusReply, error) {
 // 	rt := new(app.Application)
 // 	if err := as.collection.FindOneAndDelete(ctx, bson.M{"id": req.Id}).Decode(rt); err != nil {
 // 		return nil, err
@@ -157,16 +137,16 @@ func (as *AppStore) Install(ctx context.Context, req *app.AppOpRequest) (*app.Ap
 // 	return &app.AppStatusReply{}, err
 // }
 
-func (as *AppStore) Delete(ctx context.Context, in *kiae.DeleteRequest) (*emptypb.Empty, error) {
-	rt, err := as.daoApp.Get(ctx, in.Id)
+func (s *App) Delete(ctx context.Context, in *kiae.DeleteRequest) (*emptypb.Empty, error) {
+	rt, err := s.daoApp.Get(ctx, in.Id)
 	if err != nil {
 		return nil, err
 	}
 
 	ns := kiaeutil.BuildAppNs(rt.Env)
-	if err := as.oamClient.CoreV1beta1().Applications(ns).Delete(ctx, rt.Name, metav1.DeleteOptions{}); err != nil {
+	if err := s.oamClient.CoreV1beta1().Applications(ns).Delete(ctx, rt.Name, metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 
-	return &emptypb.Empty{}, as.daoApp.Delete(ctx, in.Id)
+	return &emptypb.Empty{}, s.daoApp.Delete(ctx, in.Id)
 }

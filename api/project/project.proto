@@ -4,10 +4,10 @@ package project;
 
 import "google/api/annotations.proto";
 import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "kiae/request.proto";
 import "validate/validate.proto";
-import "google/protobuf/empty.proto";
 
 option go_package = "github.com/kiaedev/kiae/api/project";
 
@@ -34,6 +34,12 @@ service ProjectService {
         };
     }
 
+    rpc Read (kiae.DeleteRequest) returns (Project) {
+        option (google.api.http) = {
+            get: "/api/v1/projects/{id}"
+        };
+    }
+
     rpc Delete (kiae.DeleteRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/api/v1/projects/{id}"
@@ -45,8 +51,8 @@ message Project {
     string id = 1; // @gotags: bson:"_id,omitempty"
     string name = 2 [(validate.rules).string = {max_len: 32, min_len: 3}];
     string intro = 3 [(validate.rules).string = {max_len: 150, min_len: 5}];
-    string git = 4 [(validate.rules).string = {ignore_empty: true}];
-    string image = 5 [(validate.rules).string = {ignore_empty: true}];
+    string git = 4 [(validate.rules).string = {min_len: 10, max_len: 512}];
+    repeated Image images = 5;
     repeated Port ports = 6;
     repeated Configuration configs = 7;
     repeated Middleware middlewares = 8;
@@ -55,6 +61,15 @@ message Project {
     google.protobuf.Timestamp created_by = 102;
     google.protobuf.Timestamp updated_at = 103;
     google.protobuf.Timestamp updated_by = 104;
+}
+
+message Image {
+    string name = 1;
+    string image = 2 [(validate.rules).string = {}];
+    string latest = 3;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
 }
 
 message Port {
