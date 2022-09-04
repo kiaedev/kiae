@@ -10,6 +10,7 @@ import (
 
 	"github.com/kiaedev/kiae/api/graph/generated"
 	"github.com/kiaedev/kiae/api/graph/model"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
@@ -21,8 +22,13 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 // Pods is the resolver for the pods field.
-func (r *queryResolver) Pods(ctx context.Context, ns string) ([]*model.Pod, error) {
-	results, err := r.cs.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
+func (r *queryResolver) Pods(ctx context.Context, ns string, app *string) ([]*model.Pod, error) {
+	selector, err := buildAppSelector(app)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := r.cs.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: selector.String()})
 	if err != nil {
 		return nil, err
 	}
@@ -38,10 +44,14 @@ func (r *queryResolver) Pods(ctx context.Context, ns string) ([]*model.Pod, erro
 }
 
 // Pods is the resolver for the pods field.
-func (r *subscriptionResolver) Pods(ctx context.Context, ns string) (<-chan []*model.Pod, error) {
+func (r *subscriptionResolver) Pods(ctx context.Context, ns string, app *string) (<-chan []*model.Pod, error) {
+	selector, err := buildAppSelector(app)
+	if err != nil {
+		return nil, err
+	}
+
 	channel := make(chan []*model.Pod, 1)
 	latestPods := func(obj interface{}) {
-		selector := labels.NewSelector()
 		rt, err := r.podInformer.Lister().List(selector)
 		if err != nil {
 			log.Println(err)
@@ -54,9 +64,32 @@ func (r *subscriptionResolver) Pods(ctx context.Context, ns string) (<-chan []*m
 				continue
 			}
 
+			containerStatusMap := make(map[string]v1.ContainerStatus)
+
+			for _, status := range pod.Status.ContainerStatuses {
+				containerStatusMap[status.Name] = status
+			}
+
+			containers := make([]*model.Container, 0)
+			for _, container := range pod.Spec.Containers {
+				containerStatus := containerStatusMap[container.Name]
+				containers = append(containers, &model.Container{
+					Name:  container.Name,
+					Image: container.Image,
+					// Status: containerStatus.State,
+
+					RestartCount: int(containerStatus.RestartCount),
+				})
+			}
 			pods = append(pods, &model.Pod{
-				Name:      pod.Name,
-				Namespace: pod.Namespace,
+				Name:       pod.Name,
+				Namespace:  pod.Namespace,
+				Containers: containers,
+				Status:     string(pod.Status.Phase),
+				PodIP:      pod.Status.PodIP,
+				NodeIP:     pod.Status.HostIP,
+				CreatedAt:  pod.CreationTimestamp.String(),
+				// RestartCount: .RestartCount,
 			})
 		}
 		channel <- pods
@@ -85,3 +118,18 @@ func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subsc
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func buildAppSelector(app *string) (labels.Selector, error) {
+	matchLabels := make(map[string]string)
+	if app != nil {
+		matchLabels["app.oam.dev/component"] = *app
+	}
+
+	return metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: matchLabels})
+}

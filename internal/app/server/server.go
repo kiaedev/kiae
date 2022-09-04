@@ -6,9 +6,14 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gorilla/websocket"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/graph"
@@ -56,20 +61,6 @@ func NewServer(kubeconfig string) (*Server, error) {
 }
 
 func (s *Server) Run() error {
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
-
-	resolver := graph.NewResolver(s.ss.K8sClient)
-	if err := resolver.Run(context.Background()); err != nil {
-		return err
-	}
-
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
-	http.Handle("/graphql", srv)
-	http.Handle("/graphiql", playground.Handler("My GraphQL App", "/graphql"))
-
 	port := 8888
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -79,13 +70,43 @@ func (s *Server) Run() error {
 	gs := grpc.NewServer()
 	app.RegisterAppServiceServer(gs, service.NewAppStore(s.ss))
 	go func() {
-		log.Printf("server listening at %v", lis.Addr())
+		log.Printf("grpc server listening at %v", lis.Addr())
 		if err := gs.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
+	resolver := graph.NewResolver(s.ss.K8sClient)
+	if err := resolver.Run(context.Background()); err != nil {
+		return err
+	}
+
+	s.runGraphql(resolver)
 	return s.runGateway()
+}
+
+func (s *Server) runGraphql(resolver *graph.Resolver) {
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.AddTransport(transport.MultipartForm{})
+	srv.SetQueryCache(lru.New(1000))
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New(100),
+	})
+
+	http.Handle("/api/graphql", srv)
+	http.Handle("/graphql", playground.Handler("My GraphQL App", "/api/graphql"))
 }
 
 func (s *Server) runGateway() error {
@@ -106,5 +127,6 @@ func (s *Server) runGateway() error {
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	http.Handle("/", mux)
+	log.Printf("http server listening at %v", 8081)
 	return http.ListenAndServe(":8081", nil)
 }

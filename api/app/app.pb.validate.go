@@ -133,6 +133,8 @@ func (m *Application) validate(all bool) error {
 
 	// no validation rules for Size
 
+	// no validation rules for Replicas
+
 	for idx, item := range m.GetConfigs() {
 		_, _ = idx, item
 

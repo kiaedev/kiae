@@ -61,7 +61,8 @@ message Application {
     repeated project.Port ports = 6;
     Status status = 7;
     Size size = 8;
-    repeated project.Configuration configs = 9;
+    uint32 replicas = 9;
+    repeated project.Configuration configs = 10;
     //    string depends = 8;
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp created_by = 102; // @gotags: bson:"created_by,omitempty"

@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.16
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/envoyproxy/protoc-gen-validate v0.1.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	github.com/oam-dev/kubevela-core-api v1.2.6
 	github.com/saltbo/gopkg v0.0.0-20210820093533-07a5e6511706
@@ -43,7 +44,6 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.3.1 // indirect

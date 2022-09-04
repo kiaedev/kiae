@@ -1,5 +1,5 @@
-subscription {
-    pods(ns: "kiae-app-dev",) {
+query {
+    pods(ns: "kiae-app-test", app:"test-4akl") {
         name,
         namespace
     }
