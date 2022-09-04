@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/graph"
@@ -60,9 +61,14 @@ func (s *Server) Run() error {
 	// 	panic(err.Error())
 	// }
 
-	// use the current context in kubeconfig
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: graph.NewResolver(s.ss.K8sClient)}))
+	resolver := graph.NewResolver(s.ss.K8sClient)
+	if err := resolver.Run(context.Background()); err != nil {
+		return err
+	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 	http.Handle("/graphql", srv)
+	http.Handle("/graphiql", playground.Handler("My GraphQL App", "/graphql"))
 
 	port := 8888
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))

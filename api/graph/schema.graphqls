@@ -3,10 +3,15 @@
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }
 
 type Mutation {
     createTodo(input: NewTodo!): Pod!
+}
+
+type Subscription{
+    pods(ns: String!): [Pod!]!
 }
 
 type Pod {

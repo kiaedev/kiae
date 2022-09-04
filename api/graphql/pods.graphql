@@ -1,4 +1,4 @@
-query {
+subscription {
     pods(ns: "kiae-app-dev",) {
         name,
         namespace
