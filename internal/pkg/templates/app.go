@@ -16,31 +16,48 @@ import (
 )
 
 type Application struct {
-	Name        string
-	Image       string
-	Replicas    uint32
-	Resources   v1.ResourceRequirements
-	Ports       []*project.Port
-	ConfigPaths []string
-	Traits      []common.ApplicationTrait
-	Middlewares []common.ApplicationComponent
+	Name             string
+	Labels           map[string]string
+	Annotations      map[string]string
+	Image            string
+	ImagePullSecrets string
+	Replicas         uint32
+	Resources        v1.ResourceRequirements
+	Ports            []*project.Port
+	Envs             map[string]string
+	LivenessProbe    *project.HealthProbe
+	ReadinessProbe   *project.HealthProbe
+	ConfigPaths      []string
+	Traits           []common.ApplicationTrait
+	Middlewares      []common.ApplicationComponent
+	Depends          []string
 }
 
 func NewApplication(app *app.Application, proj *project.Project, traits []*kiae.Trait) (*v1beta1.Application, error) {
 	appTmplModel := &Application{
-		Name:        app.Name,
-		Image:       app.Image,
-		Ports:       proj.Ports,
-		Replicas:    app.Replicas,
-		Resources:   buildResources(app.Size, 0.5),
-		ConfigPaths: buildMountPaths(kiaeutil.ConfigsMerge(proj.Configs, app.Configs)),
-		Traits:      buildTraits(traits),
-		Middlewares: buildMiddlewares(proj.Middlewares),
+		Name:             app.Name,
+		Labels:           map[string]string{},
+		Annotations:      map[string]string{},
+		Image:            app.Image,
+		ImagePullSecrets: "",
+		Replicas:         app.Replicas,
+		Ports:            proj.Ports,
+		Envs:             map[string]string{},
+		Resources:        buildResources(app.Size, 0.5),
+		ConfigPaths:      buildMountPaths(kiaeutil.ConfigsMerge(proj.Configs, app.Configs)),
+		Traits:           buildTraits(traits),
+		Middlewares:      buildMiddlewares(proj.Middlewares),
+	}
+
+	if app.LivenessProbeEnabled {
+		appTmplModel.LivenessProbe = proj.LivenessProbe
+	}
+	if app.ReadinessProbeEnabled {
+		appTmplModel.LivenessProbe = proj.ReadinessProbe
 	}
 
 	var oam v1beta1.Application
-	err := New("app").Render(appTmplModel, &oam)
-	if err != nil {
+	if err := New("app").Render(appTmplModel, &oam); err != nil {
 		return nil, err
 	}
 

@@ -228,6 +228,64 @@ func (m *Project) validate(all bool) error {
 	}
 
 	if all {
+		switch v := interface{}(m.GetLivenessProbe()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ProjectValidationError{
+					field:  "LivenessProbe",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ProjectValidationError{
+					field:  "LivenessProbe",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetLivenessProbe()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ProjectValidationError{
+				field:  "LivenessProbe",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetReadinessProbe()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ProjectValidationError{
+					field:  "ReadinessProbe",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ProjectValidationError{
+					field:  "ReadinessProbe",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetReadinessProbe()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ProjectValidationError{
+				field:  "ReadinessProbe",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
@@ -419,6 +477,119 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ProjectValidationError{}
+
+// Validate checks the field values on HealthProbe with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *HealthProbe) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on HealthProbe with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in HealthProbeMultiError, or
+// nil if none found.
+func (m *HealthProbe) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *HealthProbe) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Port
+
+	// no validation rules for Path
+
+	// no validation rules for PeriodSeconds
+
+	// no validation rules for TimeoutSeconds
+
+	// no validation rules for SuccessThreshold
+
+	// no validation rules for FailureThreshold
+
+	// no validation rules for InitialDelaySeconds
+
+	if len(errors) > 0 {
+		return HealthProbeMultiError(errors)
+	}
+
+	return nil
+}
+
+// HealthProbeMultiError is an error wrapping multiple validation errors
+// returned by HealthProbe.ValidateAll() if the designated constraints aren't met.
+type HealthProbeMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m HealthProbeMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m HealthProbeMultiError) AllErrors() []error { return m }
+
+// HealthProbeValidationError is the validation error returned by
+// HealthProbe.Validate if the designated constraints aren't met.
+type HealthProbeValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e HealthProbeValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e HealthProbeValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e HealthProbeValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e HealthProbeValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e HealthProbeValidationError) ErrorName() string { return "HealthProbeValidationError" }
+
+// Error satisfies the builtin error interface
+func (e HealthProbeValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sHealthProbe.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = HealthProbeValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = HealthProbeValidationError{}
 
 // Validate checks the field values on Image with the rules defined in the
 // proto definition for this message. If any rules are violated, the first

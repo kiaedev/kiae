@@ -181,10 +181,21 @@
                     "$ref": "#/definitions/projectConfiguration"
                   }
                 },
+                "middlewares": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/projectMiddleware"
+                  }
+                },
+                "livenessProbeEnabled": {
+                  "type": "boolean"
+                },
+                "readinessProbeEnabled": {
+                  "type": "boolean"
+                },
                 "createdAt": {
                   "type": "string",
-                  "format": "date-time",
-                  "title": "string depends = 8;"
+                  "format": "date-time"
                 },
                 "createdBy": {
                   "type": "string",
@@ -270,10 +281,21 @@
                     "$ref": "#/definitions/projectConfiguration"
                   }
                 },
+                "middlewares": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/projectMiddleware"
+                  }
+                },
+                "livenessProbeEnabled": {
+                  "type": "boolean"
+                },
+                "readinessProbeEnabled": {
+                  "type": "boolean"
+                },
                 "createdAt": {
                   "type": "string",
-                  "format": "date-time",
-                  "title": "string depends = 8;"
+                  "format": "date-time"
                 },
                 "createdBy": {
                   "type": "string",
@@ -477,6 +499,12 @@
                     "$ref": "#/definitions/projectMiddleware"
                   }
                 },
+                "livenessProbe": {
+                  "$ref": "#/definitions/projectHealthProbe"
+                },
+                "readinessProbe": {
+                  "$ref": "#/definitions/projectHealthProbe"
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -563,6 +591,12 @@
                   "items": {
                     "$ref": "#/definitions/projectMiddleware"
                   }
+                },
+                "livenessProbe": {
+                  "$ref": "#/definitions/projectHealthProbe"
+                },
+                "readinessProbe": {
+                  "$ref": "#/definitions/projectHealthProbe"
                 },
                 "createdAt": {
                   "type": "string",
@@ -653,10 +687,21 @@
             "$ref": "#/definitions/projectConfiguration"
           }
         },
+        "middlewares": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/projectMiddleware"
+          }
+        },
+        "livenessProbeEnabled": {
+          "type": "boolean"
+        },
+        "readinessProbeEnabled": {
+          "type": "boolean"
+        },
         "createdAt": {
           "type": "string",
-          "format": "date-time",
-          "title": "string depends = 8;"
+          "format": "date-time"
         },
         "createdBy": {
           "type": "string",
@@ -759,6 +804,38 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "projectHealthProbe": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "path": {
+          "type": "string"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     },
@@ -866,6 +943,12 @@
           "items": {
             "$ref": "#/definitions/projectMiddleware"
           }
+        },
+        "livenessProbe": {
+          "$ref": "#/definitions/projectHealthProbe"
+        },
+        "readinessProbe": {
+          "$ref": "#/definitions/projectHealthProbe"
         },
         "createdAt": {
           "type": "string",
