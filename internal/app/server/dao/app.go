@@ -47,7 +47,8 @@ func (p *AppDao) Create(ctx context.Context, in *app.Application) (*app.Applicat
 
 func (p *AppDao) Update(ctx context.Context, in *app.Application) (*app.Application, error) {
 	oid, _ := primitive.ObjectIDFromHex(in.Id)
+	in.Id = "" // clean the immutable field
 	in.UpdatedAt = timestamppb.Now()
-	_, err := p.collection.UpdateByID(ctx, oid, in)
+	_, err := p.collection.UpdateOne(ctx, bson.M{"_id": oid}, bson.M{"$set": in})
 	return in, err
 }

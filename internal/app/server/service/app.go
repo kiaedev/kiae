@@ -9,8 +9,10 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/templates"
+	"github.com/kiaedev/kiae/internal/pkg/render"
+	"github.com/kiaedev/kiae/internal/pkg/render/components"
 	"github.com/kiaedev/kiae/pkg/kiaeutil"
+	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,7 +20,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -61,18 +62,14 @@ func (s *App) Create(ctx context.Context, in *app.Application) (*app.Application
 		return nil, status.Errorf(codes.AlreadyExists, "该环境已存在")
 	}
 
-	traits := []*kiae.Trait{}
+	// traits := []*kiae.Trait{}
 
 	in.Replicas = 2
 	in.Name = strings.ToLower(fmt.Sprintf("%s-%s", proj.Name, strutil.RandomText(4)))
-	oApp, err := templates.NewApplication(in, proj, traits)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "rendering app failed: %v", err)
-	}
-
 	ns := kiaeutil.BuildAppNs(in.Env)
-	if _, err := s.k8sClient.CoreV1().ConfigMaps(ns).Create(ctx, buildConfigs(proj, in), metav1.CreateOptions{}); err != nil {
-		return nil, status.Errorf(codes.Internal, "creating app-config failed: %v", err)
+	oApp, err := s.buildOApp(ctx, in, proj)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "%s", err)
 	}
 
 	if _, err := s.oamClient.CoreV1beta1().Applications(ns).Create(ctx, oApp, metav1.CreateOptions{}); err != nil {
@@ -80,22 +77,6 @@ func (s *App) Create(ctx context.Context, in *app.Application) (*app.Application
 	}
 
 	return s.daoApp.Create(ctx, in)
-}
-
-func buildConfigs(proj *project.Project, app *app.Application) *v1.ConfigMap {
-	configs := kiaeutil.ConfigsMerge(proj.Configs, app.Configs)
-	data := make(map[string]string)
-
-	for _, config := range configs {
-		data[config.Filename] = config.Content
-	}
-	// todo 考虑一下是否有必要把不同MountPath的配置创建单独的ConfigMap
-
-	cm := &v1.ConfigMap{
-		Data: data,
-	}
-	cm.SetName("kiaeapp-" + app.Name)
-	return cm
 }
 
 func (s *App) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
@@ -112,32 +93,62 @@ func (s *App) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse
 	return &app.ListResponse{Items: results, Total: total}, err
 }
 
-// func (as *App) Start(ctx context.Context, req *app.AppStatusRequest) (*app.AppStatusReply, error) {
-// 	result := new(app.Application)
-// 	if err := as.collection.FindOneAndDelete(ctx, bson.M{"id": req.Id}).Decode(result); err != nil {
-// 		return nil, err
-// 	}
-//
-// 	m, err := templates.NewApplication(result, nil, nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	_, err = as.oamClientSet.CoreV1beta1().Applications(result.Env).Update(ctx, m, metav1.UpdateOptions{})
-// 	return &app.AppStatusReply{}, err
-// }
-//
-// func (as *App) Stop(ctx context.Context, req *app.AppStatusRequest) (*app.AppStatusReply, error) {
-// 	rt := new(app.Application)
-// 	if err := as.collection.FindOneAndDelete(ctx, bson.M{"id": req.Id}).Decode(rt); err != nil {
-// 		return nil, err
-// 	}
-//
-// 	_, err := as.oamClientSet.CoreV1beta1().Applications(rt.Env).Update(ctx, &v1beta1.Application{}, metav1.UpdateOptions{})
-// 	return &app.AppStatusReply{}, err
-// }
+func (s *App) Update(ctx context.Context, in *app.UpdateRequest) (*app.Application, error) {
+	existedApp, err := s.daoApp.Get(ctx, in.Payload.Id)
+	if err != nil {
+		return nil, err
+	}
 
-func (s *App) Delete(ctx context.Context, in *kiae.DeleteRequest) (*emptypb.Empty, error) {
+	if in.UpdateMask == nil {
+		existedApp = in.Payload
+	} else {
+		s.handlePatch(in, existedApp)
+	}
+
+	// update the application
+	oApp, err := s.rebuildOApp(ctx, existedApp)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(existedApp.Env)).Update(ctx, oApp, metav1.UpdateOptions{}); err != nil {
+		return nil, status.Errorf(codes.Internal, "update the application failed: %v", err)
+	}
+
+	return s.daoApp.Update(ctx, existedApp)
+}
+
+func (s *App) handlePatch(in *app.UpdateRequest, existedApp *app.Application) {
+	payload := in.Payload
+	for _, path := range in.GetUpdateMask().Paths {
+		// 只允许运行状态时进行修改，避免状态调整为0又被改回去
+		if path == "replicas" && existedApp.Replicas != 0 {
+			existedApp.Replicas = payload.Replicas
+		}
+
+		if path == "size" {
+			existedApp.Size = payload.Size
+		}
+
+		if path == "status" {
+			if existedApp.Status == app.Status_STATUS_RUNNING && payload.Status == app.Status_STATUS_STOPPED {
+				// 停止逻辑: 实例数调到0
+				existedApp.PreviousReplicas = existedApp.Replicas
+				existedApp.Replicas = 0
+			} else if existedApp.Status == app.Status_STATUS_STOPPED && payload.Status == app.Status_STATUS_RUNNING {
+				// 启动逻辑：实例数调回停止前
+				existedApp.Replicas = existedApp.PreviousReplicas
+				existedApp.PreviousReplicas = 0
+			} else if existedApp.Status == app.Status_STATUS_RESTARTING {
+				// todo 重启逻辑：设置一个Annotation
+
+			}
+			existedApp.Status = payload.Status
+		}
+	}
+}
+
+func (s *App) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
 	rt, err := s.daoApp.Get(ctx, in.Id)
 	if err != nil {
 		return nil, err
@@ -149,4 +160,22 @@ func (s *App) Delete(ctx context.Context, in *kiae.DeleteRequest) (*emptypb.Empt
 	}
 
 	return &emptypb.Empty{}, s.daoApp.Delete(ctx, in.Id)
+}
+
+func (s *App) buildOApp(ctx context.Context, app *app.Application, proj *project.Project) (*v1beta1.Application, error) {
+	return render.NewApplication(components.NewKWebservice(app, proj)), nil
+}
+
+func (s *App) rebuildOApp(ctx context.Context, app *app.Application) (*v1beta1.Application, error) {
+	proj, err := s.daoProj.Get(ctx, app.Pid)
+	if err != nil {
+		return nil, err
+	}
+
+	oApp, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(app.Env)).Get(ctx, app.Name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return render.NewApplicationWith(components.NewKWebservice(app, proj), oApp), nil
 }

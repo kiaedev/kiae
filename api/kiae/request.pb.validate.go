@@ -35,22 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on DeleteRequest with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on IdRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *DeleteRequest) Validate() error {
+func (m *IdRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on DeleteRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in DeleteRequestMultiError, or
-// nil if none found.
-func (m *DeleteRequest) ValidateAll() error {
+// ValidateAll checks the field values on IdRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in IdRequestMultiError, or nil
+// if none found.
+func (m *IdRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *DeleteRequest) validate(all bool) error {
+func (m *IdRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -60,19 +60,18 @@ func (m *DeleteRequest) validate(all bool) error {
 	// no validation rules for Id
 
 	if len(errors) > 0 {
-		return DeleteRequestMultiError(errors)
+		return IdRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// DeleteRequestMultiError is an error wrapping multiple validation errors
-// returned by DeleteRequest.ValidateAll() if the designated constraints
-// aren't met.
-type DeleteRequestMultiError []error
+// IdRequestMultiError is an error wrapping multiple validation errors returned
+// by IdRequest.ValidateAll() if the designated constraints aren't met.
+type IdRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m DeleteRequestMultiError) Error() string {
+func (m IdRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -81,11 +80,11 @@ func (m DeleteRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m DeleteRequestMultiError) AllErrors() []error { return m }
+func (m IdRequestMultiError) AllErrors() []error { return m }
 
-// DeleteRequestValidationError is the validation error returned by
-// DeleteRequest.Validate if the designated constraints aren't met.
-type DeleteRequestValidationError struct {
+// IdRequestValidationError is the validation error returned by
+// IdRequest.Validate if the designated constraints aren't met.
+type IdRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -93,22 +92,22 @@ type DeleteRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e DeleteRequestValidationError) Field() string { return e.field }
+func (e IdRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e DeleteRequestValidationError) Reason() string { return e.reason }
+func (e IdRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e DeleteRequestValidationError) Cause() error { return e.cause }
+func (e IdRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e DeleteRequestValidationError) Key() bool { return e.key }
+func (e IdRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e DeleteRequestValidationError) ErrorName() string { return "DeleteRequestValidationError" }
+func (e IdRequestValidationError) ErrorName() string { return "IdRequestValidationError" }
 
 // Error satisfies the builtin error interface
-func (e DeleteRequestValidationError) Error() string {
+func (e IdRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -120,14 +119,14 @@ func (e DeleteRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sDeleteRequest.%s: %s%s",
+		"invalid %sIdRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = DeleteRequestValidationError{}
+var _ error = IdRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -135,4 +134,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = DeleteRequestValidationError{}
+} = IdRequestValidationError{}

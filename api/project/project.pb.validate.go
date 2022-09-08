@@ -786,6 +786,17 @@ func (m *Port) validate(all bool) error {
 	if _, ok := _Port_Protocol_InLookup[m.GetProtocol()]; !ok {
 		err := PortValidationError{
 			field:  "Protocol",
+			reason: "value must be in list [TCP UDP STCP]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _Port_AppProtocol_InLookup[m.GetAppProtocol()]; !ok {
+		err := PortValidationError{
+			field:  "AppProtocol",
 			reason: "value must be in list [http http2 tcp]",
 		}
 		if !all {
@@ -872,6 +883,12 @@ var _ interface {
 } = PortValidationError{}
 
 var _Port_Protocol_InLookup = map[string]struct{}{
+	"TCP":  {},
+	"UDP":  {},
+	"STCP": {},
+}
+
+var _Port_AppProtocol_InLookup = map[string]struct{}{
 	"http":  {},
 	"http2": {},
 	"tcp":   {},

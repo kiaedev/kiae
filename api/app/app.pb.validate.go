@@ -135,6 +135,12 @@ func (m *Application) validate(all bool) error {
 
 	// no validation rules for Replicas
 
+	// no validation rules for PreviousReplicas
+
+	// no validation rules for LivenessProbeEnabled
+
+	// no validation rules for ReadinessProbeEnabled
+
 	for idx, item := range m.GetConfigs() {
 		_, _ = idx, item
 
@@ -202,10 +208,6 @@ func (m *Application) validate(all bool) error {
 		}
 
 	}
-
-	// no validation rules for LivenessProbeEnabled
-
-	// no validation rules for ReadinessProbeEnabled
 
 	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {
@@ -636,248 +638,100 @@ var _ interface {
 	ErrorName() string
 } = ListResponseValidationError{}
 
-// Validate checks the field values on AppOpRequest with the rules defined in
+// Validate checks the field values on UpdateRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *AppOpRequest) Validate() error {
+func (m *UpdateRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on AppOpRequest with the rules defined
+// ValidateAll checks the field values on UpdateRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in AppOpRequestMultiError, or
+// result is a list of violation errors wrapped in UpdateRequestMultiError, or
 // nil if none found.
-func (m *AppOpRequest) ValidateAll() error {
+func (m *UpdateRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *AppOpRequest) validate(all bool) error {
+func (m *UpdateRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Id
+	if all {
+		switch v := interface{}(m.GetPayload()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateRequestValidationError{
+					field:  "Payload",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateRequestValidationError{
+					field:  "Payload",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetPayload()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateRequestValidationError{
+				field:  "Payload",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
-	// no validation rules for Op
+	if all {
+		switch v := interface{}(m.GetUpdateMask()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateRequestValidationError{
+					field:  "UpdateMask",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateRequestValidationError{
+					field:  "UpdateMask",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUpdateMask()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateRequestValidationError{
+				field:  "UpdateMask",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
-		return AppOpRequestMultiError(errors)
+		return UpdateRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// AppOpRequestMultiError is an error wrapping multiple validation errors
-// returned by AppOpRequest.ValidateAll() if the designated constraints aren't met.
-type AppOpRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m AppOpRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m AppOpRequestMultiError) AllErrors() []error { return m }
-
-// AppOpRequestValidationError is the validation error returned by
-// AppOpRequest.Validate if the designated constraints aren't met.
-type AppOpRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e AppOpRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e AppOpRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e AppOpRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e AppOpRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e AppOpRequestValidationError) ErrorName() string { return "AppOpRequestValidationError" }
-
-// Error satisfies the builtin error interface
-func (e AppOpRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sAppOpRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = AppOpRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = AppOpRequestValidationError{}
-
-// Validate checks the field values on AppOpReply with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *AppOpReply) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on AppOpReply with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in AppOpReplyMultiError, or
-// nil if none found.
-func (m *AppOpReply) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *AppOpReply) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return AppOpReplyMultiError(errors)
-	}
-
-	return nil
-}
-
-// AppOpReplyMultiError is an error wrapping multiple validation errors
-// returned by AppOpReply.ValidateAll() if the designated constraints aren't met.
-type AppOpReplyMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m AppOpReplyMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m AppOpReplyMultiError) AllErrors() []error { return m }
-
-// AppOpReplyValidationError is the validation error returned by
-// AppOpReply.Validate if the designated constraints aren't met.
-type AppOpReplyValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e AppOpReplyValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e AppOpReplyValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e AppOpReplyValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e AppOpReplyValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e AppOpReplyValidationError) ErrorName() string { return "AppOpReplyValidationError" }
-
-// Error satisfies the builtin error interface
-func (e AppOpReplyValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sAppOpReply.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = AppOpReplyValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = AppOpReplyValidationError{}
-
-// Validate checks the field values on AppStatusRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *AppStatusRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on AppStatusRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// AppStatusRequestMultiError, or nil if none found.
-func (m *AppStatusRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *AppStatusRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Id
-
-	// no validation rules for Status
-
-	if len(errors) > 0 {
-		return AppStatusRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// AppStatusRequestMultiError is an error wrapping multiple validation errors
-// returned by AppStatusRequest.ValidateAll() if the designated constraints
+// UpdateRequestMultiError is an error wrapping multiple validation errors
+// returned by UpdateRequest.ValidateAll() if the designated constraints
 // aren't met.
-type AppStatusRequestMultiError []error
+type UpdateRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m AppStatusRequestMultiError) Error() string {
+func (m UpdateRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -886,11 +740,11 @@ func (m AppStatusRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m AppStatusRequestMultiError) AllErrors() []error { return m }
+func (m UpdateRequestMultiError) AllErrors() []error { return m }
 
-// AppStatusRequestValidationError is the validation error returned by
-// AppStatusRequest.Validate if the designated constraints aren't met.
-type AppStatusRequestValidationError struct {
+// UpdateRequestValidationError is the validation error returned by
+// UpdateRequest.Validate if the designated constraints aren't met.
+type UpdateRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -898,22 +752,22 @@ type AppStatusRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e AppStatusRequestValidationError) Field() string { return e.field }
+func (e UpdateRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e AppStatusRequestValidationError) Reason() string { return e.reason }
+func (e UpdateRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e AppStatusRequestValidationError) Cause() error { return e.cause }
+func (e UpdateRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e AppStatusRequestValidationError) Key() bool { return e.key }
+func (e UpdateRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e AppStatusRequestValidationError) ErrorName() string { return "AppStatusRequestValidationError" }
+func (e UpdateRequestValidationError) ErrorName() string { return "UpdateRequestValidationError" }
 
 // Error satisfies the builtin error interface
-func (e AppStatusRequestValidationError) Error() string {
+func (e UpdateRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -925,14 +779,14 @@ func (e AppStatusRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sAppStatusRequest.%s: %s%s",
+		"invalid %sUpdateRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = AppStatusRequestValidationError{}
+var _ error = UpdateRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -940,104 +794,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = AppStatusRequestValidationError{}
-
-// Validate checks the field values on AppStatusReply with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *AppStatusReply) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on AppStatusReply with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in AppStatusReplyMultiError,
-// or nil if none found.
-func (m *AppStatusReply) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *AppStatusReply) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return AppStatusReplyMultiError(errors)
-	}
-
-	return nil
-}
-
-// AppStatusReplyMultiError is an error wrapping multiple validation errors
-// returned by AppStatusReply.ValidateAll() if the designated constraints
-// aren't met.
-type AppStatusReplyMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m AppStatusReplyMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m AppStatusReplyMultiError) AllErrors() []error { return m }
-
-// AppStatusReplyValidationError is the validation error returned by
-// AppStatusReply.Validate if the designated constraints aren't met.
-type AppStatusReplyValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e AppStatusReplyValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e AppStatusReplyValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e AppStatusReplyValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e AppStatusReplyValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e AppStatusReplyValidationError) ErrorName() string { return "AppStatusReplyValidationError" }
-
-// Error satisfies the builtin error interface
-func (e AppStatusReplyValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sAppStatusReply.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = AppStatusReplyValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = AppStatusReplyValidationError{}
+} = UpdateRequestValidationError{}

@@ -128,7 +128,7 @@ type subscriptionResolver struct{ *Resolver }
 func buildAppSelector(app *string) (labels.Selector, error) {
 	matchLabels := make(map[string]string)
 	if app != nil {
-		matchLabels["app.oam.dev/component"] = *app
+		matchLabels["kiae.dev/component"] = *app
 	}
 
 	return metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: matchLabels})

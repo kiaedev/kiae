@@ -26,20 +26,8 @@ const _ = grpc.SupportPackageIsVersion7
 type AppServiceClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Create(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error)
-	Update(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error)
-	//    rpc Start (AppStatusRequest) returns (AppStatusReply) {
-	//        option (google.api.http) = {
-	//            patch: "/api/v1/apps/{id}/status"
-	//            body: "*"
-	//        };
-	//    }
-	//    rpc Stop (AppStatusRequest) returns (AppStatusReply) {
-	//        option (google.api.http) = {
-	//            patch: "/api/v1/apps/{id}/status"
-	//            body: "*"
-	//        };
-	//    }
-	Delete(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Application, error)
+	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type appServiceClient struct {
@@ -68,7 +56,7 @@ func (c *appServiceClient) Create(ctx context.Context, in *Application, opts ...
 	return out, nil
 }
 
-func (c *appServiceClient) Update(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error) {
+func (c *appServiceClient) Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Application, error) {
 	out := new(Application)
 	err := c.cc.Invoke(ctx, "/app.AppService/Update", in, out, opts...)
 	if err != nil {
@@ -77,7 +65,7 @@ func (c *appServiceClient) Update(ctx context.Context, in *Application, opts ...
 	return out, nil
 }
 
-func (c *appServiceClient) Delete(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *appServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/app.AppService/Delete", in, out, opts...)
 	if err != nil {
@@ -92,20 +80,8 @@ func (c *appServiceClient) Delete(ctx context.Context, in *kiae.DeleteRequest, o
 type AppServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Create(context.Context, *Application) (*Application, error)
-	Update(context.Context, *Application) (*Application, error)
-	//    rpc Start (AppStatusRequest) returns (AppStatusReply) {
-	//        option (google.api.http) = {
-	//            patch: "/api/v1/apps/{id}/status"
-	//            body: "*"
-	//        };
-	//    }
-	//    rpc Stop (AppStatusRequest) returns (AppStatusReply) {
-	//        option (google.api.http) = {
-	//            patch: "/api/v1/apps/{id}/status"
-	//            body: "*"
-	//        };
-	//    }
-	Delete(context.Context, *kiae.DeleteRequest) (*emptypb.Empty, error)
+	Update(context.Context, *UpdateRequest) (*Application, error)
+	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedAppServiceServer()
 }
 
@@ -119,10 +95,10 @@ func (UnimplementedAppServiceServer) List(context.Context, *ListRequest) (*ListR
 func (UnimplementedAppServiceServer) Create(context.Context, *Application) (*Application, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedAppServiceServer) Update(context.Context, *Application) (*Application, error) {
+func (UnimplementedAppServiceServer) Update(context.Context, *UpdateRequest) (*Application, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedAppServiceServer) Delete(context.Context, *kiae.DeleteRequest) (*emptypb.Empty, error) {
+func (UnimplementedAppServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedAppServiceServer) mustEmbedUnimplementedAppServiceServer() {}
@@ -175,7 +151,7 @@ func _AppService_Create_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _AppService_Update_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Application)
+	in := new(UpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -187,13 +163,13 @@ func _AppService_Update_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/app.AppService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Update(ctx, req.(*Application))
+		return srv.(AppServiceServer).Update(ctx, req.(*UpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AppService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(kiae.DeleteRequest)
+	in := new(kiae.IdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -205,7 +181,7 @@ func _AppService_Delete_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/app.AppService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServiceServer).Delete(ctx, req.(*kiae.DeleteRequest))
+		return srv.(AppServiceServer).Delete(ctx, req.(*kiae.IdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

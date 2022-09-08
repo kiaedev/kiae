@@ -88,7 +88,6 @@
     },
     "/api/v1/apps/{id}": {
       "delete": {
-        "summary": "rpc Start (AppStatusRequest) returns (AppStatusReply) {\n       option (google.api.http) = {\n           patch: \"/api/v1/apps/{id}/status\"\n           body: \"*\"\n       };\n   }\n   rpc Stop (AppStatusRequest) returns (AppStatusReply) {\n       option (google.api.http) = {\n           patch: \"/api/v1/apps/{id}/status\"\n           body: \"*\"\n       };\n   }",
         "operationId": "AppService_Delete",
         "responses": {
           "200": {
@@ -116,7 +115,9 @@
         "tags": [
           "AppService"
         ]
-      },
+      }
+    },
+    "/api/v1/apps/{payload.id}": {
       "put": {
         "operationId": "AppService_Update",
         "responses": {
@@ -135,13 +136,13 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "payload.id",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "body",
+            "name": "payload",
             "in": "body",
             "required": true,
             "schema": {
@@ -175,6 +176,16 @@
                   "type": "integer",
                   "format": "int64"
                 },
+                "previousReplicas": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "livenessProbeEnabled": {
+                  "type": "boolean"
+                },
+                "readinessProbeEnabled": {
+                  "type": "boolean"
+                },
                 "configs": {
                   "type": "array",
                   "items": {
@@ -186,12 +197,6 @@
                   "items": {
                     "$ref": "#/definitions/projectMiddleware"
                   }
-                },
-                "livenessProbeEnabled": {
-                  "type": "boolean"
-                },
-                "readinessProbeEnabled": {
-                  "type": "boolean"
                 },
                 "createdAt": {
                   "type": "string",
@@ -211,6 +216,12 @@
                 }
               }
             }
+          },
+          {
+            "name": "updateMask",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -235,13 +246,13 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "payload.id",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "body",
+            "name": "payload",
             "in": "body",
             "required": true,
             "schema": {
@@ -275,6 +286,16 @@
                   "type": "integer",
                   "format": "int64"
                 },
+                "previousReplicas": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "livenessProbeEnabled": {
+                  "type": "boolean"
+                },
+                "readinessProbeEnabled": {
+                  "type": "boolean"
+                },
                 "configs": {
                   "type": "array",
                   "items": {
@@ -286,12 +307,6 @@
                   "items": {
                     "$ref": "#/definitions/projectMiddleware"
                   }
-                },
-                "livenessProbeEnabled": {
-                  "type": "boolean"
-                },
-                "readinessProbeEnabled": {
-                  "type": "boolean"
                 },
                 "createdAt": {
                   "type": "string",
@@ -311,6 +326,12 @@
                 }
               }
             }
+          },
+          {
+            "name": "updateMask",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -681,6 +702,16 @@
           "type": "integer",
           "format": "int64"
         },
+        "previousReplicas": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "livenessProbeEnabled": {
+          "type": "boolean"
+        },
+        "readinessProbeEnabled": {
+          "type": "boolean"
+        },
         "configs": {
           "type": "array",
           "items": {
@@ -692,12 +723,6 @@
           "items": {
             "$ref": "#/definitions/projectMiddleware"
           }
-        },
-        "livenessProbeEnabled": {
-          "type": "boolean"
-        },
-        "readinessProbeEnabled": {
-          "type": "boolean"
         },
         "createdAt": {
           "type": "string",
@@ -751,7 +776,8 @@
       "enum": [
         "STATUS_PENDING",
         "STATUS_RUNNING",
-        "STATUS_STOPPED"
+        "STATUS_STOPPED",
+        "STATUS_RESTARTING"
       ],
       "default": "STATUS_PENDING"
     },
@@ -901,6 +927,9 @@
           "format": "int64"
         },
         "protocol": {
+          "type": "string"
+        },
+        "appProtocol": {
           "type": "string"
         }
       }

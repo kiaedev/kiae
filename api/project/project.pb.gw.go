@@ -239,7 +239,7 @@ func local_request_ProjectService_Update_1(ctx context.Context, marshaler runtim
 }
 
 func request_ProjectService_Read_0(ctx context.Context, marshaler runtime.Marshaler, client ProjectServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq kiae.DeleteRequest
+	var protoReq kiae.IdRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -265,7 +265,7 @@ func request_ProjectService_Read_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_ProjectService_Read_0(ctx context.Context, marshaler runtime.Marshaler, server ProjectServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq kiae.DeleteRequest
+	var protoReq kiae.IdRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -291,7 +291,7 @@ func local_request_ProjectService_Read_0(ctx context.Context, marshaler runtime.
 }
 
 func request_ProjectService_Delete_0(ctx context.Context, marshaler runtime.Marshaler, client ProjectServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq kiae.DeleteRequest
+	var protoReq kiae.IdRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -317,7 +317,7 @@ func request_ProjectService_Delete_0(ctx context.Context, marshaler runtime.Mars
 }
 
 func local_request_ProjectService_Delete_0(ctx context.Context, marshaler runtime.Marshaler, server ProjectServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq kiae.DeleteRequest
+	var protoReq kiae.IdRequest
 	var metadata runtime.ServerMetadata
 
 	var (

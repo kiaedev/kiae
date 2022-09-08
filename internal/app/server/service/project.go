@@ -36,7 +36,7 @@ func (p *ProjectService) Update(ctx context.Context, in *project.Project) (*proj
 	return p.daoProj.Update(ctx, in)
 }
 
-func (p *ProjectService) Read(ctx context.Context, in *kiae.DeleteRequest) (*project.Project, error) {
+func (p *ProjectService) Read(ctx context.Context, in *kiae.IdRequest) (*project.Project, error) {
 	return p.daoProj.Get(ctx, in.Id)
 }
 

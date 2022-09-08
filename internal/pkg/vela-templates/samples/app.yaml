@@ -1,0 +1,30 @@
+# app.yaml
+apiVersion: core.vela-templates.dev/v1beta1
+kind: Application
+metadata:
+  name: vela-app
+spec:
+  components:
+    - name: express-server
+      type: k-webservice
+      properties:
+        image: oamdev/hello-world
+        ports:
+          - port: 8080
+            appProtocol: http
+          - port: 8081
+            appProtocol: grpc
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 128Mi
+          limits:
+            cpu: 1
+            memory: 256Mi
+        configs:
+          - filename: abc.yaml
+            content: aaa
+            mountPath: /dev/null
+          - filename: abc2.toml
+            content: aaa1
+            mountPath: /dev/null

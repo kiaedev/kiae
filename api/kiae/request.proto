@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package kiae;
 
-import "google/protobuf/any.proto";
+import "google/protobuf/field_mask.proto";
 
 option go_package = "github.com/kiaedev/kiae/api/kiae";
 
-message DeleteRequest {
+message IdRequest {
     string id = 1;
 }

@@ -33,14 +33,12 @@ service ProjectService {
             }
         };
     }
-
-    rpc Read (kiae.DeleteRequest) returns (Project) {
+    rpc Read (kiae.IdRequest) returns (Project) {
         option (google.api.http) = {
             get: "/api/v1/projects/{id}"
         };
     }
-
-    rpc Delete (kiae.DeleteRequest) returns (google.protobuf.Empty) {
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/api/v1/projects/{id}"
         };
@@ -86,7 +84,8 @@ message Image {
 
 message Port {
     uint32 port = 1 [(validate.rules).uint32 = {gt: 0, lte: 65535}];
-    string protocol = 2 [(validate.rules).string = {in: ["http", "http2", "tcp"]}];
+    string protocol = 2 [(validate.rules).string = {in: ["TCP", "UDP", "STCP"]}];
+    string appProtocol = 3 [(validate.rules).string = {in: ["http", "http2", "tcp"]}];
 }
 
 message Configuration {

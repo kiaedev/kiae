@@ -6,6 +6,7 @@ package app;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "kiae/request.proto";
 import "project/project.proto";
@@ -23,29 +24,17 @@ service AppService {
             body: "*"
         };
     }
-    rpc Update (Application) returns (Application) {
+    rpc Update (UpdateRequest) returns (Application) {
         option (google.api.http) = {
-            put: "/api/v1/apps/{id}",
-            body: "*",
+            put: "/api/v1/apps/{payload.id}",
+            body: "payload",
             additional_bindings: {
-                patch: "/api/v1/apps/{id}"
-                body: "*"
+                patch: "/api/v1/apps/{payload.id}"
+                body: "payload"
             }
         };
     }
-    //    rpc Start (AppStatusRequest) returns (AppStatusReply) {
-    //        option (google.api.http) = {
-    //            patch: "/api/v1/apps/{id}/status"
-    //            body: "*"
-    //        };
-    //    }
-    //    rpc Stop (AppStatusRequest) returns (AppStatusReply) {
-    //        option (google.api.http) = {
-    //            patch: "/api/v1/apps/{id}/status"
-    //            body: "*"
-    //        };
-    //    }
-    rpc Delete (kiae.DeleteRequest) returns (google.protobuf.Empty) {
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/api/v1/apps/{id}"
         };
@@ -62,11 +51,12 @@ message Application {
     Status status = 7;
     Size size = 8;
     uint32 replicas = 9;
-    repeated project.Configuration configs = 10;
-    repeated project.Middleware middlewares = 11;
+    uint32 previous_replicas = 10;
 
     bool liveness_probe_enabled = 15;
     bool readiness_probe_enabled = 16;
+    repeated project.Configuration configs = 17;
+    repeated project.Middleware middlewares = 18;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp created_by = 102; // @gotags: bson:"created_by,omitempty"
@@ -83,21 +73,6 @@ message ListResponse {
     int64 total = 2;
 }
 
-message AppOpRequest {
-    string id = 1;
-    enum Operation {
-        OPERATION_UNSPECIFIED = 0;
-        OPERATION_INSTALL = 1;
-        OPERATION_UNINSTALL = 2;
-        OPERATION_UPGRADE = 3;
-    }
-    Operation op = 4;
-}
-
-message AppOpReply {
-
-}
-
 enum Size {
     SIZE_NANO = 0;
     SIZE_MIRCO = 1;
@@ -112,13 +87,10 @@ enum Status {
     STATUS_PENDING = 0;
     STATUS_RUNNING = 1;
     STATUS_STOPPED = 2;
+    STATUS_RESTARTING = 3;
 }
 
-message AppStatusRequest {
-    uint64 id = 1;
-    Status status = 2;
-}
-
-message AppStatusReply {
-
+message UpdateRequest {
+    Application payload = 1;
+    google.protobuf.FieldMask update_mask = 2;
 }

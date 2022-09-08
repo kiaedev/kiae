@@ -27,8 +27,8 @@ type ProjectServiceClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Create(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Project, error)
 	Update(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Project, error)
-	Read(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*Project, error)
-	Delete(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Read(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*Project, error)
+	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type projectServiceClient struct {
@@ -66,7 +66,7 @@ func (c *projectServiceClient) Update(ctx context.Context, in *Project, opts ...
 	return out, nil
 }
 
-func (c *projectServiceClient) Read(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*Project, error) {
+func (c *projectServiceClient) Read(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*Project, error) {
 	out := new(Project)
 	err := c.cc.Invoke(ctx, "/project.ProjectService/Read", in, out, opts...)
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *projectServiceClient) Read(ctx context.Context, in *kiae.DeleteRequest,
 	return out, nil
 }
 
-func (c *projectServiceClient) Delete(ctx context.Context, in *kiae.DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *projectServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/project.ProjectService/Delete", in, out, opts...)
 	if err != nil {
@@ -91,8 +91,8 @@ type ProjectServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Create(context.Context, *Project) (*Project, error)
 	Update(context.Context, *Project) (*Project, error)
-	Read(context.Context, *kiae.DeleteRequest) (*Project, error)
-	Delete(context.Context, *kiae.DeleteRequest) (*emptypb.Empty, error)
+	Read(context.Context, *kiae.IdRequest) (*Project, error)
+	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -109,10 +109,10 @@ func (UnimplementedProjectServiceServer) Create(context.Context, *Project) (*Pro
 func (UnimplementedProjectServiceServer) Update(context.Context, *Project) (*Project, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedProjectServiceServer) Read(context.Context, *kiae.DeleteRequest) (*Project, error) {
+func (UnimplementedProjectServiceServer) Read(context.Context, *kiae.IdRequest) (*Project, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedProjectServiceServer) Delete(context.Context, *kiae.DeleteRequest) (*emptypb.Empty, error) {
+func (UnimplementedProjectServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
@@ -183,7 +183,7 @@ func _ProjectService_Update_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _ProjectService_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(kiae.DeleteRequest)
+	in := new(kiae.IdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -195,13 +195,13 @@ func _ProjectService_Read_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/project.ProjectService/Read",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).Read(ctx, req.(*kiae.DeleteRequest))
+		return srv.(ProjectServiceServer).Read(ctx, req.(*kiae.IdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ProjectService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(kiae.DeleteRequest)
+	in := new(kiae.IdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func _ProjectService_Delete_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/project.ProjectService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).Delete(ctx, req.(*kiae.DeleteRequest))
+		return srv.(ProjectServiceServer).Delete(ctx, req.(*kiae.IdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
