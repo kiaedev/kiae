@@ -39,6 +39,17 @@ service AppService {
             delete: "/api/v1/apps/{id}"
         };
     }
+    rpc Read (kiae.IdRequest) returns (Application) {
+        option (google.api.http) = {
+            get: "/api/v1/apps/{id}"
+        };
+    }
+    rpc DoAction (ActionPayload) returns (Application) {
+        option (google.api.http) = {
+            post: "/api/v1/apps/{id}/actions"
+            body: "*"
+        };
+    }
 }
 
 message Application {
@@ -51,7 +62,7 @@ message Application {
     Status status = 7;
     Size size = 8;
     uint32 replicas = 9;
-    uint32 previous_replicas = 10;
+    map<string, string> annotations = 10;
 
     bool liveness_probe_enabled = 15;
     bool readiness_probe_enabled = 16;
@@ -93,4 +104,14 @@ enum Status {
 message UpdateRequest {
     Application payload = 1;
     google.protobuf.FieldMask update_mask = 2;
+}
+
+message ActionPayload {
+    enum Action {
+        START = 0;
+        STOP = 1;
+        RESTART = 2;
+    }
+    string id = 1;
+    Action action = 2;
 }

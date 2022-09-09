@@ -9,6 +9,7 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/internal/app/server/model"
 	"github.com/kiaedev/kiae/internal/pkg/render"
 	"github.com/kiaedev/kiae/internal/pkg/render/components"
 	"github.com/kiaedev/kiae/pkg/kiaeutil"
@@ -24,11 +25,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	APPSTORE_REPO_PATH = "../appstore/apps"
-)
-
-type App struct {
+type AppService struct {
 	app.UnimplementedAppServiceServer
 
 	daoApp    *dao.AppDao
@@ -37,8 +34,8 @@ type App struct {
 	oamClient *versioned.Clientset
 }
 
-func NewAppStore(cs *Service) *App {
-	return &App{
+func NewAppStore(cs *Service) *AppService {
+	return &AppService{
 		daoApp:    dao.NewApp(cs.DB),
 		daoProj:   dao.NewProject(cs.DB),
 		k8sClient: cs.K8sClient,
@@ -46,7 +43,7 @@ func NewAppStore(cs *Service) *App {
 	}
 }
 
-func (s *App) Create(ctx context.Context, in *app.Application) (*app.Application, error) {
+func (s *AppService) Create(ctx context.Context, in *app.Application) (*app.Application, error) {
 	if err := in.ValidateAll(); err != nil {
 		return nil, err
 	}
@@ -79,7 +76,7 @@ func (s *App) Create(ctx context.Context, in *app.Application) (*app.Application
 	return s.daoApp.Create(ctx, in)
 }
 
-func (s *App) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
+func (s *AppService) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
 	proj, err := s.daoProj.Get(ctx, req.Pid)
 	if err != nil {
 		return nil, err
@@ -93,7 +90,11 @@ func (s *App) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse
 	return &app.ListResponse{Items: results, Total: total}, err
 }
 
-func (s *App) Update(ctx context.Context, in *app.UpdateRequest) (*app.Application, error) {
+func (p *AppService) Read(ctx context.Context, in *kiae.IdRequest) (*app.Application, error) {
+	return p.daoApp.Get(ctx, in.Id)
+}
+
+func (s *AppService) Update(ctx context.Context, in *app.UpdateRequest) (*app.Application, error) {
 	existedApp, err := s.daoApp.Get(ctx, in.Payload.Id)
 	if err != nil {
 		return nil, err
@@ -118,37 +119,24 @@ func (s *App) Update(ctx context.Context, in *app.UpdateRequest) (*app.Applicati
 	return s.daoApp.Update(ctx, existedApp)
 }
 
-func (s *App) handlePatch(in *app.UpdateRequest, existedApp *app.Application) {
+func (s *AppService) handlePatch(in *app.UpdateRequest, existedApp *app.Application) {
 	payload := in.Payload
 	for _, path := range in.GetUpdateMask().Paths {
-		// 只允许运行状态时进行修改，避免状态调整为0又被改回去
-		if path == "replicas" && existedApp.Replicas != 0 {
+		if path == "replicas" {
 			existedApp.Replicas = payload.Replicas
+			// 当在停止状态调整副本数时将状态置为启动
+			if existedApp.Replicas > 0 && existedApp.Status == app.Status_STATUS_STOPPED {
+				existedApp.Status = app.Status_STATUS_RUNNING
+			}
 		}
 
 		if path == "size" {
 			existedApp.Size = payload.Size
 		}
-
-		if path == "status" {
-			if existedApp.Status == app.Status_STATUS_RUNNING && payload.Status == app.Status_STATUS_STOPPED {
-				// 停止逻辑: 实例数调到0
-				existedApp.PreviousReplicas = existedApp.Replicas
-				existedApp.Replicas = 0
-			} else if existedApp.Status == app.Status_STATUS_STOPPED && payload.Status == app.Status_STATUS_RUNNING {
-				// 启动逻辑：实例数调回停止前
-				existedApp.Replicas = existedApp.PreviousReplicas
-				existedApp.PreviousReplicas = 0
-			} else if existedApp.Status == app.Status_STATUS_RESTARTING {
-				// todo 重启逻辑：设置一个Annotation
-
-			}
-			existedApp.Status = payload.Status
-		}
 	}
 }
 
-func (s *App) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
+func (s *AppService) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
 	rt, err := s.daoApp.Get(ctx, in.Id)
 	if err != nil {
 		return nil, err
@@ -162,11 +150,38 @@ func (s *App) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, e
 	return &emptypb.Empty{}, s.daoApp.Delete(ctx, in.Id)
 }
 
-func (s *App) buildOApp(ctx context.Context, app *app.Application, proj *project.Project) (*v1beta1.Application, error) {
+func (s *AppService) DoAction(ctx context.Context, in *app.ActionPayload) (*app.Application, error) {
+	existedApp, err := s.daoApp.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if in.Action == app.ActionPayload_START && existedApp.Status != app.Status_STATUS_STOPPED {
+		return nil, fmt.Errorf("can not start for the not running application - %s", in.Id)
+	} else if in.Action == app.ActionPayload_STOP && existedApp.Status != app.Status_STATUS_RUNNING {
+		return nil, fmt.Errorf("can not stop for the not stoped application - %s", in.Id)
+	} else if in.Action == app.ActionPayload_RESTART && existedApp.Status != app.Status_STATUS_RUNNING {
+		return nil, fmt.Errorf("can not restart for the not running application - %s", in.Id)
+	}
+
+	// update the application
+	oApp, err := s.rebuildOApp(ctx, model.NewAppAction(existedApp).Do(in.Action))
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(existedApp.Env)).Update(ctx, oApp, metav1.UpdateOptions{}); err != nil {
+		return nil, status.Errorf(codes.Internal, "update the application failed: %v", err)
+	}
+
+	return s.daoApp.Update(ctx, existedApp)
+}
+
+func (s *AppService) buildOApp(ctx context.Context, app *app.Application, proj *project.Project) (*v1beta1.Application, error) {
 	return render.NewApplication(components.NewKWebservice(app, proj)), nil
 }
 
-func (s *App) rebuildOApp(ctx context.Context, app *app.Application) (*v1beta1.Application, error) {
+func (s *AppService) rebuildOApp(ctx context.Context, app *app.Application) (*v1beta1.Application, error) {
 	proj, err := s.daoProj.Get(ctx, app.Pid)
 	if err != nil {
 		return nil, err

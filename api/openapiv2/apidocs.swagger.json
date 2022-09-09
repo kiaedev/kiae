@@ -87,6 +87,34 @@
       }
     },
     "/api/v1/apps/{id}": {
+      "get": {
+        "operationId": "AppService_Read",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appApplication"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      },
       "delete": {
         "operationId": "AppService_Delete",
         "responses": {
@@ -110,6 +138,49 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      }
+    },
+    "/api/v1/apps/{id}/actions": {
+      "post": {
+        "operationId": "AppService_DoAction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appApplication"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "$ref": "#/definitions/ActionPayloadAction"
+                }
+              }
+            }
           }
         ],
         "tags": [
@@ -176,9 +247,11 @@
                   "type": "integer",
                   "format": "int64"
                 },
-                "previousReplicas": {
-                  "type": "integer",
-                  "format": "int64"
+                "annotations": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 },
                 "livenessProbeEnabled": {
                   "type": "boolean"
@@ -286,9 +359,11 @@
                   "type": "integer",
                   "format": "int64"
                 },
-                "previousReplicas": {
-                  "type": "integer",
-                  "format": "int64"
+                "annotations": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 },
                 "livenessProbeEnabled": {
                   "type": "boolean"
@@ -668,6 +743,15 @@
     }
   },
   "definitions": {
+    "ActionPayloadAction": {
+      "type": "string",
+      "enum": [
+        "START",
+        "STOP",
+        "RESTART"
+      ],
+      "default": "START"
+    },
     "appApplication": {
       "type": "object",
       "properties": {
@@ -702,9 +786,11 @@
           "type": "integer",
           "format": "int64"
         },
-        "previousReplicas": {
-          "type": "integer",
-          "format": "int64"
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "livenessProbeEnabled": {
           "type": "boolean"

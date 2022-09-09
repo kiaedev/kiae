@@ -135,7 +135,7 @@ func (m *Application) validate(all bool) error {
 
 	// no validation rules for Replicas
 
-	// no validation rules for PreviousReplicas
+	// no validation rules for Annotations
 
 	// no validation rules for LivenessProbeEnabled
 
@@ -795,3 +795,107 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UpdateRequestValidationError{}
+
+// Validate checks the field values on ActionPayload with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ActionPayload) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ActionPayload with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ActionPayloadMultiError, or
+// nil if none found.
+func (m *ActionPayload) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ActionPayload) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Action
+
+	if len(errors) > 0 {
+		return ActionPayloadMultiError(errors)
+	}
+
+	return nil
+}
+
+// ActionPayloadMultiError is an error wrapping multiple validation errors
+// returned by ActionPayload.ValidateAll() if the designated constraints
+// aren't met.
+type ActionPayloadMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ActionPayloadMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ActionPayloadMultiError) AllErrors() []error { return m }
+
+// ActionPayloadValidationError is the validation error returned by
+// ActionPayload.Validate if the designated constraints aren't met.
+type ActionPayloadValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ActionPayloadValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ActionPayloadValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ActionPayloadValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ActionPayloadValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ActionPayloadValidationError) ErrorName() string { return "ActionPayloadValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ActionPayloadValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sActionPayload.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ActionPayloadValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ActionPayloadValidationError{}

@@ -28,6 +28,8 @@ type AppServiceClient interface {
 	Create(ctx context.Context, in *Application, opts ...grpc.CallOption) (*Application, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Application, error)
 	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Read(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*Application, error)
+	DoAction(ctx context.Context, in *ActionPayload, opts ...grpc.CallOption) (*Application, error)
 }
 
 type appServiceClient struct {
@@ -74,6 +76,24 @@ func (c *appServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opts 
 	return out, nil
 }
 
+func (c *appServiceClient) Read(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*Application, error) {
+	out := new(Application)
+	err := c.cc.Invoke(ctx, "/app.AppService/Read", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) DoAction(ctx context.Context, in *ActionPayload, opts ...grpc.CallOption) (*Application, error) {
+	out := new(Application)
+	err := c.cc.Invoke(ctx, "/app.AppService/DoAction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServiceServer is the server API for AppService service.
 // All implementations must embed UnimplementedAppServiceServer
 // for forward compatibility
@@ -82,6 +102,8 @@ type AppServiceServer interface {
 	Create(context.Context, *Application) (*Application, error)
 	Update(context.Context, *UpdateRequest) (*Application, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
+	Read(context.Context, *kiae.IdRequest) (*Application, error)
+	DoAction(context.Context, *ActionPayload) (*Application, error)
 	mustEmbedUnimplementedAppServiceServer()
 }
 
@@ -100,6 +122,12 @@ func (UnimplementedAppServiceServer) Update(context.Context, *UpdateRequest) (*A
 }
 func (UnimplementedAppServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedAppServiceServer) Read(context.Context, *kiae.IdRequest) (*Application, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedAppServiceServer) DoAction(context.Context, *ActionPayload) (*Application, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DoAction not implemented")
 }
 func (UnimplementedAppServiceServer) mustEmbedUnimplementedAppServiceServer() {}
 
@@ -186,6 +214,42 @@ func _AppService_Delete_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AppService_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(kiae.IdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).Read(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/Read",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).Read(ctx, req.(*kiae.IdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_DoAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActionPayload)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).DoAction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/DoAction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).DoAction(ctx, req.(*ActionPayload))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AppService_ServiceDesc is the grpc.ServiceDesc for AppService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -208,6 +272,14 @@ var AppService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _AppService_Delete_Handler,
+		},
+		{
+			MethodName: "Read",
+			Handler:    _AppService_Read_Handler,
+		},
+		{
+			MethodName: "DoAction",
+			Handler:    _AppService_DoAction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -30,9 +30,9 @@ type KWebservice struct {
 
 func NewKWebservice(kApp *app.Application, proj *project.Project) *KWebservice {
 	return &KWebservice{
-		Name:        kApp.Name,
-		Labels:      map[string]string{"kiae.dev/test": "test"},
-		Annotations: map[string]string{"kiae.dev/test": "test"},
+		Name: kApp.Name,
+		// Labels:      map[string]string{"kiae.dev/test": "test"},
+		Annotations: kApp.Annotations,
 		Image:       kApp.Image,
 		// ImagePullSecrets: "",
 		Replicas:  kApp.Replicas,

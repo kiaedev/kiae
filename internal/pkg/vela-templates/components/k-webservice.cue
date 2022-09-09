@@ -30,9 +30,10 @@ template: {
 			template: {
 				metadata: {
 					labels: {
-						"kiae.dev/component":   context.name
-						"kiae.dev/revision":    context.revision
-						"kiae.dev/appRevision": context.appRevision
+						if parameter.labels != _|_ {
+							parameter.labels
+						}
+						"kiae.dev/component": context.name
 					}
 					if parameter.annotations != _|_ {
 						annotations: parameter.annotations
