@@ -95,10 +95,9 @@ enum Size {
     SIZE_XXLARGE = 7;
 }
 enum Status {
-    STATUS_PENDING = 0;
+    STATUS_CREATED = 0;
     STATUS_RUNNING = 1;
     STATUS_STOPPED = 2;
-    STATUS_RESTARTING = 3;
 }
 
 message UpdateRequest {

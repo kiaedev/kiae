@@ -860,12 +860,11 @@
     "appStatus": {
       "type": "string",
       "enum": [
-        "STATUS_PENDING",
+        "STATUS_CREATED",
         "STATUS_RUNNING",
-        "STATUS_STOPPED",
-        "STATUS_RESTARTING"
+        "STATUS_STOPPED"
       ],
-      "default": "STATUS_PENDING"
+      "default": "STATUS_CREATED"
     },
     "googlerpcStatus": {
       "type": "object",
