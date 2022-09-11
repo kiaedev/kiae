@@ -3,7 +3,7 @@ package dao
 import (
 	"context"
 
-	"github.com/kiaedev/kiae/api/project"
+	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,18 +11,18 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ProjectDao struct {
+type EntryDao struct {
 	*Dao
 }
 
-func NewProject(db *mongo.Database) *ProjectDao {
-	return &ProjectDao{
-		Dao: NewDao(db.Collection("projects")),
+func NewEntryDao(db *mongo.Database) *EntryDao {
+	return &EntryDao{
+		Dao: NewDao(db.Collection("entries")),
 	}
 }
 
-func (p *ProjectDao) Get(ctx context.Context, id string) (*project.Project, error) {
-	var proj project.Project
+func (p *EntryDao) Get(ctx context.Context, id string) (*entry.Entry, error) {
+	var proj entry.Entry
 	oid, _ := primitive.ObjectIDFromHex(id)
 	if err := p.collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&proj); err != nil {
 		return nil, err
@@ -31,13 +31,13 @@ func (p *ProjectDao) Get(ctx context.Context, id string) (*project.Project, erro
 	return &proj, nil
 }
 
-func (p *ProjectDao) List(ctx context.Context, m bson.M) ([]*project.Project, int64, error) {
-	var results []*project.Project
+func (p *EntryDao) List(ctx context.Context, m bson.M) ([]*entry.Entry, int64, error) {
+	var results []*entry.Entry
 	total, err := mongoutil.ListAndCount(ctx, p.collection, m, &results)
 	return results, total, err
 }
 
-func (p *ProjectDao) Create(ctx context.Context, in *project.Project) (*project.Project, error) {
+func (p *EntryDao) Create(ctx context.Context, in *entry.Entry) (*entry.Entry, error) {
 	in.CreatedAt = timestamppb.Now()
 	in.UpdatedAt = timestamppb.Now()
 	rt, err := p.collection.InsertOne(ctx, in)
@@ -45,7 +45,7 @@ func (p *ProjectDao) Create(ctx context.Context, in *project.Project) (*project.
 	return in, err
 }
 
-func (p *ProjectDao) Update(ctx context.Context, in *project.Project) (*project.Project, error) {
+func (p *EntryDao) Update(ctx context.Context, in *entry.Entry) (*entry.Entry, error) {
 	oid, _ := primitive.ObjectIDFromHex(in.Id)
 	in.Id = "" // clean the immutable field
 	in.UpdatedAt = timestamppb.Now()

@@ -16,9 +16,11 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/api/graph/generated"
 	"github.com/kiaedev/kiae/api/project"
+	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
@@ -68,7 +70,7 @@ func (s *Server) Run() error {
 	}
 
 	gs := grpc.NewServer()
-	app.RegisterAppServiceServer(gs, service.NewAppStore(s.ss))
+	app.RegisterAppServiceServer(gs, service.NewAppService(s.ss))
 	go func() {
 		log.Printf("grpc server listening at %v", lis.Addr())
 		if err := gs.Serve(lis); err != nil {
@@ -117,8 +119,10 @@ func (s *Server) runGateway() error {
 	// Register gRPC server endpoint
 	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux()
-	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppStore(s.ss))
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
+	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.ss))
+	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.ss))
+	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, service.NewRouteService(s.ss))
 	// opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	// err := app.RegisterAppServiceHandlerFromEndpoint(ctx, mux, "localhost:8888", opts)
 	// if err != nil {

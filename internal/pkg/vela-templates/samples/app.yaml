@@ -1,11 +1,11 @@
 # app.yaml
-apiVersion: core.vela-templates.dev/v1beta1
+apiVersion: core.oam.dev/v1beta1
 kind: Application
 metadata:
   name: vela-app
 spec:
   components:
-    - name: express-server
+    - name: kapp
       type: k-webservice
       properties:
         image: oamdev/hello-world
@@ -28,3 +28,15 @@ spec:
           - filename: abc2.toml
             content: aaa1
             mountPath: /dev/null
+    - name: k-svc
+      type: k-route
+      properties:
+        gateways:
+          - name: kapp
+            host: "kapp.kiae.dev"
+        routes:
+          - name: kappaa
+#            uri: abc
+#            exactMatch: true
+#            methods:
+#              - "GET"

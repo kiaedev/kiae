@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package kiae;
+
+option go_package = "github.com/kiaedev/kiae/api/kiae";
+
+enum OpStatus {
+    OP_STATUS_DISABLED = 0;
+    OP_STATUS_ENABLED = 1;
+}

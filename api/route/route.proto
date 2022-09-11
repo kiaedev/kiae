@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package route;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/op_status.proto";
+import "kiae/request.proto";
+import "validate/validate.proto";
+
+
+option go_package = "github.com/kiaedev/kiae/api/route";
+
+service RouteService {
+
+    rpc List (ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/apps/{appid}/routes"
+        };
+    }
+    rpc Create (Route) returns (Route) {
+        option (google.api.http) = {
+            post: "/api/v1/apps/{appid}/routes"
+            body: "*"
+        };
+    }
+    rpc Update (UpdateRequest) returns (Route) {
+        option (google.api.http) = {
+            put: "/api/v1/apps/{payload.appid}/routes/{payload.id}",
+            body: "payload",
+            additional_bindings: {
+                patch: "/api/v1/apps/{payload.appid}/routes/{payload.id}"
+                body: "payload"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/apps/{id}/routes/{id}"
+        };
+    }
+}
+
+message ListRequest {
+    string appid = 1;
+}
+
+message ListResponse {
+    repeated Route items = 1;
+    int64 total = 2;
+}
+
+message UpdateRequest {
+    Route payload = 1;
+    google.protobuf.FieldMask update_mask = 2;
+}
+
+message Route {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string appid = 2;
+    string path = 5;
+    repeated string methods = 6;
+    enum Type {
+        FORWARD = 0;
+        REDIRECT = 1;
+        DIRECT_RESPONSE = 2;
+    }
+    Type type = 7;
+
+    Forward forward = 10;
+    Redirect redirect = 11;
+    DirectResponse mock = 12;
+
+    kiae.OpStatus status = 20;
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp created_by = 102;
+    google.protobuf.Timestamp updated_at = 103;
+    google.protobuf.Timestamp updated_by = 104;
+}
+
+message Forward {
+    Cors cors = 1;
+    Rewrite rewrite = 2;
+    Limiter limiter = 9;
+}
+
+message Cors {
+    bool enabled = 1;
+    repeated string allow_origins = 2;
+    repeated string allow_methods = 3;
+    repeated string allow_headers = 4;
+    repeated string expose_headers = 5;
+    uint32 max_age = 6;
+    bool allow_credentials = 7;
+}
+
+message Rewrite {
+    bool enabled = 1;
+    string uri = 2;
+    string authority = 3;
+}
+
+message Limiter {
+    bool enabled = 1;
+    uint32 qps = 2;
+    message Fallback {
+        uint32 status = 3;
+        string body = 5;
+        string redirect = 4;
+    }
+}
+
+message Redirect {
+    uint32 code = 1 [(validate.rules).uint32 = {in: [301, 302, 307, 308]}];
+    string url = 2 [(validate.rules).string = {address: true}];
+}
+
+message DirectResponse {
+    uint32 code = 1;
+    string body = 2;
+}

@@ -3,7 +3,7 @@ package dao
 import (
 	"context"
 
-	"github.com/kiaedev/kiae/api/project"
+	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,18 +11,18 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ProjectDao struct {
+type RouteDao struct {
 	*Dao
 }
 
-func NewProject(db *mongo.Database) *ProjectDao {
-	return &ProjectDao{
-		Dao: NewDao(db.Collection("projects")),
+func NewRouteDao(db *mongo.Database) *RouteDao {
+	return &RouteDao{
+		Dao: NewDao(db.Collection("routes")),
 	}
 }
 
-func (p *ProjectDao) Get(ctx context.Context, id string) (*project.Project, error) {
-	var proj project.Project
+func (p *RouteDao) Get(ctx context.Context, id string) (*route.Route, error) {
+	var proj route.Route
 	oid, _ := primitive.ObjectIDFromHex(id)
 	if err := p.collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&proj); err != nil {
 		return nil, err
@@ -31,24 +31,27 @@ func (p *ProjectDao) Get(ctx context.Context, id string) (*project.Project, erro
 	return &proj, nil
 }
 
-func (p *ProjectDao) List(ctx context.Context, m bson.M) ([]*project.Project, int64, error) {
-	var results []*project.Project
+func (p *RouteDao) List(ctx context.Context, m bson.M) ([]*route.Route, int64, error) {
+	var results []*route.Route
 	total, err := mongoutil.ListAndCount(ctx, p.collection, m, &results)
 	return results, total, err
 }
 
-func (p *ProjectDao) Create(ctx context.Context, in *project.Project) (*project.Project, error) {
+func (p *RouteDao) Create(ctx context.Context, in *route.Route) (*route.Route, error) {
 	in.CreatedAt = timestamppb.Now()
 	in.UpdatedAt = timestamppb.Now()
 	rt, err := p.collection.InsertOne(ctx, in)
-	in.Id = rt.InsertedID.(primitive.ObjectID).Hex()
+	if err == nil {
+		in.Id = rt.InsertedID.(primitive.ObjectID).Hex()
+	}
 	return in, err
 }
 
-func (p *ProjectDao) Update(ctx context.Context, in *project.Project) (*project.Project, error) {
+func (p *RouteDao) Update(ctx context.Context, in *route.Route) (*route.Route, error) {
 	oid, _ := primitive.ObjectIDFromHex(in.Id)
 	in.Id = "" // clean the immutable field
 	in.UpdatedAt = timestamppb.Now()
 	_, err := p.collection.UpdateOne(ctx, bson.M{"_id": oid}, bson.M{"$set": in})
+	in.Id = oid.Hex()
 	return in, err
 }

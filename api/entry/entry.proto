@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package entry;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/op_status.proto";
+import "kiae/request.proto";
+
+
+option go_package = "github.com/kiaedev/kiae/api/entry";
+
+service EntryService {
+    rpc List (ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/apps/{appid}/entries"
+        };
+    }
+    rpc Create (Entry) returns (Entry) {
+        option (google.api.http) = {
+            post: "/api/v1/apps/{appid}/entries"
+            body: "*"
+        };
+    }
+    rpc Update (UpdateRequest) returns (Entry) {
+        option (google.api.http) = {
+            put: "/api/v1/apps/{payload.appid}/entries/{payload.id}",
+            body: "payload",
+            additional_bindings: {
+                patch: "/api/v1/apps/{payload.appid}/entries/{payload.id}"
+                body: "payload"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/apps/{id}/entries/{id}"
+        };
+    }
+}
+
+message ListRequest {
+    string appid = 1;
+}
+
+message ListResponse {
+    repeated Entry items = 1;
+    int64 total = 2;
+}
+
+message UpdateRequest {
+    Entry payload = 1;
+    google.protobuf.FieldMask update_mask = 2;
+}
+
+message Entry {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string appid = 2;
+    string gateway = 4;
+    string host = 5;
+    enum Scope {
+        ALL = 0;
+        PARTIAL = 1;
+    }
+    Scope scope = 6;
+    repeated string route_ids = 7;
+    kiae.OpStatus status = 8;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}

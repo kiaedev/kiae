@@ -28,16 +28,20 @@ import (
 type AppService struct {
 	app.UnimplementedAppServiceServer
 
-	daoApp    *dao.AppDao
 	daoProj   *dao.ProjectDao
+	daoApp    *dao.AppDao
+	daoEntry  *dao.EntryDao
+	daoRoute  *dao.RouteDao
 	k8sClient *kubernetes.Clientset
 	oamClient *versioned.Clientset
 }
 
-func NewAppStore(cs *Service) *AppService {
+func NewAppService(cs *Service) *AppService {
 	return &AppService{
-		daoApp:    dao.NewApp(cs.DB),
 		daoProj:   dao.NewProject(cs.DB),
+		daoApp:    dao.NewApp(cs.DB),
+		daoEntry:  dao.NewEntryDao(cs.DB),
+		daoRoute:  dao.NewRouteDao(cs.DB),
 		k8sClient: cs.K8sClient,
 		oamClient: cs.OamClient,
 	}
@@ -91,7 +95,18 @@ func (s *AppService) List(ctx context.Context, req *app.ListRequest) (*app.ListR
 }
 
 func (p *AppService) Read(ctx context.Context, in *kiae.IdRequest) (*app.Application, error) {
-	return p.daoApp.Get(ctx, in.Id)
+	kApp, err := p.daoApp.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	proj, err := p.daoProj.Get(ctx, kApp.Pid)
+	if err != nil {
+		return nil, err
+	}
+
+	kApp.Configs = kiaeutil.ConfigsMerge(proj.Configs, kApp.Configs)
+	return kApp, nil
 }
 
 func (s *AppService) Update(ctx context.Context, in *app.UpdateRequest) (*app.Application, error) {
@@ -107,13 +122,8 @@ func (s *AppService) Update(ctx context.Context, in *app.UpdateRequest) (*app.Ap
 	}
 
 	// update the application
-	oApp, err := s.rebuildOApp(ctx, existedApp)
-	if err != nil {
+	if err := s.UpdateAllComponents(ctx, existedApp); err != nil {
 		return nil, err
-	}
-
-	if _, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(existedApp.Env)).Update(ctx, oApp, metav1.UpdateOptions{}); err != nil {
-		return nil, status.Errorf(codes.Internal, "update the application failed: %v", err)
 	}
 
 	return s.daoApp.Update(ctx, existedApp)
@@ -165,24 +175,28 @@ func (s *AppService) DoAction(ctx context.Context, in *app.ActionPayload) (*app.
 	}
 
 	// update the application
-	oApp, err := s.rebuildOApp(ctx, model.NewAppAction(existedApp).Do(in.Action))
-	if err != nil {
+	if err := s.UpdateAllComponents(ctx, model.NewAppAction(existedApp).Do(in.Action)); err != nil {
 		return nil, err
-	}
-
-	if _, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(existedApp.Env)).Update(ctx, oApp, metav1.UpdateOptions{}); err != nil {
-		return nil, status.Errorf(codes.Internal, "update the application failed: %v", err)
 	}
 
 	return s.daoApp.Update(ctx, existedApp)
 }
 
 func (s *AppService) buildOApp(ctx context.Context, app *app.Application, proj *project.Project) (*v1beta1.Application, error) {
-	return render.NewApplication(components.NewKWebservice(app, proj)), nil
+	return render.NewApplication(app.Name, components.NewKWebservice(app, proj)), nil
 }
 
 func (s *AppService) rebuildOApp(ctx context.Context, app *app.Application) (*v1beta1.Application, error) {
 	proj, err := s.daoProj.Get(ctx, app.Pid)
+	if err != nil {
+		return nil, err
+	}
+
+	entries, _, err := s.daoEntry.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	if err != nil {
+		return nil, err
+	}
+	routes, _, err := s.daoRoute.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
 	if err != nil {
 		return nil, err
 	}
@@ -192,5 +206,34 @@ func (s *AppService) rebuildOApp(ctx context.Context, app *app.Application) (*v1
 		return nil, err
 	}
 
-	return render.NewApplicationWith(components.NewKWebservice(app, proj), oApp), nil
+	coms := make([]render.Component, 0)
+	coms = append(coms, components.NewKWebservice(app, proj))
+	if len(entries) > 0 || len(routes) > 0 {
+		coms = append(coms, components.NewRouteComponent(app.Name, entries, routes))
+	}
+
+	fmt.Println(coms)
+	return render.NewApplicationWith(oApp, coms...), nil
+}
+
+func (s *AppService) UpdateAllComponents(ctx context.Context, app *app.Application) error {
+	oApp, err := s.rebuildOApp(ctx, app)
+	if err != nil {
+		return err
+	}
+
+	if _, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(app.Env)).Update(ctx, oApp, metav1.UpdateOptions{}); err != nil {
+		return status.Errorf(codes.Internal, "update the application failed: %v", err)
+	}
+
+	return nil
+}
+
+func (s *AppService) UpdateAllComponentsByAppid(ctx context.Context, appid string) error {
+	aa, err := s.daoApp.Get(ctx, appid)
+	if err != nil {
+		return err
+	}
+
+	return s.UpdateAllComponents(ctx, aa)
 }
