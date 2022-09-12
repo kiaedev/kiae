@@ -25,7 +25,7 @@ func NewEntryService(s *Service) *EntryService {
 }
 
 func (s *EntryService) List(ctx context.Context, in *entry.ListRequest) (*entry.ListResponse, error) {
-	results, total, err := s.daoEntry.List(ctx, bson.M{})
+	results, total, err := s.daoEntry.List(ctx, bson.M{"appid": in.Appid})
 	return &entry.ListResponse{Items: results, Total: total}, err
 }
 

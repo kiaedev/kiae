@@ -25,7 +25,7 @@ func NewRouteService(s *Service) *RouteService {
 }
 
 func (s *RouteService) List(ctx context.Context, in *route.ListRequest) (*route.ListResponse, error) {
-	results, total, err := s.daoRoute.List(ctx, bson.M{})
+	results, total, err := s.daoRoute.List(ctx, bson.M{"appid": in.Appid})
 	return &route.ListResponse{Items: results, Total: total}, err
 }
 

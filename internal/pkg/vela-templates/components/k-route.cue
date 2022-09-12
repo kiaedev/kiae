@@ -107,13 +107,49 @@ template: {
 		}
 	}
 	outputs: {
-		//  kLimiter: {
-		//   apiVersion: "networking.istio.io/v1alpha3"
-		//   kind:       "EnovyFilter"
-		//   metadata: name: context.name
-		//   spec: {
-		//   }
-		//  }
+		kLimiter: {
+			apiVersion: "networking.istio.io/v1alpha3"
+			kind:       "EnvoyFilter"
+			metadata: name: context.name
+			spec: {
+				workloadSelector: {
+					labels: "kiae.dev/component": context.appName
+				}
+				configPatches: [
+					{
+						applyTo: "HTTP_FILTER"
+						match: {
+							context: "SIDECAR_INBOUND"
+							listener: filterChain: filter: name: "envoy.filters.network.http_connection_manager"
+						}
+						patch: {
+							operation: "INSERT_BEFORE"
+							value: {
+								name: "envoy.filters.http.local_ratelimit"
+								typed_config: {
+									"@type":  "type.googleapis.com/udpa.type.v1.TypedStruct"
+									type_url: "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit"
+									value: stat_prefix: "http_local_rate_limiter"
+								}
+							}
+						}
+					},
+//					{
+//						applyTo: "HTTP_ROUTE"
+//						match: {
+//							context: "SIDECAR_INBOUND"
+//							routeConfiguration: vhost: name: "inbound|http|{{.ServicePort}}"
+//						}
+//						patch: {
+//							operation: "INSERT_FIRST"
+//							value: {
+//								name: context.name
+//							}
+//						}
+//					},
+				]
+			}
+		}
 	}
 	parameter: {
 
