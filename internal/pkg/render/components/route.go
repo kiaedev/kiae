@@ -1,6 +1,8 @@
 package components
 
 import (
+	"net/url"
+
 	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/route"
 )
@@ -24,14 +26,12 @@ func NewRouteComponent(name string, entries []*entry.Entry, rs []*route.Route) *
 			Methods:    r.Methods,
 			ExactMatch: false,
 		}
-		if r.GetForward() != nil {
-			nr.Forward = r.GetForward()
-		}
-		if r.GetRedirect() != nil {
-			nr.Redirect = r.GetRedirect()
-		}
-		if r.GetMock() != nil {
+		if r.Type == route.Route_REDIRECT {
+			nr.Redirect = &Redirect{URL: NewURL(r.Redirect.Url), Code: r.Redirect.Code}
+		} else if r.Type == route.Route_DIRECT_RESPONSE {
 			nr.DirectResponse = r.GetMock()
+		} else {
+			nr.Forward = r.GetForward()
 		}
 
 		routes = append(routes, nr)
@@ -63,6 +63,26 @@ type Route struct {
 	Methods        []string              `json:"methods,omitempty"`
 	ExactMatch     bool                  `json:"exactMatch,omitempty"`
 	DirectResponse *route.DirectResponse `json:"directResponse,omitempty"`
-	Redirect       *route.Redirect       `json:"redirect,omitempty"`
+	Redirect       *Redirect             `json:"redirect,omitempty"`
 	Forward        *route.Forward        `json:"forward,omitempty"`
+}
+
+type Redirect struct {
+	URL  URL    `json:"url,omitempty"`
+	Code uint32 `json:"code,omitempty"`
+}
+
+type URL struct {
+	Schema string `json:"schema,omitempty"`
+	Host   string `json:"host,omitempty"`
+	Path   string `json:"path,omitempty"`
+}
+
+func NewURL(urlStr string) URL {
+	u, _ := url.Parse(urlStr)
+	return URL{
+		Schema: u.Scheme,
+		Host:   u.Host,
+		Path:   u.Path,
+	}
 }

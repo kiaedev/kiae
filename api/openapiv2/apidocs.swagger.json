@@ -1815,12 +1815,12 @@
             "type": "string"
           }
         },
+        "allowCredentials": {
+          "type": "boolean"
+        },
         "maxAge": {
           "type": "integer",
           "format": "int64"
-        },
-        "allowCredentials": {
-          "type": "boolean"
         }
       }
     },

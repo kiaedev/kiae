@@ -28,15 +28,39 @@ spec:
           - filename: abc2.toml
             content: aaa1
             mountPath: /dev/null
-    - name: k-svc
+    - name: vvv-vex4-routes
       type: k-route
       properties:
+        name: vvv-vex4
         gateways:
-          - name: kapp
-            host: "kapp.kiae.dev"
+          - host: vvv-vex4.dev.kiae.localhost
+            name: httpbin-gateway
         routes:
-          - name: kappaa
-#            uri: abc
-#            exactMatch: true
-#            methods:
-#              - "GET"
+          - directResponse:
+              body: ok
+              code: 200
+            methods:
+              - GET
+            name: ""
+            uri: /v1/books
+          - methods:
+              - GET
+            name: ""
+            redirect:
+              code: 302
+              url:
+                path: /v1/books
+            uri: /install
+          - methods:
+              - GET
+            name: ""
+            forward:
+              cors:
+                enabled: true
+                allowOrigins:
+                  - http://localhost:8080
+                allowMethods:
+                  - GET
+              rewrite: {}
+            uri: /install
+          - name: default

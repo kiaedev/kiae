@@ -31,24 +31,15 @@ func NewApplication(name string, components ...Component) *v1beta1.Application {
 }
 
 func NewApplicationWith(oApp *v1beta1.Application, components ...Component) *v1beta1.Application {
-	existComponents := make(map[string]int)
-	for idx, c := range oApp.Spec.Components {
-		existComponents[c.Type] = idx
-	}
-
+	oApp.Spec.Components = make([]common.ApplicationComponent, 0, len(components))
 	for _, component := range components {
-		if idx, ok := existComponents[component.GetType()]; ok {
-			oApp.Spec.Components[idx].Name = component.GetName()
-			oApp.Spec.Components[idx].Properties = util.Object2RawExtension(component)
-		} else {
-			oApp.Spec.Components = append(oApp.Spec.Components, common.ApplicationComponent{
-				Name:       component.GetName(),
-				Type:       component.GetType(),
-				Properties: util.Object2RawExtension(component),
-				// Traits:     buildTraits(traits),
-				// DependsOn:  nil,
-			})
-		}
+		oApp.Spec.Components = append(oApp.Spec.Components, common.ApplicationComponent{
+			Name:       component.GetName(),
+			Type:       component.GetType(),
+			Properties: util.Object2RawExtension(component),
+			// Traits:     buildTraits(traits),
+			// DependsOn:  nil,
+		})
 	}
 	return oApp
 }

@@ -952,9 +952,9 @@ func (m *Cors) validate(all bool) error {
 
 	// no validation rules for Enabled
 
-	// no validation rules for MaxAge
-
 	// no validation rules for AllowCredentials
+
+	// no validation rules for MaxAge
 
 	if len(errors) > 0 {
 		return CorsMultiError(errors)

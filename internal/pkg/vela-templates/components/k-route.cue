@@ -28,7 +28,7 @@ template: {
 					if r.methods != _|_ {
 						match: [ for m in r.methods {
 							{
-								method: m
+								method: exact: m
 								if r["exactMatch"] == _|_ {
 									uri: prefix: r.uri
 								}
@@ -44,49 +44,64 @@ template: {
 						}]
 					}
 
-					if parameter["directResponse"] != _|_ {
+					if r["directResponse"] != _|_ {
 						directResponse: {
-							body: string: parameter.directResponse.body
-							status: parameter.directResponse.code
+							body: string: r.directResponse.body
+							status: r.directResponse.code
 						}
 					}
 
-					if parameter["redirect"] != _|_ {
+					if r["redirect"] != _|_ {
 						redirect: {
-							schema:       parameter.redirect.url.schema
-							authority:    parameter.redirect.url.host
-							uri:          parameter.redirect.url.path
-							redirectCode: parameter.redirect.code
+							redirectCode: r.redirect.code
+						}
+						if r.redirect.url.schema != _|_ {
+							redirect: schema: r.redirect.url.schema
+						}
+						if r.redirect.url.host != _|_ {
+							redirect: authority: r.redirect.url.host
+						}
+						if r.redirect.url.path != _|_ {
+							redirect: uri: r.redirect.url.path
 						}
 					}
 
-					if parameter["rewrite"] != _|_ {
-						rewrite: {
-							authority: parameter.rewrite.authority
-							uri:       parameter.rewrite.uri
-						}
+					if r.forward.rewrite.authority != _|_ {
+						rewrite: authority: r.forward.rewrite.authority
+					}
+					if r.forward.rewrite.uri != _|_ {
+						rewrite: uri: r.forward.rewrite.uri
 					}
 
-					if parameter["corsPolicy"] != _|_ {
-						corsPolicy: {
-							allowCredentials: parameter.corsPolicy.allowCredentials
-							allowHeaders:     parameter.corsPolicy.allowHeaders
-							allowMethods:     parameter.corsPolicy.allowMethods
-							allowOrigins: [ for origin in parameter.corsPolicy.allowOrigins {
-								{
-									// todo how to handle *
-									exact: origin
-								}
-							}]
-							maxAge: parameter.corsPolicy.maxAge
-						}
+					if r.forward.cors.allowOrigins != _|_ {
+						corsPolicy: allowOrigins: [ for origin in r.forward.cors.allowOrigins {
+							{
+								// todo how to handle *
+								exact: origin
+							}
+						}]
+					}
+					if r.forward.cors.allowMethods != _|_ {
+						corsPolicy: allowMethods: r.forward.cors.allowMethods
+					}
+					if r.forward.cors.allowHeaders != _|_ {
+						corsPolicy: allowHeaders: r.forward.cors.allowHeaders
+					}
+					if r.forward.cors.allowCredentials != _|_ {
+						corsPolicy: allowCredentials: r.forward.cors.allowCredentials
 					}
 
-					route: [{
-						destination: {
-							host: context.appName
-						}
-					}]
+					if r.forward.cors.maxAge != _|_ {
+						corsPolicy: maxAge: r.forward.cors.maxAge
+					}
+
+					if r["directResponse"] == _|_ && r["redirect"] == _|_ {
+						route: [{
+							destination: {
+								host: context.appName
+							}
+						}]
+					}
 				}
 			}]
 		}
@@ -116,21 +131,21 @@ template: {
 
 			exactMatch?: bool
 
-			forward: #Forward
+			forward?: #Forward
 
-			redirect: #Redirect
+			redirect?: #Redirect
 
-			directResponse: #DirectResponse
+			directResponse?: #DirectResponse
 		}]
 	}
 
 	#Forward: {
-		corsPolicy: #CORS
-		rewrite: {
-			uri:       string
-			authority: string
+		cors?: #CORS
+		rewrite?: {
+			uri?:       string
+			authority?: string
 		}
-		limitPolicy: {
+		limiter?: {
 			qps: uint32
 			fallback: {
 				url: string, body: string
@@ -139,12 +154,13 @@ template: {
 	}
 
 	#CORS: {
-		allow_origins: [...string]
-		allow_methods: [...string]
-		allow_headers: [...string]
-		expose_headers: [...string]
-		max_age:           uint32
-		allow_credentials: bool
+		enabled: bool
+		allowOrigins?: [...string]
+		allowMethods?: [...string]
+		allowHeaders?: [...string]
+		exposeHeaders?: [...string]
+		maxAge?:           uint32
+		allowCredentials?: bool
 	}
 
 	#Redirect: {
@@ -158,8 +174,8 @@ template: {
 	}
 
 	#URL: {
-		schema: string
-		host:   string
-		path:   string
+		schema?: string
+		host?:   string
+		path?:   string
 	}
 }

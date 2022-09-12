@@ -88,12 +88,12 @@ message Forward {
 
 message Cors {
     bool enabled = 1;
-    repeated string allow_origins = 2;
-    repeated string allow_methods = 3;
-    repeated string allow_headers = 4;
-    repeated string expose_headers = 5;
-    uint32 max_age = 6;
-    bool allow_credentials = 7;
+    repeated string allow_origins = 2;// @gotags: json:"allowOrigins,omitempty"
+    repeated string allow_methods = 3;// @gotags: json:"allowMethods,omitempty"
+    repeated string allow_headers = 4;// @gotags: json:"allowHeaders,omitempty"
+    repeated string expose_headers = 5;// @gotags: json:"exposeHeaders,omitempty"
+    bool allow_credentials = 6;// @gotags: json:"allowCredentials,omitempty"
+    uint32 max_age = 7;// @gotags: json:"maxAge,omitempty"
 }
 
 message Rewrite {
@@ -113,11 +113,11 @@ message Limiter {
 }
 
 message Redirect {
-    uint32 code = 1 [(validate.rules).uint32 = {in: [301, 302, 307, 308]}];
-    string url = 2 [(validate.rules).string = {address: true}];
+    uint32 code = 2 [(validate.rules).uint32 = {in: [301, 302, 307, 308]}];
+    string url = 3 [(validate.rules).string = {address: true}];
 }
 
 message DirectResponse {
-    uint32 code = 1;
-    string body = 2;
+    uint32 code = 2;
+    string body = 3;
 }
