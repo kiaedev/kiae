@@ -84,17 +84,6 @@ template: {
 				ports: parameter.ports
 			}
 		}
-		for v in parameter.configs {
-			"\(v.filename)": {
-				apiVersion: "v1"
-				kind:       "ConfigMap"
-				metadata: name: context.name + "-" + v.filename
-				data: {
-					"\(v.filename)": v.content
-				}
-			}
-		}
-
 	}
 	parameter: {
 
@@ -146,14 +135,6 @@ template: {
 
 		// +usage=Define arguments by using environment variables
 		envs?: [string]: string
-
-		configs?: [...{
-			filename: string
-
-			content: string
-
-			mountPath: string
-		}]
 
 		// +usage=Instructions for assessing whether the container is alive.
 		livenessProbe?: #HealthProbe

@@ -21,13 +21,16 @@ spec:
           limits:
             cpu: 1
             memory: 256Mi
-        configs:
-          - filename: abc.yaml
-            content: aaa
-            mountPath: /dev/null
-          - filename: abc2.toml
-            content: aaa1
-            mountPath: /dev/null
+      traits:
+        - type: k-config
+          properties:
+            configs:
+              - filename: abc.yaml
+                content: aaa
+                mountPath: /dev/null
+              - filename: abc2.toml
+                content: aaa1
+                mountPath: /dev/null
     - name: vvv-vex4-routes
       type: k-route
       properties:
