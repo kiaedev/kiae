@@ -31,39 +31,38 @@ spec:
               - filename: abc2.toml
                 content: aaa1
                 mountPath: /dev/null
-    - name: vvv-vex4-routes
-      type: k-route
-      properties:
-        name: vvv-vex4
-        gateways:
-          - host: vvv-vex4.dev.kiae.localhost
-            name: httpbin-gateway
-        routes:
-          - directResponse:
-              body: ok
-              code: 200
-            methods:
-              - GET
-            name: ""
-            uri: /v1/books
-          - methods:
-              - GET
-            name: ""
-            redirect:
-              code: 302
-              url:
-                path: /v1/books
-            uri: /install
-          - methods:
-              - GET
-            name: ""
-            forward:
-              cors:
-                enabled: true
-                allowOrigins:
-                  - http://localhost:8080
-                allowMethods:
+        - type: k-route
+          properties:
+            name: vvv-vex4
+            gateways:
+              - host: vvv-vex4.dev.kiae.localhost
+                name: httpbin-gateway
+            routes:
+              - directResponse:
+                  body: ok
+                  code: 200
+                methods:
                   - GET
-              rewrite: {}
-            uri: /install
-          - name: default
+                name: ""
+                uri: /v1/books
+              - methods:
+                  - GET
+                name: ""
+                redirect:
+                  code: 302
+                  url:
+                    path: /v1/books
+                uri: /install
+              - methods:
+                  - GET
+                name: ""
+                forward:
+                  cors:
+                    enabled: true
+                    allowOrigins:
+                      - http://localhost:8080
+                    allowMethods:
+                      - GET
+                  rewrite: {}
+                uri: /install
+              - name: default
