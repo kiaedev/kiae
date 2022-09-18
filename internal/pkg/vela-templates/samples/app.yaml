@@ -22,6 +22,9 @@ spec:
             cpu: 1
             memory: 256Mi
       traits:
+        - type: k-secret2file
+          properties:
+            secretName: hello-world
         - type: k-config
           properties:
             configs:
@@ -70,3 +73,4 @@ spec:
       type: k-mw-mysqldb
       properties:
         dbname: "test"
+        instance: "default"

@@ -44,7 +44,7 @@ template: {
 					}
 				}
 				writeConnectionSecretToRef: {
-					name:      context.appName + "-mysql-conn-info"
+					name:      parameter.dbname
 					namespace: context.namespace
 				}
 			}

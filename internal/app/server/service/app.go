@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/depend"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
@@ -178,7 +179,7 @@ func (s *AppService) createAppComponent(ctx context.Context, appPb *app.Applicat
 		Name:       coreComponent.GetName(),
 		Type:       coreComponent.GetType(),
 		Properties: util.Object2RawExtension(coreComponent),
-		// Traits:     buildTraits(traits),
+		Traits:     coreComponent.GetTraits(),
 		// DependsOn:  nil,
 	})
 
@@ -207,6 +208,17 @@ func (s *AppService) updateAppComponent(ctx context.Context, app *app.Applicatio
 	kAppComponent := components.NewKWebservice(app, proj)
 	if len(entries) > 0 || len(routes) > 0 {
 		kAppComponent.SetupTrait(traits.NewRouteTrait(app.Name, entries, routes))
+	}
+
+	depends, _, err := s.daoDepend.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	if err != nil {
+		return err
+	}
+
+	for _, dd := range depends {
+		if dd.Type == depend.Depend_MIDDLEWARE {
+			kAppComponent.SetupTrait(traits.NewSecret2File(dd.Name))
+		}
 	}
 
 	return s.updateComponent(ctx, app.Id, kAppComponent)
@@ -243,7 +255,7 @@ func (s *AppService) addComponent(ctx context.Context, appid string, com compone
 		Name:       com.GetName(),
 		Type:       com.GetType(),
 		Properties: util.Object2RawExtension(com),
-		// Traits:     buildTraits(traits),
+		Traits:     com.GetTraits(),
 		// DependsOn:  nil,
 	})
 	_, err = appCli.Update(ctx, oApp, metav1.UpdateOptions{})
@@ -268,7 +280,7 @@ func (s *AppService) updateComponent(ctx context.Context, appid string, com comp
 				Name:       com.GetName(),
 				Type:       com.GetType(),
 				Properties: util.Object2RawExtension(com),
-				// Traits:     buildTraits(traits),
+				Traits:     com.GetTraits(),
 				// DependsOn:  nil,
 			}
 			break

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/kiaedev/kiae/api/depend"
@@ -36,12 +37,18 @@ func (s *DependService) List(ctx context.Context, in *depend.ListRequest) (*depe
 }
 
 func (s *DependService) Create(ctx context.Context, in *depend.Depend) (*depend.Depend, error) {
-	in.Name = strings.ToLower(strutil.RandomText(8))
+	app, err := s.appSvc.daoApp.Get(ctx, in.Appid)
+	if err != nil {
+		return nil, err
+	}
+
 	if in.Type == depend.Depend_MIDDLEWARE && in.MInstance != "" {
 		in.Status = depend.Depend_BOUND
 	}
 
-	if err := s.appSvc.addComponent(ctx, in.Appid, components.MwConstructor(in.MType, in.MInstance, in.Name)); err != nil {
+	in.Name = fmt.Sprintf("mw-%s-%s", app.Name, strings.ToLower(strutil.RandomText(5)))
+	com := components.MwConstructor(in.MType, in.MInstance, in.Name)
+	if err := s.appSvc.addComponent(ctx, in.Appid, com); err != nil {
 		return nil, err
 	}
 
@@ -58,7 +65,8 @@ func (s *DependService) Delete(ctx context.Context, in *kiae.IdRequest) (*emptyp
 		return nil, err
 	}
 
-	if err := s.appSvc.removeComponent(ctx, dpb.Appid, components.MwConstructor(dpb.MType, dpb.MInstance, dpb.Name)); err != nil {
+	com := components.MwConstructor(dpb.MType, dpb.MInstance, dpb.Name)
+	if err := s.appSvc.removeComponent(ctx, dpb.Appid, com); err != nil {
 		return nil, err
 	}
 

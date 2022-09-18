@@ -24,13 +24,13 @@ type KWebservice struct {
 	LivenessProbe    *project.HealthProbe    `json:"livenessProbe,omitempty"`
 	ReadinessProbe   *project.HealthProbe    `json:"readinessProbe,omitempty"`
 
-	Traits []common.ApplicationTrait
+	traits []common.ApplicationTrait
 }
 
 func NewKWebservice(kApp *app.Application, proj *project.Project) *KWebservice {
-	traits := make([]common.ApplicationTrait, 0)
+	ts := make([]common.ApplicationTrait, 0)
 	if len(kApp.Configs) > 0 {
-		traits = append(traits, common.ApplicationTrait{
+		ts = append(ts, common.ApplicationTrait{
 			Type: "k-config", Properties: util.Object2RawExtension(map[string]interface{}{"configs": kApp.Configs}),
 		})
 	}
@@ -45,7 +45,8 @@ func NewKWebservice(kApp *app.Application, proj *project.Project) *KWebservice {
 		Ports:     kApp.Ports,
 		Resources: utils.BuildResources(kApp.Size, 0.5),
 		Envs:      map[string]string{},
-		Traits:    traits,
+
+		traits: ts,
 	}
 }
 
@@ -57,6 +58,10 @@ func (c *KWebservice) GetType() string {
 	return "k-webservice"
 }
 
+func (c *KWebservice) GetTraits() []common.ApplicationTrait {
+	return c.traits
+}
+
 func (c *KWebservice) SetupTrait(trait traits.Trait) {
-	c.Traits = append(c.Traits, common.ApplicationTrait{Type: trait.GetType(), Properties: util.Object2RawExtension(trait)})
+	c.traits = append(c.traits, common.ApplicationTrait{Type: trait.GetType(), Properties: util.Object2RawExtension(trait)})
 }

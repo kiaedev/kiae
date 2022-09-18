@@ -1,8 +1,11 @@
 package components
 
+import "github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
+
 type Component interface {
 	GetName() string
 	GetType() string
+	GetTraits() []common.ApplicationTrait
 }
 
 var _ = KWebservice{}
