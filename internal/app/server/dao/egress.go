@@ -3,7 +3,7 @@ package dao
 import (
 	"context"
 
-	"github.com/kiaedev/kiae/api/depend"
+	"github.com/kiaedev/kiae/api/egress"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,18 +11,18 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type DependDao struct {
+type EgressDao struct {
 	*Dao
 }
 
-func NewDependDao(db *mongo.Database) *DependDao {
-	return &DependDao{
+func NewEgressDao(db *mongo.Database) *EgressDao {
+	return &EgressDao{
 		Dao: NewDao(db.Collection("depends")),
 	}
 }
 
-func (p *DependDao) Get(ctx context.Context, id string) (*depend.Depend, error) {
-	var proj depend.Depend
+func (p *EgressDao) Get(ctx context.Context, id string) (*egress.Egress, error) {
+	var proj egress.Egress
 	oid, _ := primitive.ObjectIDFromHex(id)
 	if err := p.collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&proj); err != nil {
 		return nil, err
@@ -31,13 +31,13 @@ func (p *DependDao) Get(ctx context.Context, id string) (*depend.Depend, error) 
 	return &proj, nil
 }
 
-func (p *DependDao) List(ctx context.Context, m bson.M) ([]*depend.Depend, int64, error) {
-	var results []*depend.Depend
+func (p *EgressDao) List(ctx context.Context, m bson.M) ([]*egress.Egress, int64, error) {
+	var results []*egress.Egress
 	total, err := mongoutil.ListAndCount(ctx, p.collection, m, &results)
 	return results, total, err
 }
 
-func (p *DependDao) Create(ctx context.Context, in *depend.Depend) (*depend.Depend, error) {
+func (p *EgressDao) Create(ctx context.Context, in *egress.Egress) (*egress.Egress, error) {
 	in.CreatedAt = timestamppb.Now()
 	in.UpdatedAt = timestamppb.Now()
 	rt, err := p.collection.InsertOne(ctx, in)
@@ -45,7 +45,7 @@ func (p *DependDao) Create(ctx context.Context, in *depend.Depend) (*depend.Depe
 	return in, err
 }
 
-func (p *DependDao) Update(ctx context.Context, in *depend.Depend) (*depend.Depend, error) {
+func (p *EgressDao) Update(ctx context.Context, in *egress.Egress) (*egress.Egress, error) {
 	oid, _ := primitive.ObjectIDFromHex(in.Id)
 	in.Id = "" // clean the immutable field
 	in.UpdatedAt = timestamppb.Now()

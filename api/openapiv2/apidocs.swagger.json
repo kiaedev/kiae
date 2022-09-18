@@ -10,13 +10,13 @@
   },
   "tags": [
     {
-      "name": "DependService"
-    },
-    {
       "name": "ProjectService"
     },
     {
       "name": "AppService"
+    },
+    {
+      "name": "EgressService"
     },
     {
       "name": "EntryService"
@@ -98,14 +98,14 @@
         ]
       }
     },
-    "/api/v1/apps/{appid}/depends": {
+    "/api/v1/apps/{appid}/egress": {
       "get": {
-        "operationId": "DependService_List",
+        "operationId": "EgressService_List",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/dependListResponse"
+              "$ref": "#/definitions/egressListResponse"
             }
           },
           "default": {
@@ -130,16 +130,16 @@
           }
         ],
         "tags": [
-          "DependService"
+          "EgressService"
         ]
       },
       "post": {
-        "operationId": "DependService_Create",
+        "operationId": "EgressService_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/dependDepend"
+              "$ref": "#/definitions/egressEgress"
             }
           },
           "default": {
@@ -167,22 +167,13 @@
                   "type": "string"
                 },
                 "type": {
-                  "$ref": "#/definitions/dependDependType"
+                  "$ref": "#/definitions/egressEgressType"
                 },
                 "name": {
                   "type": "string"
                 },
-                "mType": {
-                  "type": "string"
-                },
-                "mPolicy": {
-                  "$ref": "#/definitions/DependPolicy"
-                },
-                "mInstance": {
-                  "type": "string"
-                },
                 "status": {
-                  "$ref": "#/definitions/dependDependStatus"
+                  "$ref": "#/definitions/kiaeOpStatus"
                 },
                 "createdAt": {
                   "type": "string",
@@ -197,18 +188,18 @@
           }
         ],
         "tags": [
-          "DependService"
+          "EgressService"
         ]
       }
     },
-    "/api/v1/apps/{appid}/depends/{id}": {
+    "/api/v1/apps/{appid}/egress/{id}": {
       "put": {
-        "operationId": "DependService_Update",
+        "operationId": "EgressService_Update",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/dependDepend"
+              "$ref": "#/definitions/egressEgress"
             }
           },
           "default": {
@@ -239,22 +230,13 @@
               "type": "object",
               "properties": {
                 "type": {
-                  "$ref": "#/definitions/dependDependType"
+                  "$ref": "#/definitions/egressEgressType"
                 },
                 "name": {
                   "type": "string"
                 },
-                "mType": {
-                  "type": "string"
-                },
-                "mPolicy": {
-                  "$ref": "#/definitions/DependPolicy"
-                },
-                "mInstance": {
-                  "type": "string"
-                },
                 "status": {
-                  "$ref": "#/definitions/dependDependStatus"
+                  "$ref": "#/definitions/kiaeOpStatus"
                 },
                 "createdAt": {
                   "type": "string",
@@ -269,16 +251,16 @@
           }
         ],
         "tags": [
-          "DependService"
+          "EgressService"
         ]
       },
       "patch": {
-        "operationId": "DependService_Update2",
+        "operationId": "EgressService_Update2",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/dependDepend"
+              "$ref": "#/definitions/egressEgress"
             }
           },
           "default": {
@@ -309,22 +291,13 @@
               "type": "object",
               "properties": {
                 "type": {
-                  "$ref": "#/definitions/dependDependType"
+                  "$ref": "#/definitions/egressEgressType"
                 },
                 "name": {
                   "type": "string"
                 },
-                "mType": {
-                  "type": "string"
-                },
-                "mPolicy": {
-                  "$ref": "#/definitions/DependPolicy"
-                },
-                "mInstance": {
-                  "type": "string"
-                },
                 "status": {
-                  "$ref": "#/definitions/dependDependStatus"
+                  "$ref": "#/definitions/kiaeOpStatus"
                 },
                 "createdAt": {
                   "type": "string",
@@ -339,7 +312,7 @@
           }
         ],
         "tags": [
-          "DependService"
+          "EgressService"
         ]
       }
     },
@@ -653,9 +626,9 @@
         ]
       }
     },
-    "/api/v1/apps/{id}/depends/{id}": {
+    "/api/v1/apps/{id}/egress/{id}": {
       "delete": {
-        "operationId": "DependService_Delete",
+        "operationId": "EgressService_Delete",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -686,7 +659,7 @@
           }
         ],
         "tags": [
-          "DependService"
+          "EgressService"
         ]
       }
     },
@@ -1314,7 +1287,226 @@
         ]
       }
     },
-    "/api/v1/middleware/instances": {
+    "/api/v1/middleware/claims": {
+      "get": {
+        "operationId": "MiddlewareService_Claims",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareClaimsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      },
+      "post": {
+        "operationId": "MiddlewareService_ClaimCreate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareClaim"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/middlewareClaim"
+            }
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      }
+    },
+    "/api/v1/middleware/claims/{id}": {
+      "delete": {
+        "operationId": "MiddlewareService_ClaimDelete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      },
+      "put": {
+        "operationId": "MiddlewareService_ClaimUpdate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareClaim"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appid": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "policy": {
+                  "$ref": "#/definitions/ClaimPolicy"
+                },
+                "instance": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/middlewareClaimStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      },
+      "patch": {
+        "operationId": "MiddlewareService_ClaimUpdate2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareClaim"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appid": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "policy": {
+                  "$ref": "#/definitions/ClaimPolicy"
+                },
+                "instance": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/middlewareClaimStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      }
+    },
+    "/api/v1/middlewares": {
       "get": {
         "operationId": "MiddlewareService_List",
         "responses": {
@@ -1374,7 +1566,7 @@
         ]
       }
     },
-    "/api/v1/middleware/instances/{id}": {
+    "/api/v1/middlewares/{id}": {
       "delete": {
         "operationId": "MiddlewareService_Delete",
         "responses": {
@@ -1849,7 +2041,7 @@
       ],
       "default": "START"
     },
-    "DependPolicy": {
+    "ClaimPolicy": {
       "type": "string",
       "enum": [
         "REUSE",
@@ -1973,7 +2165,7 @@
       ],
       "default": "STATUS_CREATED"
     },
-    "dependDepend": {
+    "egressEgress": {
       "type": "object",
       "properties": {
         "id": {
@@ -1983,22 +2175,13 @@
           "type": "string"
         },
         "type": {
-          "$ref": "#/definitions/dependDependType"
+          "$ref": "#/definitions/egressEgressType"
         },
         "name": {
           "type": "string"
         },
-        "mType": {
-          "type": "string"
-        },
-        "mPolicy": {
-          "$ref": "#/definitions/DependPolicy"
-        },
-        "mInstance": {
-          "type": "string"
-        },
         "status": {
-          "$ref": "#/definitions/dependDependStatus"
+          "$ref": "#/definitions/kiaeOpStatus"
         },
         "createdAt": {
           "type": "string",
@@ -2010,30 +2193,21 @@
         }
       }
     },
-    "dependDependStatus": {
+    "egressEgressType": {
       "type": "string",
       "enum": [
-        "UNBOUND",
-        "BOUND"
+        "INTERNAL",
+        "INTERNET"
       ],
-      "default": "UNBOUND"
+      "default": "INTERNAL"
     },
-    "dependDependType": {
-      "type": "string",
-      "enum": [
-        "MIDDLEWARE",
-        "INTERNAL_APP",
-        "INTERNET_APP"
-      ],
-      "default": "MIDDLEWARE"
-    },
-    "dependListResponse": {
+    "egressListResponse": {
       "type": "object",
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/dependDepend"
+            "$ref": "#/definitions/egressEgress"
           }
         },
         "total": {
@@ -2119,6 +2293,63 @@
         "OP_STATUS_ENABLED"
       ],
       "default": "OP_STATUS_DISABLED"
+    },
+    "middlewareClaim": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "appid": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "policy": {
+          "$ref": "#/definitions/ClaimPolicy"
+        },
+        "instance": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/middlewareClaimStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "middlewareClaimStatus": {
+      "type": "string",
+      "enum": [
+        "UNBOUND",
+        "BOUND"
+      ],
+      "default": "UNBOUND"
+    },
+    "middlewareClaimsResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/middlewareClaim"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "middlewareInstance": {
       "type": "object",

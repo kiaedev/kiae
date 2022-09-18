@@ -28,6 +28,10 @@ type MiddlewareServiceClient interface {
 	Create(ctx context.Context, in *Instance, opts ...grpc.CallOption) (*Instance, error)
 	Update(ctx context.Context, in *Instance, opts ...grpc.CallOption) (*Instance, error)
 	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Claims(ctx context.Context, in *ClaimsRequest, opts ...grpc.CallOption) (*ClaimsResponse, error)
+	ClaimCreate(ctx context.Context, in *Claim, opts ...grpc.CallOption) (*Claim, error)
+	ClaimUpdate(ctx context.Context, in *Claim, opts ...grpc.CallOption) (*Claim, error)
+	ClaimDelete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type middlewareServiceClient struct {
@@ -74,6 +78,42 @@ func (c *middlewareServiceClient) Delete(ctx context.Context, in *kiae.IdRequest
 	return out, nil
 }
 
+func (c *middlewareServiceClient) Claims(ctx context.Context, in *ClaimsRequest, opts ...grpc.CallOption) (*ClaimsResponse, error) {
+	out := new(ClaimsResponse)
+	err := c.cc.Invoke(ctx, "/middleware.MiddlewareService/Claims", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *middlewareServiceClient) ClaimCreate(ctx context.Context, in *Claim, opts ...grpc.CallOption) (*Claim, error) {
+	out := new(Claim)
+	err := c.cc.Invoke(ctx, "/middleware.MiddlewareService/ClaimCreate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *middlewareServiceClient) ClaimUpdate(ctx context.Context, in *Claim, opts ...grpc.CallOption) (*Claim, error) {
+	out := new(Claim)
+	err := c.cc.Invoke(ctx, "/middleware.MiddlewareService/ClaimUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *middlewareServiceClient) ClaimDelete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/middleware.MiddlewareService/ClaimDelete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MiddlewareServiceServer is the server API for MiddlewareService service.
 // All implementations must embed UnimplementedMiddlewareServiceServer
 // for forward compatibility
@@ -82,6 +122,10 @@ type MiddlewareServiceServer interface {
 	Create(context.Context, *Instance) (*Instance, error)
 	Update(context.Context, *Instance) (*Instance, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
+	Claims(context.Context, *ClaimsRequest) (*ClaimsResponse, error)
+	ClaimCreate(context.Context, *Claim) (*Claim, error)
+	ClaimUpdate(context.Context, *Claim) (*Claim, error)
+	ClaimDelete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedMiddlewareServiceServer()
 }
 
@@ -100,6 +144,18 @@ func (UnimplementedMiddlewareServiceServer) Update(context.Context, *Instance) (
 }
 func (UnimplementedMiddlewareServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedMiddlewareServiceServer) Claims(context.Context, *ClaimsRequest) (*ClaimsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Claims not implemented")
+}
+func (UnimplementedMiddlewareServiceServer) ClaimCreate(context.Context, *Claim) (*Claim, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClaimCreate not implemented")
+}
+func (UnimplementedMiddlewareServiceServer) ClaimUpdate(context.Context, *Claim) (*Claim, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClaimUpdate not implemented")
+}
+func (UnimplementedMiddlewareServiceServer) ClaimDelete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClaimDelete not implemented")
 }
 func (UnimplementedMiddlewareServiceServer) mustEmbedUnimplementedMiddlewareServiceServer() {}
 
@@ -186,6 +242,78 @@ func _MiddlewareService_Delete_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MiddlewareService_Claims_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClaimsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MiddlewareServiceServer).Claims(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/middleware.MiddlewareService/Claims",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MiddlewareServiceServer).Claims(ctx, req.(*ClaimsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MiddlewareService_ClaimCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Claim)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MiddlewareServiceServer).ClaimCreate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/middleware.MiddlewareService/ClaimCreate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MiddlewareServiceServer).ClaimCreate(ctx, req.(*Claim))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MiddlewareService_ClaimUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Claim)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MiddlewareServiceServer).ClaimUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/middleware.MiddlewareService/ClaimUpdate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MiddlewareServiceServer).ClaimUpdate(ctx, req.(*Claim))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MiddlewareService_ClaimDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(kiae.IdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MiddlewareServiceServer).ClaimDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/middleware.MiddlewareService/ClaimDelete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MiddlewareServiceServer).ClaimDelete(ctx, req.(*kiae.IdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MiddlewareService_ServiceDesc is the grpc.ServiceDesc for MiddlewareService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -208,6 +336,22 @@ var MiddlewareService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _MiddlewareService_Delete_Handler,
+		},
+		{
+			MethodName: "Claims",
+			Handler:    _MiddlewareService_Claims_Handler,
+		},
+		{
+			MethodName: "ClaimCreate",
+			Handler:    _MiddlewareService_ClaimCreate_Handler,
+		},
+		{
+			MethodName: "ClaimUpdate",
+			Handler:    _MiddlewareService_ClaimUpdate_Handler,
+		},
+		{
+			MethodName: "ClaimDelete",
+			Handler:    _MiddlewareService_ClaimDelete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

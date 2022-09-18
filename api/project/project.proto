@@ -103,12 +103,6 @@ enum ConfigLevel {
     CONFIG_LEVEL_APP = 2;
 }
 
-message Middleware {
-    string name = 1;
-    string type = 2 [(validate.rules).string = {in: ["MySQL", "MongoDB", "Redis", "Memcached", "Kafka", "RabbitMQ", "iNotify"]}];
-    map<string, google.protobuf.Any> properties = 3;
-}
-
 message ListRequest {
     string name = 1;
 }

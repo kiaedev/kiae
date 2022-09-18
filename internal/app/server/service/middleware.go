@@ -2,12 +2,18 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/middleware"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	mw_provider "github.com/kiaedev/kiae/internal/pkg/mw-provider"
+	"github.com/kiaedev/kiae/internal/pkg/render/components"
+	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,13 +28,17 @@ type MiddlewareService struct {
 	kc *kubernetes.Clientset
 
 	daoMwInstance *dao.MiddlewareInstance
+	daoMwClaim    *dao.MiddlewareClaim
+	appSvc        *AppService
 }
 
 func NewMiddlewareService(cs *Service) *MiddlewareService {
 	return &MiddlewareService{
 		kc:            cs.K8sClient,
 		rc:            cs.RuntimeClient,
+		appSvc:        NewAppService(cs),
 		daoMwInstance: dao.NewMiddlewareInstanceDao(cs.DB),
+		daoMwClaim:    dao.NewMiddlewareClaimDao(cs.DB),
 	}
 }
 
@@ -79,4 +89,43 @@ func (s *MiddlewareService) Delete(ctx context.Context, in *kiae.IdRequest) (*em
 	}
 
 	return &emptypb.Empty{}, s.daoMwInstance.Delete(ctx, in.Id)
+}
+
+func (s *MiddlewareService) Claims(ctx context.Context, in *middleware.ClaimsRequest) (*middleware.ClaimsResponse, error) {
+	query := make(bson.M)
+	results, total, err := s.daoMwClaim.List(ctx, query)
+	return &middleware.ClaimsResponse{Items: results, Total: total}, err
+}
+
+func (s *MiddlewareService) ClaimCreate(ctx context.Context, in *middleware.Claim) (*middleware.Claim, error) {
+	app, err := s.appSvc.daoApp.Get(ctx, in.Appid)
+	if err != nil {
+		return nil, err
+	}
+
+	in.Name = fmt.Sprintf("%s-mw-%s", app.Name, strings.ToLower(strutil.RandomText(5)))
+	com := components.MwConstructor(in.Type, in.Instance, in.Name)
+	if err := s.appSvc.addComponent(ctx, in.Appid, com); err != nil {
+		return nil, err
+	}
+
+	return s.daoMwClaim.Create(ctx, in)
+}
+
+func (s *MiddlewareService) ClaimUpdate(ctx context.Context, in *middleware.Claim) (*middleware.Claim, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClaimUpdate not implemented")
+}
+
+func (s *MiddlewareService) ClaimDelete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
+	dpb, err := s.daoMwClaim.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	com := components.MwConstructor(dpb.Type, dpb.Instance, dpb.Name)
+	if err := s.appSvc.removeComponent(ctx, dpb.Appid, com); err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, s.daoMwClaim.Delete(ctx, in.Id)
 }

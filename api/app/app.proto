@@ -4,7 +4,6 @@ option go_package = "github.com/kiaedev/kiae/api/app";
 
 package app;
 
-import "depend/depend.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
@@ -68,7 +67,6 @@ message Application {
     bool liveness_probe_enabled = 15;
     bool readiness_probe_enabled = 16;
     repeated project.Configuration configs = 17;
-//    repeated depend.Depend depends = 18;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp created_by = 102; // @gotags: bson:"created_by,omitempty"

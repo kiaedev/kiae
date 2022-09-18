@@ -1,40 +1,41 @@
 syntax = "proto3";
 
-option go_package = "github.com/kiaedev/kiae/api/depend";
+option go_package = "github.com/kiaedev/kiae/api/egress";
 
-package depend;
+package egress;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "kiae/op_status.proto";
 import "kiae/request.proto";
 
 
-service DependService {
+service EgressService {
     rpc List (ListRequest) returns (ListResponse) {
         option (google.api.http) = {
-            get: "/api/v1/apps/{appid}/depends"
+            get: "/api/v1/apps/{appid}/egress"
         };
     }
-    rpc Create (Depend) returns (Depend) {
+    rpc Create (Egress) returns (Egress) {
         option (google.api.http) = {
-            post: "/api/v1/apps/{appid}/depends"
+            post: "/api/v1/apps/{appid}/egress"
             body: "*"
         };
     }
-    rpc Update (Depend) returns (Depend) {
+    rpc Update (Egress) returns (Egress) {
         option (google.api.http) = {
-            put: "/api/v1/apps/{appid}/depends/{id}",
+            put: "/api/v1/apps/{appid}/egress/{id}",
             body: "*",
             additional_bindings: {
-                patch: "/api/v1/apps/{appid}/depends/{id}"
+                patch: "/api/v1/apps/{appid}/egress/{id}"
                 body: "*"
             }
         };
     }
     rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            delete: "/api/v1/apps/{id}/depends/{id}"
+            delete: "/api/v1/apps/{id}/egress/{id}"
         };
     }
 }
@@ -45,33 +46,20 @@ message ListRequest {
 }
 
 message ListResponse {
-    repeated Depend items = 1;
+    repeated Egress items = 1;
     int64 total = 2;
 }
 
-
-message Depend {
+message Egress {
     string id = 1; // @gotags: bson:"_id,omitempty"
     string appid = 2;
     enum Type {
-        MIDDLEWARE = 0;
-        INTERNAL_APP = 1;
-        INTERNET_APP = 2;
+        INTERNAL = 0;
+        INTERNET = 1;
     }
     Type type = 5;
     string name = 6;
-    string m_type = 7;
-    enum Policy {
-        REUSE = 0;
-        CREATE = 1;
-    }
-    Policy m_policy = 8;
-    string m_instance = 9;
-    enum Status {
-        UNBOUND = 0;
-        BOUND = 1;
-    }
-    Status status = 10;
+    kiae.OpStatus status = 10;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"

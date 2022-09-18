@@ -275,6 +275,433 @@ var _ interface {
 	ErrorName() string
 } = ListResponseValidationError{}
 
+// Validate checks the field values on ClaimsRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ClaimsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ClaimsRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ClaimsRequestMultiError, or
+// nil if none found.
+func (m *ClaimsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ClaimsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Type
+
+	if len(errors) > 0 {
+		return ClaimsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ClaimsRequestMultiError is an error wrapping multiple validation errors
+// returned by ClaimsRequest.ValidateAll() if the designated constraints
+// aren't met.
+type ClaimsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ClaimsRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ClaimsRequestMultiError) AllErrors() []error { return m }
+
+// ClaimsRequestValidationError is the validation error returned by
+// ClaimsRequest.Validate if the designated constraints aren't met.
+type ClaimsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ClaimsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ClaimsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ClaimsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ClaimsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ClaimsRequestValidationError) ErrorName() string { return "ClaimsRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ClaimsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sClaimsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ClaimsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ClaimsRequestValidationError{}
+
+// Validate checks the field values on ClaimsResponse with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ClaimsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ClaimsResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ClaimsResponseMultiError,
+// or nil if none found.
+func (m *ClaimsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ClaimsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ClaimsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ClaimsResponseValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ClaimsResponseValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Total
+
+	if len(errors) > 0 {
+		return ClaimsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ClaimsResponseMultiError is an error wrapping multiple validation errors
+// returned by ClaimsResponse.ValidateAll() if the designated constraints
+// aren't met.
+type ClaimsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ClaimsResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ClaimsResponseMultiError) AllErrors() []error { return m }
+
+// ClaimsResponseValidationError is the validation error returned by
+// ClaimsResponse.Validate if the designated constraints aren't met.
+type ClaimsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ClaimsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ClaimsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ClaimsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ClaimsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ClaimsResponseValidationError) ErrorName() string { return "ClaimsResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ClaimsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sClaimsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ClaimsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ClaimsResponseValidationError{}
+
+// Validate checks the field values on Claim with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Claim) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Claim with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in ClaimMultiError, or nil if none found.
+func (m *Claim) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Claim) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Appid
+
+	if _, ok := _Claim_Type_InLookup[m.GetType()]; !ok {
+		err := ClaimValidationError{
+			field:  "Type",
+			reason: "value must be in list [MySQL MongoDB Redis Memcached Kafka RabbitMQ iNotify]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for Policy
+
+	// no validation rules for Instance
+
+	// no validation rules for Status
+
+	if all {
+		switch v := interface{}(m.GetCreatedAt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ClaimValidationError{
+					field:  "CreatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ClaimValidationError{
+					field:  "CreatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ClaimValidationError{
+				field:  "CreatedAt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetUpdatedAt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ClaimValidationError{
+					field:  "UpdatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ClaimValidationError{
+					field:  "UpdatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ClaimValidationError{
+				field:  "UpdatedAt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ClaimMultiError(errors)
+	}
+
+	return nil
+}
+
+// ClaimMultiError is an error wrapping multiple validation errors returned by
+// Claim.ValidateAll() if the designated constraints aren't met.
+type ClaimMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ClaimMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ClaimMultiError) AllErrors() []error { return m }
+
+// ClaimValidationError is the validation error returned by Claim.Validate if
+// the designated constraints aren't met.
+type ClaimValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ClaimValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ClaimValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ClaimValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ClaimValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ClaimValidationError) ErrorName() string { return "ClaimValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ClaimValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sClaim.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ClaimValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ClaimValidationError{}
+
+var _Claim_Type_InLookup = map[string]struct{}{
+	"MySQL":     {},
+	"MongoDB":   {},
+	"Redis":     {},
+	"Memcached": {},
+	"Kafka":     {},
+	"RabbitMQ":  {},
+	"iNotify":   {},
+}
+
 // Validate checks the field values on Instance with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.

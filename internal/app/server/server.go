@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
-	"github.com/kiaedev/kiae/api/depend"
+	"github.com/kiaedev/kiae/api/egress"
 	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/api/graph/generated"
@@ -130,7 +130,7 @@ func (s *Server) runGateway() error {
 	mux := runtime.NewServeMux()
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
 	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.ss))
-	_ = depend.RegisterDependServiceHandlerServer(ctx, mux, service.NewDependService(s.ss))
+	_ = egress.RegisterEgressServiceHandlerServer(ctx, mux, service.NewEgressService(s.ss))
 	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.ss))
 	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, service.NewRouteService(s.ss))
 

@@ -5,39 +5,65 @@ option go_package = "github.com/kiaedev/kiae/api/middleware";
 package middleware;
 
 import "google/api/annotations.proto";
-import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 import "kiae/op_status.proto";
 import "kiae/request.proto";
 import "validate/validate.proto";
 
-
 service MiddlewareService {
+
     rpc List (ListRequest) returns (ListResponse) {
         option (google.api.http) = {
-            get: "/api/v1/middleware/instances"
+            get: "/api/v1/middlewares"
         };
     }
     rpc Create (Instance) returns (Instance) {
         option (google.api.http) = {
-            post: "/api/v1/middleware/instances"
+            post: "/api/v1/middlewares"
             body: "*"
         };
     }
     rpc Update (Instance) returns (Instance) {
         option (google.api.http) = {
-            put: "/api/v1/middleware/instances/{id}",
+            put: "/api/v1/middlewares/{id}",
             body: "*",
             additional_bindings: {
-                patch: "/api/v1/middleware/instances/{id}"
+                patch: "/api/v1/middlewares/{id}"
                 body: "*"
             }
         };
     }
     rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            delete: "/api/v1/middleware/instances/{id}"
+            delete: "/api/v1/middlewares/{id}"
+        };
+    }
+
+    rpc Claims (ClaimsRequest) returns (ClaimsResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/middleware/claims"
+        };
+    }
+    rpc ClaimCreate (Claim) returns (Claim) {
+        option (google.api.http) = {
+            post: "/api/v1/middleware/claims"
+            body: "*"
+        };
+    }
+    rpc ClaimUpdate (Claim) returns (Claim) {
+        option (google.api.http) = {
+            put: "/api/v1/middleware/claims/{id}",
+            body: "*",
+            additional_bindings: {
+                patch: "/api/v1/middleware/claims/{id}"
+                body: "*"
+            }
+        };
+    }
+    rpc ClaimDelete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/middleware/claims/{id}"
         };
     }
 }
@@ -49,6 +75,36 @@ message ListRequest {
 message ListResponse {
     repeated Instance items = 1;
     int64 total = 2;
+}
+
+message ClaimsRequest {
+    string type = 1;
+}
+
+message ClaimsResponse {
+    repeated Claim items = 1;
+    int64 total = 2;
+}
+
+message Claim {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string appid = 2;
+    string type = 3 [(validate.rules).string = {in: ["MySQL", "MongoDB", "Redis", "Memcached", "Kafka", "RabbitMQ", "iNotify"]}];
+    string name = 4;
+    enum Policy {
+        REUSE = 0;
+        CREATE = 1;
+    }
+    Policy policy = 5;
+    string instance = 6;
+    enum Status {
+        UNBOUND = 0;
+        BOUND = 1;
+    }
+    Status status = 7;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
 }
 
 message Instance {

@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/kiaedev/kiae/api/app"
-	"github.com/kiaedev/kiae/api/depend"
 	"github.com/kiaedev/kiae/api/kiae"
+	"github.com/kiaedev/kiae/api/middleware"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/model"
@@ -36,19 +36,19 @@ type AppService struct {
 	daoEntry      *dao.EntryDao
 	daoRoute      *dao.RouteDao
 	daoMwInstance *dao.MiddlewareInstance
+	daoMwClaim    *dao.MiddlewareClaim
 	k8sClient     *kubernetes.Clientset
 	oamClient     *versioned.Clientset
-	daoDepend     *dao.DependDao
 }
 
 func NewAppService(cs *Service) *AppService {
 	return &AppService{
 		daoProj:       dao.NewProject(cs.DB),
 		daoApp:        dao.NewApp(cs.DB),
-		daoDepend:     dao.NewDependDao(cs.DB),
 		daoEntry:      dao.NewEntryDao(cs.DB),
 		daoRoute:      dao.NewRouteDao(cs.DB),
 		daoMwInstance: dao.NewMiddlewareInstanceDao(cs.DB),
+		daoMwClaim:    dao.NewMiddlewareClaimDao(cs.DB),
 		k8sClient:     cs.K8sClient,
 		oamClient:     cs.OamClient,
 	}
@@ -210,13 +210,13 @@ func (s *AppService) updateAppComponent(ctx context.Context, app *app.Applicatio
 		kAppComponent.SetupTrait(traits.NewRouteTrait(app.Name, entries, routes))
 	}
 
-	depends, _, err := s.daoDepend.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	mwClaims, _, err := s.daoMwClaim.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
 	if err != nil {
 		return err
 	}
 
-	for _, dd := range depends {
-		if dd.Type == depend.Depend_MIDDLEWARE {
+	for _, dd := range mwClaims {
+		if dd.Status == middleware.Claim_BOUND {
 			kAppComponent.SetupTrait(traits.NewSecret2File(dd.Name))
 		}
 	}
