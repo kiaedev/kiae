@@ -8,7 +8,7 @@ spec:
     - name: kapp
       type: k-webservice
       properties:
-        image: oamdev/hello-world
+        image: saltbo/hello-world
         ports:
           - port: 8080
             appProtocol: http
@@ -27,10 +27,10 @@ spec:
             configs:
               - filename: abc.yaml
                 content: aaa
-                mountPath: /dev/null
+                mountPath: /etc/hello1/
               - filename: abc2.toml
                 content: aaa1
-                mountPath: /dev/null
+                mountPath: /etc/hello2/
         - type: k-route
           properties:
             name: vvv-vex4
@@ -63,6 +63,10 @@ spec:
                       - http://localhost:8080
                     allowMethods:
                       - GET
-                  rewrite: {}
+                  rewrite: { }
                 uri: /install
               - name: default
+    - name: mysql
+      type: k-mw-mysqldb
+      properties:
+        dbname: "test"

@@ -52,8 +52,8 @@ message Project {
     string git = 4 [(validate.rules).string = {min_len: 10, max_len: 512}];
     repeated Image images = 5;
     repeated Port ports = 6;
-    repeated Configuration configs = 7;
-    repeated Middleware middlewares = 8;
+    //    repeated Configuration configs = 7;
+    //    repeated Middleware middlewares = 8;
     HealthProbe liveness_probe = 9;
     HealthProbe readiness_probe = 10;
 

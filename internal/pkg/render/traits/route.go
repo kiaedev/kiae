@@ -1,4 +1,4 @@
-package components
+package traits
 
 import (
 	"net/url"
@@ -7,13 +7,13 @@ import (
 	"github.com/kiaedev/kiae/api/route"
 )
 
-type RouteComponent struct {
+type RouteTrait struct {
 	Name     string    `json:"name"`
 	Gateways []Gateway `json:"gateways,omitempty"`
 	Routes   []Route   `json:"routes,omitempty"`
 }
 
-func NewRouteComponent(name string, entries []*entry.Entry, rs []*route.Route) *RouteComponent {
+func NewRouteTrait(name string, entries []*entry.Entry, rs []*route.Route) *RouteTrait {
 	gateways := make([]Gateway, 0, len(entries))
 	for _, e := range entries {
 		gateways = append(gateways, Gateway{e.Gateway, e.Host})
@@ -37,18 +37,18 @@ func NewRouteComponent(name string, entries []*entry.Entry, rs []*route.Route) *
 		routes = append(routes, nr)
 	}
 	routes = append(routes, Route{Name: "default"})
-	return &RouteComponent{
+	return &RouteTrait{
 		Name:     name,
 		Gateways: gateways,
 		Routes:   routes,
 	}
 }
 
-func (c *RouteComponent) GetName() string {
+func (c *RouteTrait) GetName() string {
 	return c.Name + "-routes"
 }
 
-func (c *RouteComponent) GetType() string {
+func (c *RouteTrait) GetType() string {
 	return "k-route"
 }
 

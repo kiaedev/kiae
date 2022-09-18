@@ -16,9 +16,11 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/depend"
 	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/api/graph/generated"
+	"github.com/kiaedev/kiae/api/middleware"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
@@ -28,6 +30,7 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Server struct {
@@ -44,6 +47,11 @@ func NewServer(kubeconfig string) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	runtimeClient, err := client.New(config, client.Options{})
+	if err != nil {
+		return nil, err
+	}
+
 	oamClientSet, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, err
@@ -55,9 +63,10 @@ func NewServer(kubeconfig string) (*Server, error) {
 	}
 	return &Server{
 		ss: &service.Service{
-			DB:        dbClient.DB.Database("kiae"),
-			K8sClient: k8sClientSet,
-			OamClient: oamClientSet,
+			DB:            dbClient.DB.Database("kiae"),
+			K8sClient:     k8sClientSet,
+			RuntimeClient: runtimeClient,
+			OamClient:     oamClientSet,
 		},
 	}, nil
 }
@@ -121,8 +130,11 @@ func (s *Server) runGateway() error {
 	mux := runtime.NewServeMux()
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
 	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.ss))
+	_ = depend.RegisterDependServiceHandlerServer(ctx, mux, service.NewDependService(s.ss))
 	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.ss))
 	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, service.NewRouteService(s.ss))
+
+	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, service.NewMiddlewareService(s.ss))
 	// opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	// err := app.RegisterAppServiceHandlerFromEndpoint(ctx, mux, "localhost:8888", opts)
 	// if err != nil {

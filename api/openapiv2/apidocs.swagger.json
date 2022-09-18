@@ -10,6 +10,9 @@
   },
   "tags": [
     {
+      "name": "DependService"
+    },
+    {
       "name": "ProjectService"
     },
     {
@@ -17,6 +20,9 @@
     },
     {
       "name": "EntryService"
+    },
+    {
+      "name": "MiddlewareService"
     },
     {
       "name": "RouteService"
@@ -89,6 +95,251 @@
         ],
         "tags": [
           "AppService"
+        ]
+      }
+    },
+    "/api/v1/apps/{appid}/depends": {
+      "get": {
+        "operationId": "DependService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/dependListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DependService"
+        ]
+      },
+      "post": {
+        "operationId": "DependService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/dependDepend"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "$ref": "#/definitions/dependDependType"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "mType": {
+                  "type": "string"
+                },
+                "mPolicy": {
+                  "$ref": "#/definitions/DependPolicy"
+                },
+                "mInstance": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/dependDependStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DependService"
+        ]
+      }
+    },
+    "/api/v1/apps/{appid}/depends/{id}": {
+      "put": {
+        "operationId": "DependService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/dependDepend"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/dependDependType"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "mType": {
+                  "type": "string"
+                },
+                "mPolicy": {
+                  "$ref": "#/definitions/DependPolicy"
+                },
+                "mInstance": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/dependDependStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DependService"
+        ]
+      },
+      "patch": {
+        "operationId": "DependService_Update2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/dependDepend"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/dependDependType"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "mType": {
+                  "type": "string"
+                },
+                "mPolicy": {
+                  "$ref": "#/definitions/DependPolicy"
+                },
+                "mInstance": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/dependDependStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DependService"
         ]
       }
     },
@@ -399,6 +650,43 @@
         ],
         "tags": [
           "AppService"
+        ]
+      }
+    },
+    "/api/v1/apps/{id}/depends/{id}": {
+      "delete": {
+        "operationId": "DependService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DependService"
         ]
       }
     },
@@ -889,12 +1177,6 @@
                     "$ref": "#/definitions/projectConfiguration"
                   }
                 },
-                "middlewares": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectMiddleware"
-                  }
-                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -1001,12 +1283,6 @@
                     "$ref": "#/definitions/projectConfiguration"
                   }
                 },
-                "middlewares": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectMiddleware"
-                  }
-                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -1035,6 +1311,225 @@
         ],
         "tags": [
           "AppService"
+        ]
+      }
+    },
+    "/api/v1/middleware/instances": {
+      "get": {
+        "operationId": "MiddlewareService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      },
+      "post": {
+        "operationId": "MiddlewareService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareInstance"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/middlewareInstance"
+            }
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      }
+    },
+    "/api/v1/middleware/instances/{id}": {
+      "delete": {
+        "operationId": "MiddlewareService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      },
+      "put": {
+        "operationId": "MiddlewareService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareInstance"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "env": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "$ref": "#/definitions/kiaeOpStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
+        ]
+      },
+      "patch": {
+        "operationId": "MiddlewareService_Update2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/middlewareInstance"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "env": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "properties": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "$ref": "#/definitions/kiaeOpStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "MiddlewareService"
         ]
       }
     },
@@ -1207,20 +1702,9 @@
                     "$ref": "#/definitions/projectPort"
                   }
                 },
-                "configs": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectConfiguration"
-                  }
-                },
-                "middlewares": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectMiddleware"
-                  }
-                },
                 "livenessProbe": {
-                  "$ref": "#/definitions/projectHealthProbe"
+                  "$ref": "#/definitions/projectHealthProbe",
+                  "title": "repeated Configuration configs = 7;\n   repeated Middleware middlewares = 8;"
                 },
                 "readinessProbe": {
                   "$ref": "#/definitions/projectHealthProbe"
@@ -1300,20 +1784,9 @@
                     "$ref": "#/definitions/projectPort"
                   }
                 },
-                "configs": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectConfiguration"
-                  }
-                },
-                "middlewares": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectMiddleware"
-                  }
-                },
                 "livenessProbe": {
-                  "$ref": "#/definitions/projectHealthProbe"
+                  "$ref": "#/definitions/projectHealthProbe",
+                  "title": "repeated Configuration configs = 7;\n   repeated Middleware middlewares = 8;"
                 },
                 "readinessProbe": {
                   "$ref": "#/definitions/projectHealthProbe"
@@ -1376,6 +1849,14 @@
       ],
       "default": "START"
     },
+    "DependPolicy": {
+      "type": "string",
+      "enum": [
+        "REUSE",
+        "CREATE"
+      ],
+      "default": "REUSE"
+    },
     "EntryScope": {
       "type": "string",
       "enum": [
@@ -1436,12 +1917,6 @@
             "$ref": "#/definitions/projectConfiguration"
           }
         },
-        "middlewares": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/projectMiddleware"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -1497,6 +1972,75 @@
         "STATUS_STOPPED"
       ],
       "default": "STATUS_CREATED"
+    },
+    "dependDepend": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "appid": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/dependDependType"
+        },
+        "name": {
+          "type": "string"
+        },
+        "mType": {
+          "type": "string"
+        },
+        "mPolicy": {
+          "$ref": "#/definitions/DependPolicy"
+        },
+        "mInstance": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/dependDependStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "dependDependStatus": {
+      "type": "string",
+      "enum": [
+        "UNBOUND",
+        "BOUND"
+      ],
+      "default": "UNBOUND"
+    },
+    "dependDependType": {
+      "type": "string",
+      "enum": [
+        "MIDDLEWARE",
+        "INTERNAL_APP",
+        "INTERNET_APP"
+      ],
+      "default": "MIDDLEWARE"
+    },
+    "dependListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dependDepend"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "entryEntry": {
       "type": "object",
@@ -1575,6 +2119,55 @@
         "OP_STATUS_ENABLED"
       ],
       "default": "OP_STATUS_DISABLED"
+    },
+    "middlewareInstance": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "env": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/kiaeOpStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "middlewareListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/middlewareInstance"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
     },
     "projectConfigLevel": {
       "type": "string",
@@ -1679,23 +2272,6 @@
         }
       }
     },
-    "projectMiddleware": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "properties": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/protobufAny"
-          }
-        }
-      }
-    },
     "projectPort": {
       "type": "object",
       "properties": {
@@ -1738,20 +2314,9 @@
             "$ref": "#/definitions/projectPort"
           }
         },
-        "configs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/projectConfiguration"
-          }
-        },
-        "middlewares": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/projectMiddleware"
-          }
-        },
         "livenessProbe": {
-          "$ref": "#/definitions/projectHealthProbe"
+          "$ref": "#/definitions/projectHealthProbe",
+          "title": "repeated Configuration configs = 7;\n   repeated Middleware middlewares = 8;"
         },
         "readinessProbe": {
           "$ref": "#/definitions/projectHealthProbe"

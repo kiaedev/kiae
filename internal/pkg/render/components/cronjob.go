@@ -4,7 +4,6 @@ import (
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/pkg/render/utils"
-	"github.com/kiaedev/kiae/pkg/kiaeutil"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -35,6 +34,6 @@ func NewKCronjob(kApp *app.Application, proj *project.Project) *KCronjob {
 		Replicas:  kApp.Replicas,
 		Envs:      map[string]string{},
 		Resources: utils.BuildResources(kApp.Size, 0.5),
-		Configs:   kiaeutil.ConfigsMerge(proj.Configs, kApp.Configs),
+		Configs:   kApp.Configs,
 	}
 }

@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/depend"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/model"
 	"github.com/kiaedev/kiae/internal/pkg/render"
 	"github.com/kiaedev/kiae/internal/pkg/render/components"
+	"github.com/kiaedev/kiae/internal/pkg/render/traits"
 	"github.com/kiaedev/kiae/pkg/kiaeutil"
 	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
@@ -28,22 +30,26 @@ import (
 type AppService struct {
 	app.UnimplementedAppServiceServer
 
-	daoProj   *dao.ProjectDao
-	daoApp    *dao.AppDao
-	daoEntry  *dao.EntryDao
-	daoRoute  *dao.RouteDao
-	k8sClient *kubernetes.Clientset
-	oamClient *versioned.Clientset
+	daoProj       *dao.ProjectDao
+	daoApp        *dao.AppDao
+	daoEntry      *dao.EntryDao
+	daoRoute      *dao.RouteDao
+	daoMwInstance *dao.MiddlewareInstance
+	k8sClient     *kubernetes.Clientset
+	oamClient     *versioned.Clientset
+	daoDepend     *dao.DependDao
 }
 
 func NewAppService(cs *Service) *AppService {
 	return &AppService{
-		daoProj:   dao.NewProject(cs.DB),
-		daoApp:    dao.NewApp(cs.DB),
-		daoEntry:  dao.NewEntryDao(cs.DB),
-		daoRoute:  dao.NewRouteDao(cs.DB),
-		k8sClient: cs.K8sClient,
-		oamClient: cs.OamClient,
+		daoProj:       dao.NewProject(cs.DB),
+		daoApp:        dao.NewApp(cs.DB),
+		daoDepend:     dao.NewDependDao(cs.DB),
+		daoEntry:      dao.NewEntryDao(cs.DB),
+		daoRoute:      dao.NewRouteDao(cs.DB),
+		daoMwInstance: dao.NewMiddlewareInstanceDao(cs.DB),
+		k8sClient:     cs.K8sClient,
+		oamClient:     cs.OamClient,
 	}
 }
 
@@ -81,16 +87,7 @@ func (s *AppService) Create(ctx context.Context, in *app.Application) (*app.Appl
 }
 
 func (s *AppService) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
-	proj, err := s.daoProj.Get(ctx, req.Pid)
-	if err != nil {
-		return nil, err
-	}
-
 	results, total, err := s.daoApp.List(ctx, bson.M{"pid": req.Pid})
-	for _, rt := range results {
-		rt.Configs = kiaeutil.ConfigsMerge(proj.Configs, rt.Configs)
-	}
-
 	return &app.ListResponse{Items: results, Total: total}, err
 }
 
@@ -100,12 +97,6 @@ func (p *AppService) Read(ctx context.Context, in *kiae.IdRequest) (*app.Applica
 		return nil, err
 	}
 
-	proj, err := p.daoProj.Get(ctx, kApp.Pid)
-	if err != nil {
-		return nil, err
-	}
-
-	kApp.Configs = kiaeutil.ConfigsMerge(proj.Configs, kApp.Configs)
 	return kApp, nil
 }
 
@@ -206,13 +197,23 @@ func (s *AppService) rebuildOApp(ctx context.Context, app *app.Application) (*v1
 		return nil, err
 	}
 
-	coms := make([]render.Component, 0)
-	coms = append(coms, components.NewKWebservice(app, proj))
+	kAppComponent := components.NewKWebservice(app, proj)
+	coms := []components.Component{kAppComponent}
 	if len(entries) > 0 || len(routes) > 0 {
-		coms = append(coms, components.NewRouteComponent(app.Name, entries, routes))
+		kAppComponent.SetupTrait(traits.NewRouteTrait(app.Name, entries, routes))
 	}
 
-	fmt.Println(coms)
+	middlewares, _, err := s.daoDepend.List(ctx, bson.M{"appid": app.Id, "type": depend.Depend_MIDDLEWARE, "status": depend.Depend_BOUND})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, d := range middlewares {
+		if d.Type == depend.Depend_MIDDLEWARE && d.Status == depend.Depend_BOUND {
+			coms = append(coms, components.MwConstructor(d.MType, d.MInstance, d.Name))
+		}
+	}
+
 	return render.NewApplicationWith(oApp, coms...), nil
 }
 

@@ -8,15 +8,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var _ = components.KWebservice{}
-var _ = components.KCronjob{}
+// Middlewares      []common.ApplicationComponent
+// Depends          []string
 
-type Component interface {
-	GetName() string
-	GetType() string
-}
-
-func NewApplication(name string, components ...Component) *v1beta1.Application {
+func NewApplication(name string, components ...components.Component) *v1beta1.Application {
 	oApp := &v1beta1.Application{ObjectMeta: metav1.ObjectMeta{Name: name}}
 	for _, component := range components {
 		oApp.Spec.Components = append(oApp.Spec.Components, common.ApplicationComponent{
@@ -30,7 +25,7 @@ func NewApplication(name string, components ...Component) *v1beta1.Application {
 	return oApp
 }
 
-func NewApplicationWith(oApp *v1beta1.Application, components ...Component) *v1beta1.Application {
+func NewApplicationWith(oApp *v1beta1.Application, components ...components.Component) *v1beta1.Application {
 	oApp.Spec.Components = make([]common.ApplicationComponent, 0, len(components))
 	for _, component := range components {
 		oApp.Spec.Components = append(oApp.Spec.Components, common.ApplicationComponent{
