@@ -50,7 +50,7 @@ func (s *EntryService) Update(ctx context.Context, in *entry.UpdateRequest) (*en
 		return nil, err
 	}
 
-	return fEntry, s.appSvc.UpdateAllComponentsByAppid(ctx, fEntry.Appid)
+	return fEntry, s.appSvc.updateAppComponentById(ctx, fEntry.Appid)
 }
 
 func (s *EntryService) handlePatch(in *entry.UpdateRequest, existedEntry *entry.Entry) {

@@ -6,23 +6,23 @@ import (
 	"strings"
 
 	"github.com/kiaedev/kiae/api/app"
-	"github.com/kiaedev/kiae/api/depend"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/model"
-	"github.com/kiaedev/kiae/internal/pkg/render"
 	"github.com/kiaedev/kiae/internal/pkg/render/components"
 	"github.com/kiaedev/kiae/internal/pkg/render/traits"
 	"github.com/kiaedev/kiae/pkg/kiaeutil"
-	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
+	"github.com/oam-dev/kubevela-core-api/pkg/oam/util"
 	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -69,18 +69,10 @@ func (s *AppService) Create(ctx context.Context, in *app.Application) (*app.Appl
 		return nil, status.Errorf(codes.AlreadyExists, "该环境已存在")
 	}
 
-	// traits := []*kiae.Trait{}
-
 	in.Replicas = 2
 	in.Name = strings.ToLower(fmt.Sprintf("%s-%s", proj.Name, strutil.RandomText(4)))
-	ns := kiaeutil.BuildAppNs(in.Env)
-	oApp, err := s.buildOApp(ctx, in, proj)
-	if err != nil {
+	if err := s.createAppComponent(ctx, in, proj); err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err)
-	}
-
-	if _, err := s.oamClient.CoreV1beta1().Applications(ns).Create(ctx, oApp, metav1.CreateOptions{}); err != nil {
-		return nil, status.Errorf(codes.Internal, "creating app failed: %v", err)
 	}
 
 	return s.daoApp.Create(ctx, in)
@@ -113,7 +105,7 @@ func (s *AppService) Update(ctx context.Context, in *app.UpdateRequest) (*app.Ap
 	}
 
 	// update the application
-	if err := s.UpdateAllComponents(ctx, existedApp); err != nil {
+	if err := s.updateAppComponent(ctx, existedApp); err != nil {
 		return nil, err
 	}
 
@@ -166,75 +158,146 @@ func (s *AppService) DoAction(ctx context.Context, in *app.ActionPayload) (*app.
 	}
 
 	// update the application
-	if err := s.UpdateAllComponents(ctx, model.NewAppAction(existedApp).Do(in.Action)); err != nil {
+	if err := s.updateAppComponent(ctx, model.NewAppAction(existedApp).Do(in.Action)); err != nil {
 		return nil, err
 	}
 
 	return s.daoApp.Update(ctx, existedApp)
 }
 
-func (s *AppService) buildOApp(ctx context.Context, app *app.Application, proj *project.Project) (*v1beta1.Application, error) {
-	return render.NewApplication(app.Name, components.NewKWebservice(app, proj)), nil
-}
-
-func (s *AppService) rebuildOApp(ctx context.Context, app *app.Application) (*v1beta1.Application, error) {
-	proj, err := s.daoProj.Get(ctx, app.Pid)
-	if err != nil {
-		return nil, err
-	}
-
-	entries, _, err := s.daoEntry.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
-	if err != nil {
-		return nil, err
-	}
-	routes, _, err := s.daoRoute.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
-	if err != nil {
-		return nil, err
-	}
-
-	oApp, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(app.Env)).Get(ctx, app.Name, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	kAppComponent := components.NewKWebservice(app, proj)
-	coms := []components.Component{kAppComponent}
-	if len(entries) > 0 || len(routes) > 0 {
-		kAppComponent.SetupTrait(traits.NewRouteTrait(app.Name, entries, routes))
-	}
-
-	middlewares, _, err := s.daoDepend.List(ctx, bson.M{"appid": app.Id, "type": depend.Depend_MIDDLEWARE, "status": depend.Depend_BOUND})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, d := range middlewares {
-		if d.Type == depend.Depend_MIDDLEWARE && d.Status == depend.Depend_BOUND {
-			coms = append(coms, components.MwConstructor(d.MType, d.MInstance, d.Name))
-		}
-	}
-
-	return render.NewApplicationWith(oApp, coms...), nil
-}
-
-func (s *AppService) UpdateAllComponents(ctx context.Context, app *app.Application) error {
-	oApp, err := s.rebuildOApp(ctx, app)
-	if err != nil {
+func (s *AppService) createAppComponent(ctx context.Context, appPb *app.Application, proj *project.Project) error {
+	appCli := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(appPb.Env))
+	oApp, err := appCli.Get(ctx, appPb.Name, metav1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
 		return err
 	}
 
-	if _, err := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(app.Env)).Update(ctx, oApp, metav1.UpdateOptions{}); err != nil {
-		return status.Errorf(codes.Internal, "update the application failed: %v", err)
+	oApp.SetName(appPb.Name)
+	coreComponent := components.NewKWebservice(appPb, proj)
+	oApp.Spec.Components = append(oApp.Spec.Components, common.ApplicationComponent{
+		Name:       coreComponent.GetName(),
+		Type:       coreComponent.GetType(),
+		Properties: util.Object2RawExtension(coreComponent),
+		// Traits:     buildTraits(traits),
+		// DependsOn:  nil,
+	})
+
+	if _, err := appCli.Create(ctx, oApp, metav1.CreateOptions{}); err != nil {
+		return status.Errorf(codes.Internal, "creating app failed: %v", err)
 	}
 
 	return nil
 }
 
-func (s *AppService) UpdateAllComponentsByAppid(ctx context.Context, appid string) error {
+func (s *AppService) updateAppComponent(ctx context.Context, app *app.Application) error {
+	proj, err := s.daoProj.Get(ctx, app.Pid)
+	if err != nil {
+		return err
+	}
+
+	entries, _, err := s.daoEntry.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	if err != nil {
+		return err
+	}
+	routes, _, err := s.daoRoute.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	if err != nil {
+		return err
+	}
+
+	kAppComponent := components.NewKWebservice(app, proj)
+	if len(entries) > 0 || len(routes) > 0 {
+		kAppComponent.SetupTrait(traits.NewRouteTrait(app.Name, entries, routes))
+	}
+
+	return s.updateComponent(ctx, app.Id, kAppComponent)
+}
+
+func (s *AppService) updateAppComponentById(ctx context.Context, appid string) error {
 	aa, err := s.daoApp.Get(ctx, appid)
 	if err != nil {
 		return err
 	}
 
-	return s.UpdateAllComponents(ctx, aa)
+	return s.updateAppComponent(ctx, aa)
+}
+
+func (s *AppService) addComponent(ctx context.Context, appid string, com components.Component) error {
+	appPb, err := s.daoApp.Get(ctx, appid)
+	if err != nil {
+		return err
+	}
+
+	appCli := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(appPb.Env))
+	oApp, err := appCli.Get(ctx, appPb.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, component := range oApp.Spec.Components {
+		if component.Type == com.GetType() && component.Name == com.GetName() {
+			return fmt.Errorf("component [%s]%s already exists", com.GetType(), com.GetName())
+		}
+	}
+
+	oApp.Spec.Components = append(oApp.Spec.Components, common.ApplicationComponent{
+		Name:       com.GetName(),
+		Type:       com.GetType(),
+		Properties: util.Object2RawExtension(com),
+		// Traits:     buildTraits(traits),
+		// DependsOn:  nil,
+	})
+	_, err = appCli.Update(ctx, oApp, metav1.UpdateOptions{})
+	return err
+}
+
+func (s *AppService) updateComponent(ctx context.Context, appid string, com components.Component) error {
+	appPb, err := s.daoApp.Get(ctx, appid)
+	if err != nil {
+		return err
+	}
+
+	appCli := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(appPb.Env))
+	oApp, err := appCli.Get(ctx, appPb.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	for idx, component := range oApp.Spec.Components {
+		if component.Type == com.GetType() && component.Name == com.GetName() {
+			oApp.Spec.Components[idx] = common.ApplicationComponent{
+				Name:       com.GetName(),
+				Type:       com.GetType(),
+				Properties: util.Object2RawExtension(com),
+				// Traits:     buildTraits(traits),
+				// DependsOn:  nil,
+			}
+			break
+		}
+	}
+
+	_, err = appCli.Update(ctx, oApp, metav1.UpdateOptions{})
+	return err
+}
+
+func (s *AppService) removeComponent(ctx context.Context, appid string, com components.Component) error {
+	appPb, err := s.daoApp.Get(ctx, appid)
+	if err != nil {
+		return err
+	}
+
+	appCli := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(appPb.Env))
+	oApp, err := appCli.Get(ctx, appPb.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	for idx, component := range oApp.Spec.Components {
+		if component.Type == com.GetType() && component.Name == com.GetName() {
+			oApp.Spec.Components = append(oApp.Spec.Components[:idx], oApp.Spec.Components[idx+1:]...)
+			_, err = appCli.Update(ctx, oApp, metav1.UpdateOptions{})
+			return err
+		}
+	}
+
+	return fmt.Errorf("not found component [%s]%s", com.GetType(), com.GetName())
 }

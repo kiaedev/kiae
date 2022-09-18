@@ -7,6 +7,7 @@ import (
 	"github.com/kiaedev/kiae/api/depend"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/internal/pkg/render/components"
 	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -15,7 +16,7 @@ import (
 type DependService struct {
 	depend.UnimplementedDependServiceServer
 
-	daoApp    *dao.AppDao
+	appSvc    *AppService
 	daoDepend *dao.DependDao
 	// daoMiddleware *dao.Middleware
 	daoMwInstance *dao.MiddlewareInstance
@@ -23,7 +24,7 @@ type DependService struct {
 
 func NewDependService(cs *Service) *DependService {
 	return &DependService{
-		daoApp:        dao.NewApp(cs.DB),
+		appSvc:        NewAppService(cs),
 		daoDepend:     dao.NewDependDao(cs.DB),
 		daoMwInstance: dao.NewMiddlewareInstanceDao(cs.DB),
 	}
@@ -35,14 +36,13 @@ func (s *DependService) List(ctx context.Context, in *depend.ListRequest) (*depe
 }
 
 func (s *DependService) Create(ctx context.Context, in *depend.Depend) (*depend.Depend, error) {
-	// kApp, err := s.daoApp.Get(ctx, in.Appid)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	in.Name = strings.ToLower(strutil.RandomText(8))
 	if in.Type == depend.Depend_MIDDLEWARE && in.MInstance != "" {
 		in.Status = depend.Depend_BOUND
+	}
+
+	if err := s.appSvc.addComponent(ctx, in.Appid, components.MwConstructor(in.MType, in.MInstance, in.Name)); err != nil {
+		return nil, err
 	}
 
 	return s.daoDepend.Create(ctx, in)
@@ -53,5 +53,14 @@ func (s *DependService) Update(ctx context.Context, in *depend.Depend) (*depend.
 }
 
 func (s *DependService) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
+	dpb, err := s.daoDepend.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.appSvc.removeComponent(ctx, dpb.Appid, components.MwConstructor(dpb.MType, dpb.MInstance, dpb.Name)); err != nil {
+		return nil, err
+	}
+
 	return &emptypb.Empty{}, s.daoDepend.Delete(ctx, in.Id)
 }

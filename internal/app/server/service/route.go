@@ -50,7 +50,7 @@ func (s *RouteService) Update(ctx context.Context, in *route.UpdateRequest) (*ro
 		return nil, err
 	}
 
-	return fRoute, s.appSvc.UpdateAllComponentsByAppid(ctx, fRoute.Appid)
+	return fRoute, s.appSvc.updateAppComponentById(ctx, fRoute.Appid)
 }
 
 func (s *RouteService) handlePatch(in *route.UpdateRequest, existedRoute *route.Route) {
