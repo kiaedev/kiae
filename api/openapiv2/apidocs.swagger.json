@@ -172,6 +172,16 @@
                 "name": {
                   "type": "string"
                 },
+                "host": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "protocol": {
+                  "type": "string"
+                },
                 "status": {
                   "$ref": "#/definitions/kiaeOpStatus"
                 },
@@ -235,6 +245,16 @@
                 "name": {
                   "type": "string"
                 },
+                "host": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "protocol": {
+                  "type": "string"
+                },
                 "status": {
                   "$ref": "#/definitions/kiaeOpStatus"
                 },
@@ -294,6 +314,16 @@
                   "$ref": "#/definitions/egressEgressType"
                 },
                 "name": {
+                  "type": "string"
+                },
+                "host": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "protocol": {
                   "type": "string"
                 },
                 "status": {
@@ -2178,6 +2208,16 @@
           "$ref": "#/definitions/egressEgressType"
         },
         "name": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "protocol": {
           "type": "string"
         },
         "status": {

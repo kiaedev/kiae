@@ -34,7 +34,13 @@ func (s *EgressService) Create(ctx context.Context, in *egress.Egress) (*egress.
 	if err != nil {
 		return nil, err
 	}
-	return s.daoEgress.Create(ctx, in)
+
+	eg, err := s.daoEgress.Create(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+
+	return eg, s.appSvc.updateAppComponentById(ctx, in.Appid)
 }
 
 func (s *EgressService) Update(ctx context.Context, in *egress.Egress) (*egress.Egress, error) {
@@ -42,5 +48,14 @@ func (s *EgressService) Update(ctx context.Context, in *egress.Egress) (*egress.
 }
 
 func (s *EgressService) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
-	return &emptypb.Empty{}, s.daoEgress.Delete(ctx, in.Id)
+	eg, err := s.daoEgress.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.daoEgress.Delete(ctx, in.Id); err != nil {
+		return &emptypb.Empty{}, err
+	}
+
+	return &emptypb.Empty{}, s.appSvc.updateAppComponentById(ctx, eg.Appid)
 }

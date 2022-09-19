@@ -22,6 +22,14 @@ spec:
             cpu: 1
             memory: 256Mi
       traits:
+        - type: k-sidecar
+          properties:
+            egress:
+              - host: "abc.localhost"
+                port: 8080
+                protocol: http
+                external: true
+
         - type: k-secret2file
           properties:
             secretName: hello-world

@@ -59,6 +59,9 @@ message Egress {
     }
     Type type = 5;
     string name = 6;
+    string host = 7;
+    uint32 port = 8;
+    string protocol = 9;
     kiae.OpStatus status = 10;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"

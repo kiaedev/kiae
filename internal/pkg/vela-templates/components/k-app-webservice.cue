@@ -84,6 +84,20 @@ template: {
 				ports: parameter.ports
 			}
 		}
+		kSideCar: {
+			apiVersion: "networking.istio.io/v1beta1"
+			kind:       "Sidecar"
+			metadata: name: context.name
+			spec: {
+				workloadSelector: labels: {
+					"kiae.dev/component": context.name
+				}
+				outboundTrafficPolicy: mode: "REGISTRY_ONLY"
+				egress: [{
+					hosts: ["~/*"]
+				}]
+			}
+		}
 	}
 	parameter: {
 

@@ -306,6 +306,12 @@ func (m *Egress) validate(all bool) error {
 
 	// no validation rules for Name
 
+	// no validation rules for Host
+
+	// no validation rules for Port
+
+	// no validation rules for Protocol
+
 	// no validation rules for Status
 
 	if all {

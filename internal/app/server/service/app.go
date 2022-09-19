@@ -39,6 +39,7 @@ type AppService struct {
 	daoMwClaim    *dao.MiddlewareClaim
 	k8sClient     *kubernetes.Clientset
 	oamClient     *versioned.Clientset
+	daoEgress     *dao.EgressDao
 }
 
 func NewAppService(cs *Service) *AppService {
@@ -47,6 +48,7 @@ func NewAppService(cs *Service) *AppService {
 		daoApp:        dao.NewApp(cs.DB),
 		daoEntry:      dao.NewEntryDao(cs.DB),
 		daoRoute:      dao.NewRouteDao(cs.DB),
+		daoEgress:     dao.NewEgressDao(cs.DB),
 		daoMwInstance: dao.NewMiddlewareInstanceDao(cs.DB),
 		daoMwClaim:    dao.NewMiddlewareClaimDao(cs.DB),
 		k8sClient:     cs.K8sClient,
@@ -80,7 +82,12 @@ func (s *AppService) Create(ctx context.Context, in *app.Application) (*app.Appl
 }
 
 func (s *AppService) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
-	results, total, err := s.daoApp.List(ctx, bson.M{"pid": req.Pid})
+	query := make(bson.M)
+	if req.Pid != "" {
+		query["pid"] = req.Pid
+	}
+
+	results, total, err := s.daoApp.List(ctx, query)
 	return &app.ListResponse{Items: results, Total: total}, err
 }
 
@@ -219,6 +226,14 @@ func (s *AppService) updateAppComponent(ctx context.Context, app *app.Applicatio
 		if dd.Status == middleware.Claim_BOUND {
 			kAppComponent.SetupTrait(traits.NewSecret2File(dd.Name))
 		}
+	}
+
+	egresses, _, err := s.daoEgress.List(ctx, bson.M{"appid": app.Id})
+	if err != nil {
+		return err
+	}
+	if len(egresses) > 0 {
+		kAppComponent.SetupTrait(traits.NewSidecar(egresses))
 	}
 
 	return s.updateComponent(ctx, app.Id, kAppComponent)
