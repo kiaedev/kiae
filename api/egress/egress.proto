@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "kiae/op_status.proto";
 import "kiae/request.proto";
+import "validate/validate.proto";
 
 
 service EgressService {
@@ -60,10 +61,14 @@ message Egress {
     Type type = 5;
     string name = 6;
     string host = 7;
-    uint32 port = 8;
-    string protocol = 9;
+    repeated Port ports = 8;
     kiae.OpStatus status = 10;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
+}
+
+message Port {
+    uint32 number = 1 [(validate.rules).uint32 = {gt: 0, lte: 65535}];
+    string protocol = 2 [(validate.rules).string = {in: ["http", "http2", "tcp"]}];
 }

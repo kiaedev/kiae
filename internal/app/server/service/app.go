@@ -234,6 +234,7 @@ func (s *AppService) updateAppComponent(ctx context.Context, app *app.Applicatio
 	}
 	if len(egresses) > 0 {
 		kAppComponent.SetupTrait(traits.NewSidecar(egresses))
+		kAppComponent.SetupTrait(traits.NewServiceEntry(egresses))
 	}
 
 	return s.updateComponent(ctx, app.Id, kAppComponent)

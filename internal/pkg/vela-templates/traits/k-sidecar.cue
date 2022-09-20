@@ -10,40 +10,16 @@
 }
 
 template: {
-	externalEgress: [ for v in parameter.egress if v.external == true {
-		v
-	}]
-
-	outputs: {
-		if len(externalEgress) > 0 {
-			kServiceEntry: {
-				apiVersion: "networking.istio.io/v1beta1"
-				kind:       "ServiceEntry"
-				metadata: name: context.name
-				spec: {
-					resolution: "DNS"
-					location:   "MESH_EXTERNAL"
-					hosts: [ for v in externalEgress {
-						"\(v.host)"
-					}]
-					ports: [ for v in externalEgress {
-						{name: "\(v.protocol)-\(v.port)", number: v.port, protocol: v.protocol}
-					}]
-				}
-			}
-		}
-	}
 	patchOutputs: {
 		kSideCar: {
 			spec: {
 				// +patchStrategy=replace
-				egress: [
+				egress: [ for _, v in parameter.egress {
 					{
-						hosts: [ for v in parameter.egress {
-							"./\(v.host)"
-						}]
-					},
-				]
+						port:  v.port
+						hosts: v.hosts
+					}
+				}]
 			}
 		}
 	}
@@ -51,14 +27,13 @@ template: {
 	parameter: {
 
 		egress: [...{
+			port: {
+				number: uint32
 
-			host: string
+				protocol: string
+			}
 
-			port: uint32
-
-			protocol: string
-
-			external: bool
+			hosts: [...string]
 		}]
 	}
 }

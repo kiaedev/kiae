@@ -1,32 +1,36 @@
 package traits
 
 import (
+	"fmt"
+
 	"github.com/kiaedev/kiae/api/egress"
 	"github.com/saltbo/gopkg/strutil"
 )
+
+type Egress struct {
+	Hosts []string     `json:"hosts"`
+	Port  *egress.Port `json:"port"`
+}
 
 type Sidecar struct {
 	Egress []Egress `json:"egress"`
 }
 
-type Egress struct {
-	Host     string `json:"host"`
-	Port     uint32 `json:"port"`
-	Protocol string `json:"protocol"`
-	External bool   `json:"external"`
-}
-
 func NewSidecar(egresses []*egress.Egress) *Sidecar {
-	results := make([]Egress, 0)
+	portHosts := make(map[*egress.Port][]string)
 	for _, eg := range egresses {
-		results = append(results, Egress{
-			Host:     eg.Host,
-			Port:     eg.Port,
-			Protocol: eg.Protocol,
-			External: eg.Type == egress.Egress_INTERNET,
-		})
+		for _, port := range eg.Ports {
+			portHosts[port] = append(portHosts[port], fmt.Sprintf("./%s", eg.Host))
+		}
 	}
 
+	results := make([]Egress, 0)
+	for port, hosts := range portHosts {
+		results = append(results, Egress{
+			Hosts: hosts,
+			Port:  port,
+		})
+	}
 	return &Sidecar{results}
 }
 

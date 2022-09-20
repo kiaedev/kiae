@@ -25,10 +25,12 @@ spec:
         - type: k-sidecar
           properties:
             egress:
-              - host: "abc.localhost"
-                port: 8080
-                protocol: http
-                external: true
+              - hosts:
+                - "abc.localhost"
+                - "abc2.localhost"
+                port:
+                  number: 8080
+                  protocol: http
 
         - type: k-secret2file
           properties:

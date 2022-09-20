@@ -175,12 +175,11 @@
                 "host": {
                   "type": "string"
                 },
-                "port": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "protocol": {
-                  "type": "string"
+                "ports": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/egressPort"
+                  }
                 },
                 "status": {
                   "$ref": "#/definitions/kiaeOpStatus"
@@ -248,12 +247,11 @@
                 "host": {
                   "type": "string"
                 },
-                "port": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "protocol": {
-                  "type": "string"
+                "ports": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/egressPort"
+                  }
                 },
                 "status": {
                   "$ref": "#/definitions/kiaeOpStatus"
@@ -319,12 +317,11 @@
                 "host": {
                   "type": "string"
                 },
-                "port": {
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "protocol": {
-                  "type": "string"
+                "ports": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/egressPort"
+                  }
                 },
                 "status": {
                   "$ref": "#/definitions/kiaeOpStatus"
@@ -2213,12 +2210,11 @@
         "host": {
           "type": "string"
         },
-        "port": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "protocol": {
-          "type": "string"
+        "ports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/egressPort"
+          }
         },
         "status": {
           "$ref": "#/definitions/kiaeOpStatus"
@@ -2253,6 +2249,18 @@
         "total": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "egressPort": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "protocol": {
+          "type": "string"
         }
       }
     },

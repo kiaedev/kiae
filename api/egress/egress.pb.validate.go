@@ -308,9 +308,39 @@ func (m *Egress) validate(all bool) error {
 
 	// no validation rules for Host
 
-	// no validation rules for Port
+	for idx, item := range m.GetPorts() {
+		_, _ = idx, item
 
-	// no validation rules for Protocol
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, EgressValidationError{
+						field:  fmt.Sprintf("Ports[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, EgressValidationError{
+						field:  fmt.Sprintf("Ports[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return EgressValidationError{
+					field:  fmt.Sprintf("Ports[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	// no validation rules for Status
 
@@ -448,3 +478,129 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = EgressValidationError{}
+
+// Validate checks the field values on Port with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *Port) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Port with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in PortMultiError, or nil if none found.
+func (m *Port) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Port) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if val := m.GetNumber(); val <= 0 || val > 65535 {
+		err := PortValidationError{
+			field:  "Number",
+			reason: "value must be inside range (0, 65535]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _Port_Protocol_InLookup[m.GetProtocol()]; !ok {
+		err := PortValidationError{
+			field:  "Protocol",
+			reason: "value must be in list [http http2 tcp]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return PortMultiError(errors)
+	}
+
+	return nil
+}
+
+// PortMultiError is an error wrapping multiple validation errors returned by
+// Port.ValidateAll() if the designated constraints aren't met.
+type PortMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PortMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PortMultiError) AllErrors() []error { return m }
+
+// PortValidationError is the validation error returned by Port.Validate if the
+// designated constraints aren't met.
+type PortValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PortValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PortValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PortValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PortValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PortValidationError) ErrorName() string { return "PortValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PortValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPort.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PortValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PortValidationError{}
+
+var _Port_Protocol_InLookup = map[string]struct{}{
+	"http":  {},
+	"http2": {},
+	"tcp":   {},
+}
