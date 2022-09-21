@@ -3,7 +3,6 @@ syntax = "proto3";
 package project;
 
 import "google/api/annotations.proto";
-import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "kiae/request.proto";
@@ -51,26 +50,11 @@ message Project {
     string intro = 3 [(validate.rules).string = {max_len: 150, min_len: 5}];
     string git = 4 [(validate.rules).string = {min_len: 10, max_len: 512}];
     repeated Image images = 5;
-    repeated Port ports = 6;
-    //    repeated Configuration configs = 7;
-    //    repeated Middleware middlewares = 8;
-    HealthProbe liveness_probe = 9;
-    HealthProbe readiness_probe = 10;
 
     google.protobuf.Timestamp created_at = 101;
     google.protobuf.Timestamp created_by = 102;
     google.protobuf.Timestamp updated_at = 103;
     google.protobuf.Timestamp updated_by = 104;
-}
-
-message HealthProbe {
-    uint32 port = 1;
-    string path = 2;
-    uint32 period_seconds = 3;
-    uint32 timeout_seconds = 4;
-    uint32 success_threshold = 5;
-    uint32 failure_threshold = 6;
-    uint32 initial_delay_seconds = 7;
 }
 
 message Image {
@@ -86,15 +70,6 @@ message Port {
     uint32 port = 1 [(validate.rules).uint32 = {gt: 0, lte: 65535}];
     string protocol = 2 [(validate.rules).string = {in: ["TCP", "UDP", "STCP"]}];
     string appProtocol = 3 [(validate.rules).string = {in: ["http", "http2", "tcp"]}];
-}
-
-message Configuration {
-    string filename = 1 [(validate.rules).string = {max_len: 16,min_len: 2}];
-    string content = 2;
-    string mount_path = 3 [(validate.rules).string = {max_len: 255,min_len: 2}];
-    ConfigLevel level = 4;
-    google.protobuf.Timestamp created_at = 101;
-    google.protobuf.Timestamp updated_at = 102;
 }
 
 enum ConfigLevel {

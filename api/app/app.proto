@@ -50,6 +50,42 @@ service AppService {
             body: "*"
         };
     }
+
+    rpc CfgCreate (AppCfg) returns (Configuration) {
+        option (google.api.http) = {
+            post: "/api/v1/apps/{appid}/configs"
+            body: "payload"
+        };
+    }
+    rpc CfgUpdate (AppCfg) returns (Configuration) {
+        option (google.api.http) = {
+            put: "/api/v1/apps/{appid}/configs/{payload.name}",
+            body: "payload",
+        };
+    }
+    rpc CfgDelete (AppCfg) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/apps/{appid}/configs/{payload.name}",
+        };
+    }
+
+    rpc EnvCreate (AppEnv) returns (Environment) {
+        option (google.api.http) = {
+            post: "/api/v1/apps/{appid}/environments"
+            body: "payload"
+        };
+    }
+    rpc EnvUpdate (AppEnv) returns (Environment) {
+        option (google.api.http) = {
+            put: "/api/v1/apps/{appid}/environments/{payload.name}",
+            body: "payload",
+        };
+    }
+    rpc EnvDelete (AppEnv) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/apps/{appid}/environments/{payload.name}",
+        };
+    }
 }
 
 message Application {
@@ -64,14 +100,59 @@ message Application {
     uint32 replicas = 9;
     map<string, string> annotations = 10;
 
-    bool liveness_probe_enabled = 15;
-    bool readiness_probe_enabled = 16;
-    repeated project.Configuration configs = 17;
+    HealthProbe liveness_probe = 15;
+    HealthProbe readiness_probe = 16;
+    repeated Configuration configs = 17;
+    repeated Environment environments = 18;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp created_by = 102; // @gotags: bson:"created_by,omitempty"
     google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
     google.protobuf.Timestamp updated_by = 104; // @gotags: bson:"updated_by,omitempty"
+}
+
+message HealthProbe {
+    bool enabled = 8;
+    uint32 port = 1;
+    string path = 2;
+    uint32 period_seconds = 3;
+    uint32 timeout_seconds = 4;
+    uint32 success_threshold = 5;
+    uint32 failure_threshold = 6;
+    uint32 initial_delay_seconds = 7;
+}
+
+message Configuration {
+    string name = 1;
+    string filename = 2 [(validate.rules).string = {max_len: 16,min_len: 2}];
+    string content = 3;
+    string mount_path = 4 [(validate.rules).string = {max_len: 255,min_len: 2}];
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 102;
+}
+
+message Environment {
+    enum Type {
+        SYSTEM = 0;
+        PROJ = 1;
+        USER = 2;
+    }
+    Type type = 1;
+    string name = 2;
+    string value = 3;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 102;
+}
+
+message AppEnv {
+    string appid = 1;
+    Environment payload = 2;
+}
+
+message AppCfg {
+    string appid = 1;
+    Configuration payload = 2;
 }
 
 message ListRequest {

@@ -30,6 +30,12 @@ type AppServiceClient interface {
 	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Read(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*Application, error)
 	DoAction(ctx context.Context, in *ActionPayload, opts ...grpc.CallOption) (*Application, error)
+	CfgCreate(ctx context.Context, in *AppCfg, opts ...grpc.CallOption) (*Configuration, error)
+	CfgUpdate(ctx context.Context, in *AppCfg, opts ...grpc.CallOption) (*Configuration, error)
+	CfgDelete(ctx context.Context, in *AppCfg, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	EnvCreate(ctx context.Context, in *AppEnv, opts ...grpc.CallOption) (*Environment, error)
+	EnvUpdate(ctx context.Context, in *AppEnv, opts ...grpc.CallOption) (*Environment, error)
+	EnvDelete(ctx context.Context, in *AppEnv, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type appServiceClient struct {
@@ -94,6 +100,60 @@ func (c *appServiceClient) DoAction(ctx context.Context, in *ActionPayload, opts
 	return out, nil
 }
 
+func (c *appServiceClient) CfgCreate(ctx context.Context, in *AppCfg, opts ...grpc.CallOption) (*Configuration, error) {
+	out := new(Configuration)
+	err := c.cc.Invoke(ctx, "/app.AppService/CfgCreate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) CfgUpdate(ctx context.Context, in *AppCfg, opts ...grpc.CallOption) (*Configuration, error) {
+	out := new(Configuration)
+	err := c.cc.Invoke(ctx, "/app.AppService/CfgUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) CfgDelete(ctx context.Context, in *AppCfg, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/app.AppService/CfgDelete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) EnvCreate(ctx context.Context, in *AppEnv, opts ...grpc.CallOption) (*Environment, error) {
+	out := new(Environment)
+	err := c.cc.Invoke(ctx, "/app.AppService/EnvCreate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) EnvUpdate(ctx context.Context, in *AppEnv, opts ...grpc.CallOption) (*Environment, error) {
+	out := new(Environment)
+	err := c.cc.Invoke(ctx, "/app.AppService/EnvUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appServiceClient) EnvDelete(ctx context.Context, in *AppEnv, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/app.AppService/EnvDelete", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServiceServer is the server API for AppService service.
 // All implementations must embed UnimplementedAppServiceServer
 // for forward compatibility
@@ -104,6 +164,12 @@ type AppServiceServer interface {
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
 	Read(context.Context, *kiae.IdRequest) (*Application, error)
 	DoAction(context.Context, *ActionPayload) (*Application, error)
+	CfgCreate(context.Context, *AppCfg) (*Configuration, error)
+	CfgUpdate(context.Context, *AppCfg) (*Configuration, error)
+	CfgDelete(context.Context, *AppCfg) (*emptypb.Empty, error)
+	EnvCreate(context.Context, *AppEnv) (*Environment, error)
+	EnvUpdate(context.Context, *AppEnv) (*Environment, error)
+	EnvDelete(context.Context, *AppEnv) (*emptypb.Empty, error)
 	mustEmbedUnimplementedAppServiceServer()
 }
 
@@ -128,6 +194,24 @@ func (UnimplementedAppServiceServer) Read(context.Context, *kiae.IdRequest) (*Ap
 }
 func (UnimplementedAppServiceServer) DoAction(context.Context, *ActionPayload) (*Application, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DoAction not implemented")
+}
+func (UnimplementedAppServiceServer) CfgCreate(context.Context, *AppCfg) (*Configuration, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CfgCreate not implemented")
+}
+func (UnimplementedAppServiceServer) CfgUpdate(context.Context, *AppCfg) (*Configuration, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CfgUpdate not implemented")
+}
+func (UnimplementedAppServiceServer) CfgDelete(context.Context, *AppCfg) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CfgDelete not implemented")
+}
+func (UnimplementedAppServiceServer) EnvCreate(context.Context, *AppEnv) (*Environment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnvCreate not implemented")
+}
+func (UnimplementedAppServiceServer) EnvUpdate(context.Context, *AppEnv) (*Environment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnvUpdate not implemented")
+}
+func (UnimplementedAppServiceServer) EnvDelete(context.Context, *AppEnv) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnvDelete not implemented")
 }
 func (UnimplementedAppServiceServer) mustEmbedUnimplementedAppServiceServer() {}
 
@@ -250,6 +334,114 @@ func _AppService_DoAction_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AppService_CfgCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppCfg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).CfgCreate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/CfgCreate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).CfgCreate(ctx, req.(*AppCfg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_CfgUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppCfg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).CfgUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/CfgUpdate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).CfgUpdate(ctx, req.(*AppCfg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_CfgDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppCfg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).CfgDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/CfgDelete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).CfgDelete(ctx, req.(*AppCfg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_EnvCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppEnv)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).EnvCreate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/EnvCreate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).EnvCreate(ctx, req.(*AppEnv))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_EnvUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppEnv)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).EnvUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/EnvUpdate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).EnvUpdate(ctx, req.(*AppEnv))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppService_EnvDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AppEnv)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServiceServer).EnvDelete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/app.AppService/EnvDelete",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServiceServer).EnvDelete(ctx, req.(*AppEnv))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AppService_ServiceDesc is the grpc.ServiceDesc for AppService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,6 +472,30 @@ var AppService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DoAction",
 			Handler:    _AppService_DoAction_Handler,
+		},
+		{
+			MethodName: "CfgCreate",
+			Handler:    _AppService_CfgCreate_Handler,
+		},
+		{
+			MethodName: "CfgUpdate",
+			Handler:    _AppService_CfgUpdate_Handler,
+		},
+		{
+			MethodName: "CfgDelete",
+			Handler:    _AppService_CfgDelete_Handler,
+		},
+		{
+			MethodName: "EnvCreate",
+			Handler:    _AppService_EnvCreate_Handler,
+		},
+		{
+			MethodName: "EnvUpdate",
+			Handler:    _AppService_EnvUpdate_Handler,
+		},
+		{
+			MethodName: "EnvDelete",
+			Handler:    _AppService_EnvDelete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

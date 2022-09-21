@@ -47,28 +47,9 @@ func setDefaultProjectProperties(in *project.Project) {
 		{
 			Name:      in.Name,
 			Image:     imageRegistry + in.Name,
-			Latest:    "unknown",
+			Latest:    "latest",
 			CreatedAt: timestamppb.Now(),
 			UpdatedAt: timestamppb.Now(),
 		},
-	}
-
-	defaultPort := uint32(8000)
-	if in.Ports != nil && len(in.Ports) > 0 {
-		defaultPort = in.Ports[0].Port
-	}
-	in.ReadinessProbe = defaultHealthProbe(defaultPort, "/healthz")
-	in.LivenessProbe = defaultHealthProbe(defaultPort, "/healthz")
-}
-
-func defaultHealthProbe(port uint32, path string) *project.HealthProbe {
-	return &project.HealthProbe{
-		Port:                port,
-		Path:                path,
-		PeriodSeconds:       30,
-		TimeoutSeconds:      3,
-		SuccessThreshold:    1,
-		FailureThreshold:    3,
-		InitialDelaySeconds: 5,
 	}
 }

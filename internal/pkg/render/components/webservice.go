@@ -21,30 +21,35 @@ type KWebservice struct {
 	Ports            []*project.Port         `json:"ports"`
 	Replicas         uint32                  `json:"replicas"`
 	Resources        v1.ResourceRequirements `json:"resources"`
-	LivenessProbe    *project.HealthProbe    `json:"livenessProbe,omitempty"`
-	ReadinessProbe   *project.HealthProbe    `json:"readinessProbe,omitempty"`
+	LivenessProbe    *app.HealthProbe        `json:"livenessProbe,omitempty"`
+	ReadinessProbe   *app.HealthProbe        `json:"readinessProbe,omitempty"`
 
 	traits []common.ApplicationTrait
 }
 
-func NewKWebservice(kApp *app.Application, proj *project.Project) *KWebservice {
+func NewKWebservice(ap *app.Application, proj *project.Project) *KWebservice {
 	ts := make([]common.ApplicationTrait, 0)
-	if len(kApp.Configs) > 0 {
+	if len(ap.Configs) > 0 {
 		ts = append(ts, common.ApplicationTrait{
-			Type: "k-config", Properties: util.Object2RawExtension(map[string]interface{}{"configs": kApp.Configs}),
+			Type: "k-config", Properties: util.Object2RawExtension(map[string]interface{}{"configs": ap.Configs}),
 		})
 	}
 
+	envs := make(map[string]string)
+	for _, env := range ap.Environments {
+		envs[env.Name] = env.Value
+	}
+
 	return &KWebservice{
-		Name: kApp.Name,
+		Name: ap.Name,
 		// Labels:      map[string]string{"kiae.dev/test": "test"},
-		Annotations: kApp.Annotations,
-		Image:       kApp.Image,
+		Annotations: ap.Annotations,
+		Image:       ap.Image,
 		// ImagePullSecrets: "",
-		Replicas:  kApp.Replicas,
-		Ports:     kApp.Ports,
-		Resources: utils.BuildResources(kApp.Size, 0.5),
-		Envs:      map[string]string{},
+		Replicas:  ap.Replicas,
+		Ports:     ap.Ports,
+		Resources: utils.BuildResources(ap.Size, 0.5),
+		Envs:      envs,
 
 		traits: ts,
 	}

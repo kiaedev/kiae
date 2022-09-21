@@ -98,6 +98,174 @@
         ]
       }
     },
+    "/api/v1/apps/{appid}/configs": {
+      "post": {
+        "operationId": "AppService_CfgCreate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appConfiguration"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/appConfiguration"
+            }
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      }
+    },
+    "/api/v1/apps/{appid}/configs/{payload.name}": {
+      "delete": {
+        "operationId": "AppService_CfgDelete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload.name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload.filename",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "payload.content",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "payload.mountPath",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "payload.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "payload.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      },
+      "put": {
+        "operationId": "AppService_CfgUpdate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appConfiguration"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload.name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "filename": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "mountPath": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      }
+    },
     "/api/v1/apps/{appid}/egress": {
       "get": {
         "operationId": "EgressService_List",
@@ -437,6 +605,171 @@
         ],
         "tags": [
           "EntryService"
+        ]
+      }
+    },
+    "/api/v1/apps/{appid}/environments": {
+      "post": {
+        "operationId": "AppService_EnvCreate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appEnvironment"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/appEnvironment"
+            }
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      }
+    },
+    "/api/v1/apps/{appid}/environments/{payload.name}": {
+      "delete": {
+        "operationId": "AppService_EnvDelete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload.name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload.type",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "SYSTEM",
+              "PROJ",
+              "USER"
+            ],
+            "default": "SYSTEM"
+          },
+          {
+            "name": "payload.value",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "payload.createdAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "payload.updatedAt",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "AppService"
+        ]
+      },
+      "put": {
+        "operationId": "AppService_EnvUpdate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/appEnvironment"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "appid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload.name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "payload",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/definitions/appEnvironmentType"
+                },
+                "value": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "AppService"
         ]
       }
     },
@@ -1165,16 +1498,22 @@
                     "type": "string"
                   }
                 },
-                "livenessProbeEnabled": {
-                  "type": "boolean"
+                "livenessProbe": {
+                  "$ref": "#/definitions/appHealthProbe"
                 },
-                "readinessProbeEnabled": {
-                  "type": "boolean"
+                "readinessProbe": {
+                  "$ref": "#/definitions/appHealthProbe"
                 },
                 "configs": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/projectConfiguration"
+                    "$ref": "#/definitions/appConfiguration"
+                  }
+                },
+                "environments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/appEnvironment"
                   }
                 },
                 "createdAt": {
@@ -1271,16 +1610,22 @@
                     "type": "string"
                   }
                 },
-                "livenessProbeEnabled": {
-                  "type": "boolean"
+                "livenessProbe": {
+                  "$ref": "#/definitions/appHealthProbe"
                 },
-                "readinessProbeEnabled": {
-                  "type": "boolean"
+                "readinessProbe": {
+                  "$ref": "#/definitions/appHealthProbe"
                 },
                 "configs": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/projectConfiguration"
+                    "$ref": "#/definitions/appConfiguration"
+                  }
+                },
+                "environments": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/appEnvironment"
                   }
                 },
                 "createdAt": {
@@ -1915,19 +2260,6 @@
                     "$ref": "#/definitions/projectImage"
                   }
                 },
-                "ports": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectPort"
-                  }
-                },
-                "livenessProbe": {
-                  "$ref": "#/definitions/projectHealthProbe",
-                  "title": "repeated Configuration configs = 7;\n   repeated Middleware middlewares = 8;"
-                },
-                "readinessProbe": {
-                  "$ref": "#/definitions/projectHealthProbe"
-                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -1996,19 +2328,6 @@
                   "items": {
                     "$ref": "#/definitions/projectImage"
                   }
-                },
-                "ports": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectPort"
-                  }
-                },
-                "livenessProbe": {
-                  "$ref": "#/definitions/projectHealthProbe",
-                  "title": "repeated Configuration configs = 7;\n   repeated Middleware middlewares = 8;"
-                },
-                "readinessProbe": {
-                  "$ref": "#/definitions/projectHealthProbe"
                 },
                 "createdAt": {
                   "type": "string",
@@ -2124,16 +2443,22 @@
             "type": "string"
           }
         },
-        "livenessProbeEnabled": {
-          "type": "boolean"
+        "livenessProbe": {
+          "$ref": "#/definitions/appHealthProbe"
         },
-        "readinessProbeEnabled": {
-          "type": "boolean"
+        "readinessProbe": {
+          "$ref": "#/definitions/appHealthProbe"
         },
         "configs": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/projectConfiguration"
+            "$ref": "#/definitions/appConfiguration"
+          }
+        },
+        "environments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/appEnvironment"
           }
         },
         "createdAt": {
@@ -2151,6 +2476,97 @@
         "updatedBy": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "appConfiguration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "mountPath": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "appEnvironment": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/appEnvironmentType"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "appEnvironmentType": {
+      "type": "string",
+      "enum": [
+        "SYSTEM",
+        "PROJ",
+        "USER"
+      ],
+      "default": "SYSTEM"
+    },
+    "appHealthProbe": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "path": {
+          "type": "string"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     },
@@ -2448,72 +2864,6 @@
         }
       }
     },
-    "projectConfigLevel": {
-      "type": "string",
-      "enum": [
-        "CONFIG_LEVEL_TEAM",
-        "CONFIG_LEVEL_PROJECT",
-        "CONFIG_LEVEL_APP"
-      ],
-      "default": "CONFIG_LEVEL_TEAM"
-    },
-    "projectConfiguration": {
-      "type": "object",
-      "properties": {
-        "filename": {
-          "type": "string"
-        },
-        "content": {
-          "type": "string"
-        },
-        "mountPath": {
-          "type": "string"
-        },
-        "level": {
-          "$ref": "#/definitions/projectConfigLevel"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "projectHealthProbe": {
-      "type": "object",
-      "properties": {
-        "port": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "path": {
-          "type": "string"
-        },
-        "periodSeconds": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "timeoutSeconds": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "successThreshold": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "failureThreshold": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "initialDelaySeconds": {
-          "type": "integer",
-          "format": "int64"
-        }
-      }
-    },
     "projectImage": {
       "type": "object",
       "properties": {
@@ -2586,19 +2936,6 @@
           "items": {
             "$ref": "#/definitions/projectImage"
           }
-        },
-        "ports": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/projectPort"
-          }
-        },
-        "livenessProbe": {
-          "$ref": "#/definitions/projectHealthProbe",
-          "title": "repeated Configuration configs = 7;\n   repeated Middleware middlewares = 8;"
-        },
-        "readinessProbe": {
-          "$ref": "#/definitions/projectHealthProbe"
         },
         "createdAt": {
           "type": "string",

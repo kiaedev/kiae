@@ -23,6 +23,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -72,8 +73,7 @@ func (s *AppService) Create(ctx context.Context, in *app.Application) (*app.Appl
 		return nil, status.Errorf(codes.AlreadyExists, "该环境已存在")
 	}
 
-	in.Replicas = 2
-	in.Name = strings.ToLower(fmt.Sprintf("%s-%s", proj.Name, strutil.RandomText(4)))
+	s.fillAppDefaultValue(proj, in)
 	if err := s.createAppComponent(ctx, in, proj); err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err)
 	}
@@ -197,27 +197,30 @@ func (s *AppService) createAppComponent(ctx context.Context, appPb *app.Applicat
 	return nil
 }
 
-func (s *AppService) updateAppComponent(ctx context.Context, app *app.Application) error {
-	proj, err := s.daoProj.Get(ctx, app.Pid)
+func (s *AppService) updateAppComponent(ctx context.Context, ap *app.Application) error {
+	proj, err := s.daoProj.Get(ctx, ap.Pid)
 	if err != nil {
 		return err
 	}
 
-	entries, _, err := s.daoEntry.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	entries, _, err := s.daoEntry.List(ctx, bson.M{"appid": ap.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
 	if err != nil {
 		return err
 	}
-	routes, _, err := s.daoRoute.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	routes, _, err := s.daoRoute.List(ctx, bson.M{"appid": ap.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
 	if err != nil {
 		return err
 	}
 
-	kAppComponent := components.NewKWebservice(app, proj)
+	kAppComponent := components.NewKWebservice(ap, proj)
 	if len(entries) > 0 || len(routes) > 0 {
-		kAppComponent.SetupTrait(traits.NewRouteTrait(app.Name, entries, routes))
+		kAppComponent.SetupTrait(traits.NewRouteTrait(ap.Name, entries, routes))
+	}
+	if len(ap.Configs) > 0 {
+		kAppComponent.SetupTrait(traits.NewConfigsTrait(ap.Configs))
 	}
 
-	mwClaims, _, err := s.daoMwClaim.List(ctx, bson.M{"appid": app.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
+	mwClaims, _, err := s.daoMwClaim.List(ctx, bson.M{"appid": ap.Id, "status": kiae.OpStatus_OP_STATUS_ENABLED})
 	if err != nil {
 		return err
 	}
@@ -228,7 +231,7 @@ func (s *AppService) updateAppComponent(ctx context.Context, app *app.Applicatio
 		}
 	}
 
-	egresses, _, err := s.daoEgress.List(ctx, bson.M{"appid": app.Id})
+	egresses, _, err := s.daoEgress.List(ctx, bson.M{"appid": ap.Id})
 	if err != nil {
 		return err
 	}
@@ -237,7 +240,7 @@ func (s *AppService) updateAppComponent(ctx context.Context, app *app.Applicatio
 		kAppComponent.SetupTrait(traits.NewServiceEntry(egresses))
 	}
 
-	return s.updateComponent(ctx, app.Id, kAppComponent)
+	return s.updateComponent(ctx, ap.Id, kAppComponent)
 }
 
 func (s *AppService) updateAppComponentById(ctx context.Context, appid string) error {
@@ -328,4 +331,55 @@ func (s *AppService) removeComponent(ctx context.Context, appid string, com comp
 	}
 
 	return fmt.Errorf("not found component [%s]%s", com.GetType(), com.GetName())
+}
+
+func (s *AppService) fillAppDefaultValue(proj *project.Project, in *app.Application) {
+	in.Replicas = 2
+	in.Name = strings.ToLower(fmt.Sprintf("%s-%s", proj.Name, strutil.RandomText(4)))
+	in.Environments = defaultEnvironments(proj, in)
+	defaultPort := uint32(8000)
+	if in.Ports != nil && len(in.Ports) > 0 {
+		defaultPort = in.Ports[0].Port
+	}
+	in.ReadinessProbe = defaultHealthProbe(defaultPort, "/healthz")
+	in.LivenessProbe = defaultHealthProbe(defaultPort, "/healthz")
+}
+
+func defaultEnvironments(proj *project.Project, in *app.Application) []*app.Environment {
+	if in.Environments == nil {
+		in.Environments = make([]*app.Environment, 0)
+	}
+
+	systemEnvs := map[string]string{
+		"KIAE_ENV":       in.Env,
+		"KIAE_HOME":      "/kiae/home/",
+		"KIAE_LOG_PATH":  "/kiae/logs/",
+		"KIAE_CFG_PATH":  "/kiae/configs/",
+		"KIAE_PROJ_NAME": proj.Name,
+		"KIAE_APP_NAME":  in.Name,
+	}
+
+	for k, v := range systemEnvs {
+		in.Environments = append(in.Environments, &app.Environment{
+			Type:      app.Environment_SYSTEM,
+			Name:      k,
+			Value:     v,
+			CreatedAt: timestamppb.Now(),
+			UpdatedAt: timestamppb.Now(),
+		})
+	}
+
+	return in.Environments
+}
+
+func defaultHealthProbe(port uint32, path string) *app.HealthProbe {
+	return &app.HealthProbe{
+		Port:                port,
+		Path:                path,
+		PeriodSeconds:       30,
+		TimeoutSeconds:      3,
+		SuccessThreshold:    1,
+		FailureThreshold:    3,
+		InitialDelaySeconds: 5,
+	}
 }

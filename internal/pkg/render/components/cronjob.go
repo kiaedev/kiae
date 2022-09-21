@@ -8,16 +8,16 @@ import (
 )
 
 type KCronjob struct {
-	Name             string                   `json:"name"`
-	Labels           map[string]string        `json:"labels,omitempty"`
-	Annotations      map[string]string        `json:"annotations,omitempty"`
-	Envs             map[string]string        `json:"envs,omitempty"`
-	Image            string                   `json:"image"`
-	ImagePullPolicy  string                   `json:"imagePullPolicy,omitempty"`
-	ImagePullSecrets []string                 `json:"imagePullSecrets,omitempty"`
-	Replicas         uint32                   `json:"replicas"`
-	Resources        v1.ResourceRequirements  `json:"resources"`
-	Configs          []*project.Configuration `json:"configs,omitempty"`
+	Name             string                  `json:"name"`
+	Labels           map[string]string       `json:"labels,omitempty"`
+	Annotations      map[string]string       `json:"annotations,omitempty"`
+	Envs             map[string]string       `json:"envs,omitempty"`
+	Image            string                  `json:"image"`
+	ImagePullPolicy  string                  `json:"imagePullPolicy,omitempty"`
+	ImagePullSecrets []string                `json:"imagePullSecrets,omitempty"`
+	Replicas         uint32                  `json:"replicas"`
+	Resources        v1.ResourceRequirements `json:"resources"`
+	// Configs          []*app.Configuration    `json:"configs,omitempty"`
 
 	// Traits           []common.ApplicationTrait
 	// Middlewares      []common.ApplicationComponent
@@ -34,6 +34,6 @@ func NewKCronjob(kApp *app.Application, proj *project.Project) *KCronjob {
 		Replicas:  kApp.Replicas,
 		Envs:      map[string]string{},
 		Resources: utils.BuildResources(kApp.Size, 0.5),
-		Configs:   kApp.Configs,
+		// Configs:   kApp.Configs,
 	}
 }
