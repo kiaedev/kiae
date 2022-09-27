@@ -25,6 +25,9 @@
       "name": "MiddlewareService"
     },
     {
+      "name": "ImageService"
+    },
+    {
       "name": "RouteService"
     },
     {
@@ -1659,6 +1662,75 @@
         ]
       }
     },
+    "/api/v1/images/projects/{pid}/{id}": {
+      "put": {
+        "operationId": "ImageService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/projectImage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "image": {
+                  "type": "string"
+                },
+                "tag": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "ImageService"
+        ]
+      }
+    },
     "/api/v1/middleware/claims": {
       "get": {
         "operationId": "MiddlewareService_Claims",
@@ -2254,12 +2326,6 @@
                 "git": {
                   "type": "string"
                 },
-                "images": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectImage"
-                  }
-                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -2323,12 +2389,6 @@
                 "git": {
                   "type": "string"
                 },
-                "images": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/projectImage"
-                  }
-                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -2351,6 +2411,206 @@
         ],
         "tags": [
           "ProjectService"
+        ]
+      }
+    },
+    "/api/v1/projects/{id}/images/{id}": {
+      "delete": {
+        "operationId": "ImageService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ImageService"
+        ]
+      }
+    },
+    "/api/v1/projects/{pid}/images": {
+      "get": {
+        "operationId": "ImageService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/projectImageListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ImageService"
+        ]
+      },
+      "post": {
+        "operationId": "ImageService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/projectImage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "image": {
+                  "type": "string"
+                },
+                "tag": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "ImageService"
+        ]
+      }
+    },
+    "/api/v1/projects/{pid}/images/{id}": {
+      "patch": {
+        "operationId": "ImageService_Update2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/projectImage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "image": {
+                  "type": "string"
+                },
+                "tag": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "ImageService"
         ]
       }
     },
@@ -2867,13 +3127,25 @@
     "projectImage": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
         "image": {
           "type": "string"
         },
-        "latest": {
+        "tag": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "status": {
           "type": "string"
         },
         "createdAt": {
@@ -2883,6 +3155,21 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "projectImageListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/projectImage"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -2930,12 +3217,6 @@
         },
         "git": {
           "type": "string"
-        },
-        "images": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/projectImage"
-          }
         },
         "createdAt": {
           "type": "string",

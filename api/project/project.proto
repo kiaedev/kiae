@@ -49,21 +49,11 @@ message Project {
     string name = 2 [(validate.rules).string = {max_len: 32, min_len: 3}];
     string intro = 3 [(validate.rules).string = {max_len: 150, min_len: 5}];
     string git = 4 [(validate.rules).string = {min_len: 10, max_len: 512}];
-    repeated Image images = 5;
 
     google.protobuf.Timestamp created_at = 101;
     google.protobuf.Timestamp created_by = 102;
     google.protobuf.Timestamp updated_at = 103;
     google.protobuf.Timestamp updated_by = 104;
-}
-
-message Image {
-    string name = 1;
-    string image = 2 [(validate.rules).string = {}];
-    string latest = 3;
-
-    google.protobuf.Timestamp created_at = 101;
-    google.protobuf.Timestamp updated_at = 103;
 }
 
 message Port {

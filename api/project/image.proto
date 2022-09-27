@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package project;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/kiaedev/kiae/api/project";
+
+message Image {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string pid = 2;
+    string name = 3 [(validate.rules).string = {}];
+    string image = 4 [(validate.rules).string = {}];
+    string tag = 5;
+    string url = 6;
+    string status = 9;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+
+message ImageListRequest {
+    string pid = 1;
+}
+
+message ImageListResponse {
+    repeated Image items = 1;
+    int64 total = 2;
+}
+
+service ImageService {
+    rpc List (ImageListRequest) returns (ImageListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/projects/{pid}/images"
+        };
+    }
+    rpc Create (Image) returns (Image) {
+        option (google.api.http) = {
+            post: "/api/v1/projects/{pid}/images"
+            body: "*"
+        };
+    }
+    rpc Update (Image) returns (Image) {
+        option (google.api.http) = {
+            put: "/api/v1/images/projects/{pid}/{id}",
+            body: "*",
+            additional_bindings: {
+                patch: "/api/v1/projects/{pid}/images/{id}"
+                body: "*"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/projects/{id}/images/{id}"
+        };
+    }
+}

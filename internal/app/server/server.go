@@ -129,6 +129,7 @@ func (s *Server) runGateway() error {
 	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux()
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
+	_ = project.RegisterImageServiceHandlerServer(ctx, mux, service.NewProjectImageSvc(s.ss))
 	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.ss))
 	_ = egress.RegisterEgressServiceHandlerServer(ctx, mux, service.NewEgressService(s.ss))
 	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.ss))

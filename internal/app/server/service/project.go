@@ -7,7 +7,6 @@ import (
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"go.mongodb.org/mongo-driver/bson"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ProjectService struct {
@@ -42,14 +41,14 @@ func (p *ProjectService) Read(ctx context.Context, in *kiae.IdRequest) (*project
 
 func setDefaultProjectProperties(in *project.Project) {
 	// todo 从配置中获取镜像仓库地址
-	imageRegistry := "registry.example.com/some-namespace/"
-	in.Images = []*project.Image{
-		{
-			Name:      in.Name,
-			Image:     imageRegistry + in.Name,
-			Latest:    "latest",
-			CreatedAt: timestamppb.Now(),
-			UpdatedAt: timestamppb.Now(),
-		},
-	}
+	// imageRegistry := "registry.example.com/some-namespace/"
+	// in.Images = []*project.Image{
+	// 	{
+	// 		Name:      in.Name,
+	// 		Image:     imageRegistry + in.Name,
+	// 		Latest:    "latest",
+	// 		CreatedAt: timestamppb.Now(),
+	// 		UpdatedAt: timestamppb.Now(),
+	// 	},
+	// }
 }
