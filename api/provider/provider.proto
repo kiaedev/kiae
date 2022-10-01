@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package provider;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+
+
+option go_package = "github.com/kiaedev/kiae/api/provider";
+
+service ProviderService {
+
+    rpc Prepare (google.protobuf.Empty) returns (PreparesResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/provider/prepares"
+        };
+    }
+    rpc List (ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/providers"
+        };
+    }
+    rpc Create (Provider) returns (Provider) {
+        option (google.api.http) = {
+            post: "/api/v1/providers"
+            body: "*"
+        };
+    }
+    rpc Update (UpdateRequest) returns (Provider) {
+        option (google.api.http) = {
+            put: "/api/v1/providers/{payload.id}",
+            body: "payload",
+            additional_bindings: {
+                patch: "/api/v1/providers/{payload.id}"
+                body: "payload"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/providers/{id}"
+        };
+    }
+}
+
+message ListRequest {
+    string appid = 1;
+}
+
+message ListResponse {
+    repeated Provider items = 1;
+    int64 total = 2;
+}
+
+message PreparesResponse {
+    repeated Prepare items = 1;
+}
+
+message Prepare {
+    string name = 2;
+    string authorize_url = 5;
+    string token_url = 6;
+    repeated string scopes = 8;
+}
+
+message UpdateRequest {
+    Provider payload = 1;
+    google.protobuf.FieldMask update_mask = 2;
+}
+
+message Provider {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string name = 2;
+    string client_id = 3; // @gotags: bson:"client_id,omitempty"
+    string client_secret = 4;// @gotags: bson:"client_secret,omitempty"
+    string authorize_url = 5;// @gotags: bson:"authorize_url,omitempty"
+    string token_url = 6;// @gotags: bson:"token_url,omitempty"
+    repeated string scopes = 7;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+

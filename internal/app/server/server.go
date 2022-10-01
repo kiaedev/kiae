@@ -20,8 +20,10 @@ import (
 	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/api/graph/generated"
+	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/middleware"
 	"github.com/kiaedev/kiae/api/project"
+	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
@@ -128,8 +130,9 @@ func (s *Server) runGateway() error {
 	// Register gRPC server endpoint
 	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux()
+	_ = provider.RegisterProviderServiceHandlerServer(ctx, mux, service.NewProviderService(s.ss))
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
-	_ = project.RegisterImageServiceHandlerServer(ctx, mux, service.NewProjectImageSvc(s.ss))
+	_ = image.RegisterImageServiceHandlerServer(ctx, mux, service.NewProjectImageSvc(s.ss))
 	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.ss))
 	_ = egress.RegisterEgressServiceHandlerServer(ctx, mux, service.NewEgressService(s.ss))
 	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.ss))
@@ -144,6 +147,7 @@ func (s *Server) runGateway() error {
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	http.Handle("/", mux)
+	service.NewOauth2Service(s.ss).SetupHandler()
 	log.Printf("http server listening at %v", 8081)
 	return http.ListenAndServe(":8081", nil)
 }

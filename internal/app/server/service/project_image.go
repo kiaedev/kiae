@@ -6,15 +6,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/kiae"
-	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type ProjectImageSvc struct {
-	project.UnimplementedImageServiceServer
+	image.UnimplementedImageServiceServer
 
 	daoProjImg *dao.ProjectImageDao
 }
@@ -25,12 +25,12 @@ func NewProjectImageSvc(s *Service) *ProjectImageSvc {
 	}
 }
 
-func (p *ProjectImageSvc) List(ctx context.Context, in *project.ImageListRequest) (*project.ImageListResponse, error) {
+func (p *ProjectImageSvc) List(ctx context.Context, in *image.ImageListRequest) (*image.ImageListResponse, error) {
 	results, total, err := p.daoProjImg.List(ctx, bson.M{"pid": in.Pid})
-	return &project.ImageListResponse{Items: results, Total: total}, err
+	return &image.ImageListResponse{Items: results, Total: total}, err
 }
 
-func (p *ProjectImageSvc) Create(ctx context.Context, in *project.Image) (*project.Image, error) {
+func (p *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.Image, error) {
 	_, total, err := p.daoProjImg.List(ctx, bson.M{"pid": in.Pid, "image": in.Image})
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (p *ProjectImageSvc) Create(ctx context.Context, in *project.Image) (*proje
 	return p.daoProjImg.Create(ctx, in)
 }
 
-func (p *ProjectImageSvc) Update(ctx context.Context, in *project.Image) (*project.Image, error) {
+func (p *ProjectImageSvc) Update(ctx context.Context, in *image.Image) (*image.Image, error) {
 	return p.daoProjImg.Update(ctx, in)
 }
 

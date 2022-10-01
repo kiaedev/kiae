@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: project/image.proto
+// source: image/image.proto
 
-package project
+package image
 
 import (
 	context "context"
@@ -40,7 +40,7 @@ func NewImageServiceClient(cc grpc.ClientConnInterface) ImageServiceClient {
 
 func (c *imageServiceClient) List(ctx context.Context, in *ImageListRequest, opts ...grpc.CallOption) (*ImageListResponse, error) {
 	out := new(ImageListResponse)
-	err := c.cc.Invoke(ctx, "/project.ImageService/List", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/image.ImageService/List", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *imageServiceClient) List(ctx context.Context, in *ImageListRequest, opt
 
 func (c *imageServiceClient) Create(ctx context.Context, in *Image, opts ...grpc.CallOption) (*Image, error) {
 	out := new(Image)
-	err := c.cc.Invoke(ctx, "/project.ImageService/Create", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/image.ImageService/Create", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *imageServiceClient) Create(ctx context.Context, in *Image, opts ...grpc
 
 func (c *imageServiceClient) Update(ctx context.Context, in *Image, opts ...grpc.CallOption) (*Image, error) {
 	out := new(Image)
-	err := c.cc.Invoke(ctx, "/project.ImageService/Update", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/image.ImageService/Update", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *imageServiceClient) Update(ctx context.Context, in *Image, opts ...grpc
 
 func (c *imageServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/project.ImageService/Delete", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/image.ImageService/Delete", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func _ImageService_List_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/project.ImageService/List",
+		FullMethod: "/image.ImageService/List",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ImageServiceServer).List(ctx, req.(*ImageListRequest))
@@ -142,7 +142,7 @@ func _ImageService_Create_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/project.ImageService/Create",
+		FullMethod: "/image.ImageService/Create",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ImageServiceServer).Create(ctx, req.(*Image))
@@ -160,7 +160,7 @@ func _ImageService_Update_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/project.ImageService/Update",
+		FullMethod: "/image.ImageService/Update",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ImageServiceServer).Update(ctx, req.(*Image))
@@ -178,7 +178,7 @@ func _ImageService_Delete_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/project.ImageService/Delete",
+		FullMethod: "/image.ImageService/Delete",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ImageServiceServer).Delete(ctx, req.(*kiae.IdRequest))
@@ -190,7 +190,7 @@ func _ImageService_Delete_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ImageService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "project.ImageService",
+	ServiceName: "image.ImageService",
 	HandlerType: (*ImageServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -211,5 +211,5 @@ var ImageService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "project/image.proto",
+	Metadata: "image/image.proto",
 }
