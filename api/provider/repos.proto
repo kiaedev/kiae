@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package provider;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/kiaedev/kiae/api/provider";
+
+
+message RepoListRequest {
+    string provider = 1;
+}
+
+message RepoListResponse {
+    repeated Repo items = 1;
+    int64 total = 2;
+}
+
+message Repo {
+    string name = 2;
+    string intro = 3;
+
+    string git_url = 10; // @gotags: bson:"git_url,omitempty"
+    string http_url = 11;// @gotags: bson:"http_url,omitempty"
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+

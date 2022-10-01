@@ -6,30 +6,33 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/pkg/gitp"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/bitbucket"
-	"golang.org/x/oauth2/github"
-	"golang.org/x/oauth2/gitlab"
+	bb "golang.org/x/oauth2/bitbucket"
+	gh "golang.org/x/oauth2/github"
+	gl "golang.org/x/oauth2/gitlab"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type ProviderService struct {
 	provider.UnimplementedProviderServiceServer
 
-	daoProvider *dao.ProviderDao
+	daoProvider      *dao.ProviderDao
+	daoProviderToken *dao.ProviderTokenDao
 }
 
 func NewProviderService(s *Service) *ProviderService {
 	return &ProviderService{
-		daoProvider: dao.NewProviderDao(s.DB),
+		daoProvider:      dao.NewProviderDao(s.DB),
+		daoProviderToken: dao.NewProviderTokenDao(s.DB),
 	}
 }
 func (s *ProviderService) Prepare(context.Context, *emptypb.Empty) (*provider.PreparesResponse, error) {
 	items := []*provider.Prepare{
-		{Name: "github", AuthorizeUrl: github.Endpoint.AuthURL, TokenUrl: github.Endpoint.TokenURL, Scopes: []string{"repo", "admin:repo_hook"}},
-		{Name: "gitlab", AuthorizeUrl: gitlab.Endpoint.AuthURL, TokenUrl: gitlab.Endpoint.TokenURL, Scopes: []string{"api"}},
-		{Name: "bitbucket", AuthorizeUrl: bitbucket.Endpoint.AuthURL, TokenUrl: bitbucket.Endpoint.TokenURL},
+		{Name: "github", AuthorizeUrl: gh.Endpoint.AuthURL, TokenUrl: gh.Endpoint.TokenURL, Scopes: []string{"repo", "admin:repo_hook"}},
+		{Name: "gitlab", AuthorizeUrl: gl.Endpoint.AuthURL, TokenUrl: gl.Endpoint.TokenURL, Scopes: []string{"api"}},
+		{Name: "bitbucket", AuthorizeUrl: bb.Endpoint.AuthURL, TokenUrl: bb.Endpoint.TokenURL},
 	}
 
 	return &provider.PreparesResponse{Items: items}, nil
@@ -88,4 +91,19 @@ func (s *ProviderService) GetProvider(ctx context.Context, providerName string) 
 
 func oauth2Endpoint(pvd *provider.Provider) oauth2.Endpoint {
 	return oauth2.Endpoint{AuthURL: pvd.AuthorizeUrl, TokenURL: pvd.TokenUrl}
+}
+
+func (s *ProviderService) RepoList(ctx context.Context, in *provider.RepoListRequest) (*provider.RepoListResponse, error) {
+	pvt, err := s.daoProviderToken.GetByProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+
+	pv, err := gitp.Select(pvt.Provider, pvt.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := pv.List(ctx)
+	return &provider.RepoListResponse{Items: results}, err
 }

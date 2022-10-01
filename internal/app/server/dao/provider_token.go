@@ -21,9 +21,9 @@ func NewProviderTokenDao(db *mongo.Database) *ProviderTokenDao {
 	}
 }
 
-func (p *ProviderTokenDao) GetByName(ctx context.Context, name string) (*provider.Token, error) {
+func (p *ProviderTokenDao) GetByProvider(ctx context.Context, name string) (*provider.Token, error) {
 	var rt provider.Token
-	if err := p.collection.FindOne(ctx, bson.M{"name": name}).Decode(&rt); err != nil {
+	if err := p.collection.FindOne(ctx, bson.M{"provider": name}).Decode(&rt); err != nil {
 		return nil, err
 	}
 

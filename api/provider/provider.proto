@@ -7,6 +7,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "kiae/request.proto";
+import "provider/repos.proto";
 
 
 option go_package = "github.com/kiaedev/kiae/api/provider";
@@ -42,6 +43,12 @@ service ProviderService {
     rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/api/v1/providers/{id}"
+        };
+    }
+
+    rpc RepoList (RepoListRequest) returns (RepoListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/providers/{provider}/repositories"
         };
     }
 }

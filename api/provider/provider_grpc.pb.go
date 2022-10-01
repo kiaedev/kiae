@@ -29,6 +29,7 @@ type ProviderServiceClient interface {
 	Create(ctx context.Context, in *Provider, opts ...grpc.CallOption) (*Provider, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Provider, error)
 	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RepoList(ctx context.Context, in *RepoListRequest, opts ...grpc.CallOption) (*RepoListResponse, error)
 }
 
 type providerServiceClient struct {
@@ -84,6 +85,15 @@ func (c *providerServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, 
 	return out, nil
 }
 
+func (c *providerServiceClient) RepoList(ctx context.Context, in *RepoListRequest, opts ...grpc.CallOption) (*RepoListResponse, error) {
+	out := new(RepoListResponse)
+	err := c.cc.Invoke(ctx, "/provider.ProviderService/RepoList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProviderServiceServer is the server API for ProviderService service.
 // All implementations must embed UnimplementedProviderServiceServer
 // for forward compatibility
@@ -93,6 +103,7 @@ type ProviderServiceServer interface {
 	Create(context.Context, *Provider) (*Provider, error)
 	Update(context.Context, *UpdateRequest) (*Provider, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
+	RepoList(context.Context, *RepoListRequest) (*RepoListResponse, error)
 	mustEmbedUnimplementedProviderServiceServer()
 }
 
@@ -114,6 +125,9 @@ func (UnimplementedProviderServiceServer) Update(context.Context, *UpdateRequest
 }
 func (UnimplementedProviderServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedProviderServiceServer) RepoList(context.Context, *RepoListRequest) (*RepoListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RepoList not implemented")
 }
 func (UnimplementedProviderServiceServer) mustEmbedUnimplementedProviderServiceServer() {}
 
@@ -218,6 +232,24 @@ func _ProviderService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProviderService_RepoList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RepoListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServiceServer).RepoList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/provider.ProviderService/RepoList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServiceServer).RepoList(ctx, req.(*RepoListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProviderService_ServiceDesc is the grpc.ServiceDesc for ProviderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -244,6 +276,10 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _ProviderService_Delete_Handler,
+		},
+		{
+			MethodName: "RepoList",
+			Handler:    _ProviderService_RepoList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
