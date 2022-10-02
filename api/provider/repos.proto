@@ -6,12 +6,11 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/kiaedev/kiae/api/provider";
 
-
-message RepoListRequest {
+message ListReposRequest {
     string provider = 1;
 }
 
-message RepoListResponse {
+message ListReposResponse {
     repeated Repo items = 1;
     int64 total = 2;
 }
@@ -26,5 +25,46 @@ message Repo {
 
     google.protobuf.Timestamp created_at = 101;
     google.protobuf.Timestamp updated_at = 103;
+}
+
+message ListBranchesRequest {
+    string provider = 1;
+    string pid = 2;
+}
+
+message ListBranchesResponse {
+    repeated Branch items = 1;
+    int64 total = 2;
+}
+
+message Branch {
+    string name = 2;
+    bool default = 3;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+
+message ListCommitsRequest {
+    string provider = 1;
+    string pid = 2;
+    string ref_name = 3;
+}
+
+message ListCommitsResponse {
+    repeated Commit items = 1;
+    int64 total = 2;
+}
+
+message Commit {
+    string commit_id = 4; // @gotags: bson:"commit_id,omitempty"
+    string short_id = 5; // @gotags: bson:"short_id,omitempty"
+    string message = 6; // @gotags: bson:"message,omitempty"
+    string committer_name = 7; // @gotags: bson:"committer_name,omitempty"
+    string committer_email = 8; // @gotags: bson:"committer_email,omitempty"
+
+    google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
+    google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
+
 }
 

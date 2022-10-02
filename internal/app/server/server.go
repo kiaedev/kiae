@@ -27,7 +27,8 @@ import (
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
-	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
+	vela "github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
+	kpack "github.com/pivotal/kpack/pkg/client/clientset/versioned"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/kubernetes"
@@ -54,7 +55,12 @@ func NewServer(kubeconfig string) (*Server, error) {
 		return nil, err
 	}
 
-	oamClientSet, err := versioned.NewForConfig(config)
+	oamClientSet, err := vela.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	kpackClientSet, err := kpack.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +75,7 @@ func NewServer(kubeconfig string) (*Server, error) {
 			K8sClient:     k8sClientSet,
 			RuntimeClient: runtimeClient,
 			OamClient:     oamClientSet,
+			KpackClient:   kpackClientSet,
 		},
 	}, nil
 }

@@ -95,7 +95,7 @@ func oauth2Endpoint(pvd *provider.Provider) oauth2.Endpoint {
 	return oauth2.Endpoint{AuthURL: pvd.AuthorizeUrl, TokenURL: pvd.TokenUrl}
 }
 
-func (s *ProviderService) RepoList(ctx context.Context, in *provider.RepoListRequest) (*provider.RepoListResponse, error) {
+func (s *ProviderService) ListRepos(ctx context.Context, in *provider.ListReposRequest) (*provider.ListReposResponse, error) {
 	pvt, err := s.getProviderToken(ctx, in.Provider)
 	if err != nil {
 		return nil, err
@@ -106,8 +106,8 @@ func (s *ProviderService) RepoList(ctx context.Context, in *provider.RepoListReq
 		return nil, err
 	}
 
-	results, err := pv.List(ctx)
-	return &provider.RepoListResponse{Items: results, Total: int64(len(results))}, err
+	results, err := pv.ListRepos(ctx)
+	return &provider.ListReposResponse{Items: results, Total: int64(len(results))}, err
 }
 
 func (s *ProviderService) getProviderToken(ctx context.Context, name string) (*provider.Token, error) {

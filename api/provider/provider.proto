@@ -46,9 +46,21 @@ service ProviderService {
         };
     }
 
-    rpc RepoList (RepoListRequest) returns (RepoListResponse) {
+    rpc ListRepos (ListReposRequest) returns (ListReposResponse) {
         option (google.api.http) = {
-            get: "/api/v1/providers/{provider}/repositories"
+            get: "/api/v1/providers/{provider}/repos"
+        };
+    }
+
+    rpc ListBranches (ListBranchesRequest) returns (ListBranchesResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/projects/{provider}/branches"
+        };
+    }
+
+    rpc ListCommits (ListCommitsRequest) returns (ListCommitsResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/projects/{provider}/commits"
         };
     }
 }

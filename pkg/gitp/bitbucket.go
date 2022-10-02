@@ -19,7 +19,7 @@ func NewBitbucket(token string) Provider {
 	}
 }
 
-func (g *Bitbucket) List(ctx context.Context) ([]*provider.Repo, error) {
+func (g *Bitbucket) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
 	repos, err := g.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{})
 	if err != nil {
 		return nil, err
@@ -39,6 +39,16 @@ func (g *Bitbucket) List(ctx context.Context) ([]*provider.Repo, error) {
 	}
 
 	return results, nil
+}
+
+func (g *Bitbucket) ListBranches(ctx context.Context, fullName string) ([]*provider.Branch, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (g *Bitbucket) ListCommits(ctx context.Context, fullName, refName string) ([]*provider.Commit, error) {
+	// TODO implement me
+	panic("implement me")
 }
 
 func timeFormat(value string) *timestamppb.Timestamp {

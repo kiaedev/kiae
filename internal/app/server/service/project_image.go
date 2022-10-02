@@ -9,19 +9,24 @@ import (
 	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/pivotal/kpack/pkg/apis/build/v1alpha2"
+	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ProjectImageSvc struct {
 	image.UnimplementedImageServiceServer
 
-	daoProjImg *dao.ProjectImageDao
+	daoProjImg  *dao.ProjectImageDao
+	kPackClient alpha2.KpackV1alpha2Interface
 }
 
 func NewProjectImageSvc(s *Service) *ProjectImageSvc {
 	return &ProjectImageSvc{
-		daoProjImg: dao.NewProjectImageDao(s.DB),
+		daoProjImg:  dao.NewProjectImageDao(s.DB),
+		kPackClient: s.KpackClient.KpackV1alpha2(),
 	}
 }
 
@@ -46,6 +51,14 @@ func (p *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 
 	in.Tag = tag
 	in.Name = filepath.Base(imageItems[0])
+
+	// todo create an Image resource
+	kImage := &v1alpha2.Image{
+		Spec:   v1alpha2.ImageSpec{},
+		Status: v1alpha2.ImageStatus{},
+	}
+	p.kPackClient.Images("kiae-system").Create(ctx, kImage, metav1.CreateOptions{})
+
 	return p.daoProjImg.Create(ctx, in)
 }
 

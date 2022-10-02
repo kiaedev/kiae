@@ -29,7 +29,9 @@ type ProviderServiceClient interface {
 	Create(ctx context.Context, in *Provider, opts ...grpc.CallOption) (*Provider, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*Provider, error)
 	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RepoList(ctx context.Context, in *RepoListRequest, opts ...grpc.CallOption) (*RepoListResponse, error)
+	ListRepos(ctx context.Context, in *ListReposRequest, opts ...grpc.CallOption) (*ListReposResponse, error)
+	ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error)
+	ListCommits(ctx context.Context, in *ListCommitsRequest, opts ...grpc.CallOption) (*ListCommitsResponse, error)
 }
 
 type providerServiceClient struct {
@@ -85,9 +87,27 @@ func (c *providerServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, 
 	return out, nil
 }
 
-func (c *providerServiceClient) RepoList(ctx context.Context, in *RepoListRequest, opts ...grpc.CallOption) (*RepoListResponse, error) {
-	out := new(RepoListResponse)
-	err := c.cc.Invoke(ctx, "/provider.ProviderService/RepoList", in, out, opts...)
+func (c *providerServiceClient) ListRepos(ctx context.Context, in *ListReposRequest, opts ...grpc.CallOption) (*ListReposResponse, error) {
+	out := new(ListReposResponse)
+	err := c.cc.Invoke(ctx, "/provider.ProviderService/ListRepos", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerServiceClient) ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error) {
+	out := new(ListBranchesResponse)
+	err := c.cc.Invoke(ctx, "/provider.ProviderService/ListBranches", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *providerServiceClient) ListCommits(ctx context.Context, in *ListCommitsRequest, opts ...grpc.CallOption) (*ListCommitsResponse, error) {
+	out := new(ListCommitsResponse)
+	err := c.cc.Invoke(ctx, "/provider.ProviderService/ListCommits", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +123,9 @@ type ProviderServiceServer interface {
 	Create(context.Context, *Provider) (*Provider, error)
 	Update(context.Context, *UpdateRequest) (*Provider, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	RepoList(context.Context, *RepoListRequest) (*RepoListResponse, error)
+	ListRepos(context.Context, *ListReposRequest) (*ListReposResponse, error)
+	ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error)
+	ListCommits(context.Context, *ListCommitsRequest) (*ListCommitsResponse, error)
 	mustEmbedUnimplementedProviderServiceServer()
 }
 
@@ -126,8 +148,14 @@ func (UnimplementedProviderServiceServer) Update(context.Context, *UpdateRequest
 func (UnimplementedProviderServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedProviderServiceServer) RepoList(context.Context, *RepoListRequest) (*RepoListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RepoList not implemented")
+func (UnimplementedProviderServiceServer) ListRepos(context.Context, *ListReposRequest) (*ListReposResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRepos not implemented")
+}
+func (UnimplementedProviderServiceServer) ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBranches not implemented")
+}
+func (UnimplementedProviderServiceServer) ListCommits(context.Context, *ListCommitsRequest) (*ListCommitsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCommits not implemented")
 }
 func (UnimplementedProviderServiceServer) mustEmbedUnimplementedProviderServiceServer() {}
 
@@ -232,20 +260,56 @@ func _ProviderService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProviderService_RepoList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RepoListRequest)
+func _ProviderService_ListRepos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListReposRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProviderServiceServer).RepoList(ctx, in)
+		return srv.(ProviderServiceServer).ListRepos(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/provider.ProviderService/RepoList",
+		FullMethod: "/provider.ProviderService/ListRepos",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServiceServer).RepoList(ctx, req.(*RepoListRequest))
+		return srv.(ProviderServiceServer).ListRepos(ctx, req.(*ListReposRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProviderService_ListBranches_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBranchesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServiceServer).ListBranches(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/provider.ProviderService/ListBranches",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServiceServer).ListBranches(ctx, req.(*ListBranchesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProviderService_ListCommits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCommitsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServiceServer).ListCommits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/provider.ProviderService/ListCommits",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServiceServer).ListCommits(ctx, req.(*ListCommitsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -278,8 +342,16 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProviderService_Delete_Handler,
 		},
 		{
-			MethodName: "RepoList",
-			Handler:    _ProviderService_RepoList_Handler,
+			MethodName: "ListRepos",
+			Handler:    _ProviderService_ListRepos_Handler,
+		},
+		{
+			MethodName: "ListBranches",
+			Handler:    _ProviderService_ListBranches_Handler,
+		},
+		{
+			MethodName: "ListCommits",
+			Handler:    _ProviderService_ListCommits_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

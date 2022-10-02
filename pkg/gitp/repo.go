@@ -8,7 +8,9 @@ import (
 )
 
 type Provider interface {
-	List(ctx context.Context) ([]*provider.Repo, error)
+	ListRepos(ctx context.Context) ([]*provider.Repo, error)
+	ListBranches(ctx context.Context, fullName string) ([]*provider.Branch, error)
+	ListCommits(ctx context.Context, fullName, refName string) ([]*provider.Commit, error)
 }
 
 type Constructor func(token string) Provider
