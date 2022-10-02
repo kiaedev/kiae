@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/provider"
@@ -13,6 +14,7 @@ import (
 	gh "golang.org/x/oauth2/github"
 	gl "golang.org/x/oauth2/gitlab"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ProviderService struct {
@@ -94,7 +96,7 @@ func oauth2Endpoint(pvd *provider.Provider) oauth2.Endpoint {
 }
 
 func (s *ProviderService) RepoList(ctx context.Context, in *provider.RepoListRequest) (*provider.RepoListResponse, error) {
-	pvt, err := s.daoProviderToken.GetByProvider(ctx, in.Provider)
+	pvt, err := s.getProviderToken(ctx, in.Provider)
 	if err != nil {
 		return nil, err
 	}
@@ -105,5 +107,43 @@ func (s *ProviderService) RepoList(ctx context.Context, in *provider.RepoListReq
 	}
 
 	results, err := pv.List(ctx)
-	return &provider.RepoListResponse{Items: results}, err
+	return &provider.RepoListResponse{Items: results, Total: int64(len(results))}, err
+}
+
+func (s *ProviderService) getProviderToken(ctx context.Context, name string) (*provider.Token, error) {
+	pvt, err := s.daoProviderToken.GetByProvider(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	if pvt.ExpiresAt.AsTime().Before(time.Now()) {
+		if err := s.refreshToken(ctx, pvt); err != nil {
+			return nil, err
+		}
+	}
+
+	return pvt, nil
+}
+
+func (s *ProviderService) refreshToken(ctx context.Context, pvt *provider.Token) error {
+	_, cfg, err := s.GetProvider(ctx, pvt.Provider)
+	if err != nil {
+		return err
+	}
+
+	token := &oauth2.Token{
+		AccessToken:  pvt.AccessToken,
+		RefreshToken: pvt.RefreshToken,
+		Expiry:       pvt.ExpiresAt.AsTime(),
+	}
+	newToken, err := cfg.TokenSource(ctx, token).Token()
+	if err != nil {
+		return err
+	}
+
+	pvt.AccessToken = newToken.AccessToken
+	pvt.RefreshToken = newToken.RefreshToken
+	pvt.ExpiresAt = timestamppb.New(token.Expiry)
+	_, err = s.daoProviderToken.Upsert(ctx, pvt)
+	return err
 }

@@ -296,6 +296,8 @@ func (m *Repo) validate(all bool) error {
 
 	// no validation rules for Name
 
+	// no validation rules for FullName
+
 	// no validation rules for Intro
 
 	// no validation rules for GitUrl

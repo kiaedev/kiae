@@ -28,8 +28,9 @@ func (g *Bitbucket) List(ctx context.Context) ([]*provider.Repo, error) {
 	results := make([]*provider.Repo, 0)
 	for _, repo := range repos.Items {
 		results = append(results, &provider.Repo{
-			Name:  repo.Name,
-			Intro: repo.Description,
+			Name:     repo.Name,
+			FullName: repo.Full_name,
+			Intro:    repo.Description,
 			// GitUrl:    repo.Links["self"],
 			// HttpUrl:   repo.Links[],
 			CreatedAt: timeFormat(repo.CreatedOn),

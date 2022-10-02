@@ -3642,6 +3642,9 @@
         "name": {
           "type": "string"
         },
+        "fullName": {
+          "type": "string"
+        },
         "intro": {
           "type": "string"
         },

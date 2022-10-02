@@ -28,7 +28,8 @@ func (g *Gitlab) List(ctx context.Context) ([]*provider.Repo, error) {
 	results := make([]*provider.Repo, 0)
 	for _, proj := range projects {
 		results = append(results, &provider.Repo{
-			Name:      proj.Name,
+			Name:      proj.Path,
+			FullName:  proj.PathWithNamespace,
 			Intro:     proj.Description,
 			GitUrl:    proj.SSHURLToRepo,
 			HttpUrl:   proj.HTTPURLToRepo,

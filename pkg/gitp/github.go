@@ -34,6 +34,7 @@ func (g *Github) List(ctx context.Context) ([]*provider.Repo, error) {
 	for _, repo := range repos {
 		results = append(results, &provider.Repo{
 			Name:      repo.GetName(),
+			FullName:  repo.GetFullName(),
 			Intro:     repo.GetDescription(),
 			GitUrl:    repo.GetGitURL(),
 			HttpUrl:   repo.GetURL(),
