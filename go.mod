@@ -10,6 +10,7 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
+	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
 	github.com/ktrysmt/go-bitbucket v0.9.54
 	github.com/oam-dev/kubevela-core-api v1.2.6
 	github.com/pivotal/kpack v0.7.1

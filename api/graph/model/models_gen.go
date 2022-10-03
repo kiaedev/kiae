@@ -11,11 +11,6 @@ type Container struct {
 	CreatedAt    string `json:"createdAt"`
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
-}
-
 type Pod struct {
 	Name         string       `json:"name"`
 	Namespace    string       `json:"namespace"`
@@ -25,9 +20,4 @@ type Pod struct {
 	PodIP        string       `json:"podIP"`
 	NodeIP       string       `json:"nodeIP"`
 	CreatedAt    string       `json:"createdAt"`
-}
-
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
 }

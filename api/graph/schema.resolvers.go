@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/kiaedev/kiae/api/graph/generated"
@@ -15,11 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
-
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Pod, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
-}
 
 // Pods is the resolver for the pods field.
 func (r *queryResolver) Pods(ctx context.Context, ns string, app *string) ([]*model.Pod, error) {
@@ -106,16 +100,12 @@ func (r *subscriptionResolver) Pods(ctx context.Context, ns string, app *string)
 	return channel, nil
 }
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 // Subscription returns generated.SubscriptionResolver implementation.
 func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
 
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 

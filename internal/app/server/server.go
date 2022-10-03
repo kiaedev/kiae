@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -27,6 +28,7 @@ import (
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
+	"github.com/koding/websocketproxy"
 	vela "github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	kpack "github.com/pivotal/kpack/pkg/client/clientset/versioned"
 	"github.com/spf13/viper"
@@ -155,6 +157,10 @@ func (s *Server) runGateway() error {
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	http.Handle("/", mux)
 	service.NewOauth2Service(s.ss).SetupHandler()
+	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
+	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
+	http.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
+
 	log.Printf("http server listening at %v", 8081)
 	return http.ListenAndServe(":8081", nil)
 }

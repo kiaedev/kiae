@@ -2,12 +2,7 @@
 
 schema {
     query: Query
-    mutation: Mutation
     subscription: Subscription
-}
-
-type Mutation {
-    createTodo(input: NewTodo!): Pod!
 }
 
 type Subscription{
@@ -38,14 +33,4 @@ type Container {
 
 type Query {
     pods(ns: String!, app: String): [Pod!]!
-}
-
-type User {
-    id: ID!
-    name: String!
-}
-
-input NewTodo {
-    text: String!
-    userId: String!
 }

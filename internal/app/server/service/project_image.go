@@ -19,9 +19,10 @@ import (
 type ProjectImageSvc struct {
 	image.UnimplementedImageServiceServer
 
-	daoProjImg  *dao.ProjectImageDao
+	daoProj    *dao.ProjectDao
+	daoProjImg *dao.ProjectImageDao
+
 	kPackClient alpha2.KpackV1alpha2Interface
-	daoProj     *dao.ProjectDao
 }
 
 func NewProjectImageSvc(s *Service) *ProjectImageSvc {
