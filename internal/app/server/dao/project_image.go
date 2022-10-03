@@ -31,6 +31,15 @@ func (p *ProjectImageDao) Get(ctx context.Context, id string) (*image.Image, err
 	return &rt, nil
 }
 
+func (p *ProjectImageDao) GetByName(ctx context.Context, name string) (*image.Image, error) {
+	var rt image.Image
+	if err := p.collection.FindOne(ctx, bson.M{"name": name}).Decode(&rt); err != nil {
+		return nil, err
+	}
+
+	return &rt, nil
+}
+
 func (p *ProjectImageDao) List(ctx context.Context, m bson.M) ([]*image.Image, int64, error) {
 	var results []*image.Image
 	total, err := mongoutil.ListAndCount(ctx, p.collection, m, &results)

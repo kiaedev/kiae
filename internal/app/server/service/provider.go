@@ -7,8 +7,10 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/kiaedev/kiae/pkg/gitp"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	bb "golang.org/x/oauth2/bitbucket"
 	gh "golang.org/x/oauth2/github"
@@ -24,10 +26,10 @@ type ProviderService struct {
 	daoProviderToken *dao.ProviderTokenDao
 }
 
-func NewProviderService(s *Service) *ProviderService {
+func NewProviderService(db *mongo.Database, kClients *kcs.KubeClients) *ProviderService {
 	return &ProviderService{
-		daoProvider:      dao.NewProviderDao(s.DB),
-		daoProviderToken: dao.NewProviderTokenDao(s.DB),
+		daoProvider:      dao.NewProviderDao(db),
+		daoProviderToken: dao.NewProviderTokenDao(db),
 	}
 }
 func (s *ProviderService) Prepare(context.Context, *emptypb.Empty) (*provider.PreparesResponse, error) {

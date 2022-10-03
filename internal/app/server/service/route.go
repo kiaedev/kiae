@@ -6,7 +6,9 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -17,10 +19,10 @@ type RouteService struct {
 	daoRoute *dao.RouteDao
 }
 
-func NewRouteService(s *Service) *RouteService {
+func NewRouteService(db *mongo.Database, kClients *kcs.KubeClients) *RouteService {
 	return &RouteService{
-		appSvc:   NewAppService(s),
-		daoRoute: dao.NewRouteDao(s.DB),
+		appSvc:   NewAppService(db, kClients),
+		daoRoute: dao.NewRouteDao(db),
 	}
 }
 

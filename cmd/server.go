@@ -25,8 +25,11 @@ import (
 	"flag"
 	"path/filepath"
 
+	"github.com/kiaedev/kiae/internal/app/watcher"
+	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 
 	"github.com/kiaedev/kiae/internal/app/server"
@@ -51,8 +54,27 @@ to quickly create a Cobra application.`,
 		}
 		flag.Parse()
 
-		s, err := server.NewServer(*kubeconfig)
+		config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 		if err != nil {
+			return err
+		}
+
+		kubeClients, err := kcs.NewKubeClients(config)
+		if err != nil {
+			return err
+		}
+
+		s, err := server.NewServer(kubeClients)
+		if err != nil {
+			return err
+		}
+
+		w, err := watcher.NewWatcher(s.DB(), kubeClients)
+		if err != nil {
+			return err
+		}
+
+		if err := w.Run(cmd.Context()); err != nil {
 			return err
 		}
 

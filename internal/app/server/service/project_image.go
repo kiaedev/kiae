@@ -8,9 +8,11 @@ import (
 	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/pivotal/kpack/pkg/apis/core/v1alpha1"
 	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,26 +27,26 @@ type ProjectImageSvc struct {
 	kPackClient alpha2.KpackV1alpha2Interface
 }
 
-func NewProjectImageSvc(s *Service) *ProjectImageSvc {
+func NewProjectImageSvc(db *mongo.Database, kClients *kcs.KubeClients) *ProjectImageSvc {
 	return &ProjectImageSvc{
-		daoProj:     dao.NewProject(s.DB),
-		daoProjImg:  dao.NewProjectImageDao(s.DB),
-		kPackClient: s.KpackClient.KpackV1alpha2(),
+		daoProj:     dao.NewProject(db),
+		daoProjImg:  dao.NewProjectImageDao(db),
+		kPackClient: kClients.KpackCs.KpackV1alpha2(),
 	}
 }
 
-func (p *ProjectImageSvc) List(ctx context.Context, in *image.ImageListRequest) (*image.ImageListResponse, error) {
-	results, total, err := p.daoProjImg.List(ctx, bson.M{"pid": in.Pid})
+func (s *ProjectImageSvc) List(ctx context.Context, in *image.ImageListRequest) (*image.ImageListResponse, error) {
+	results, total, err := s.daoProjImg.List(ctx, bson.M{"pid": in.Pid})
 	return &image.ImageListResponse{Items: results, Total: total}, err
 }
 
-func (p *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.Image, error) {
-	proj, err := p.daoProj.Get(ctx, in.Pid)
+func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.Image, error) {
+	proj, err := s.daoProj.Get(ctx, in.Pid)
 	if err != nil {
 		return nil, err
 	}
 
-	_, total, err := p.daoProjImg.List(ctx, bson.M{"pid": in.Pid, "image": in.Image})
+	_, total, err := s.daoProjImg.List(ctx, bson.M{"pid": in.Pid, "image": in.Image})
 	if err != nil {
 		return nil, err
 	} else if total > 0 {
@@ -63,7 +65,7 @@ func (p *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 
 	in.Tag = tag
 	in.Name = fmt.Sprintf("%s-%s", proj.Name, tag)
-	imgCli := p.kPackClient.Images("default")
+	imgCli := s.kPackClient.Images("default")
 	kImage, err := imgCli.Get(ctx, in.Name, metav1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
 		return nil, err
@@ -81,11 +83,11 @@ func (p *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 		return nil, err
 	}
 
-	return p.daoProjImg.Create(ctx, in)
+	return s.daoProjImg.Create(ctx, in)
 }
 
-func (p *ProjectImageSvc) Update(ctx context.Context, in *image.Image) (*image.Image, error) {
-	return p.daoProjImg.Update(ctx, in)
+func (s *ProjectImageSvc) Update(ctx context.Context, in *image.Image) (*image.Image, error) {
+	return s.daoProjImg.Update(ctx, in)
 }
 
 func (s *ProjectImageSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
@@ -100,6 +102,23 @@ func (s *ProjectImageSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*empt
 	}
 
 	return &emptypb.Empty{}, s.daoProjImg.Delete(ctx, in.Id)
+}
+
+func (s *ProjectImageSvc) UpdateStatus(ctx context.Context, name string, status image.Image_Status) (*image.Image, error) {
+	img, err := s.daoProjImg.GetByName(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	img.Status = status
+	return s.daoProjImg.Update(ctx, img)
+}
+
+func (s *ProjectImageSvc) ListNotDoneStatus(ctx context.Context) ([]*image.Image, error) {
+	results, _, err := s.daoProjImg.List(ctx, bson.M{"$nor": bson.A{
+		bson.M{"status": image.Image_PUBLISHED}, bson.M{"status": image.Image_FAILED}},
+	})
+	return results, err
 }
 
 func ssh2https(gitssh string) string {

@@ -19,10 +19,11 @@ message Image {
     string commit = 6;
     string url = 8;
     enum Status {
-        BUILDING = 0;
-        PUBLISHED = 1;
-        EXPIRED = 2;
-        FAILED = 3;
+        PENDING = 0;
+        BUILDING = 1;
+        PUBLISHED = 2;
+        EXPIRED = 3;
+        FAILED = 4;
     }
     Status status = 9;
 

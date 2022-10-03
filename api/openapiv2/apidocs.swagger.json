@@ -3446,12 +3446,13 @@
     "imageImageStatus": {
       "type": "string",
       "enum": [
+        "PENDING",
         "BUILDING",
         "PUBLISHED",
         "EXPIRED",
         "FAILED"
       ],
-      "default": "BUILDING"
+      "default": "PENDING"
     },
     "kiaeOpStatus": {
       "type": "string",

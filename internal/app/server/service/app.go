@@ -11,6 +11,7 @@ import (
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/model"
+	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/kiaedev/kiae/internal/pkg/render/components"
 	"github.com/kiaedev/kiae/internal/pkg/render/traits"
 	"github.com/kiaedev/kiae/pkg/kiaeutil"
@@ -43,17 +44,17 @@ type AppService struct {
 	daoEgress     *dao.EgressDao
 }
 
-func NewAppService(cs *Service) *AppService {
+func NewAppService(db *mongo.Database, kClients *kcs.KubeClients) *AppService {
 	return &AppService{
-		daoProj:       dao.NewProject(cs.DB),
-		daoApp:        dao.NewApp(cs.DB),
-		daoEntry:      dao.NewEntryDao(cs.DB),
-		daoRoute:      dao.NewRouteDao(cs.DB),
-		daoEgress:     dao.NewEgressDao(cs.DB),
-		daoMwInstance: dao.NewMiddlewareInstanceDao(cs.DB),
-		daoMwClaim:    dao.NewMiddlewareClaimDao(cs.DB),
-		k8sClient:     cs.K8sClient,
-		oamClient:     cs.OamClient,
+		daoProj:       dao.NewProject(db),
+		daoApp:        dao.NewApp(db),
+		daoEntry:      dao.NewEntryDao(db),
+		daoRoute:      dao.NewRouteDao(db),
+		daoEgress:     dao.NewEgressDao(db),
+		daoMwInstance: dao.NewMiddlewareInstanceDao(db),
+		daoMwClaim:    dao.NewMiddlewareClaimDao(db),
+		k8sClient:     kClients.K8sCs,
+		oamClient:     kClients.VelaCs,
 	}
 }
 

@@ -27,59 +27,33 @@ import (
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
+	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/koding/websocketproxy"
-	vela "github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
-	kpack "github.com/pivotal/kpack/pkg/client/clientset/versioned"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Server struct {
-	ss *service.Service
+	db  *mongo.Database
+	kcs *kcs.KubeClients
 }
 
-func NewServer(kubeconfig string) (*Server, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
-	k8sClientSet, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	runtimeClient, err := client.New(config, client.Options{})
-	if err != nil {
-		return nil, err
-	}
-
-	oamClientSet, err := vela.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
-	kpackClientSet, err := kpack.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
+func NewServer(kubeClients *kcs.KubeClients) (*Server, error) {
 	dbClient, err := mongoutil.New(viper.GetString("dsn"))
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to mysql: %v", err)
 	}
+
 	return &Server{
-		ss: &service.Service{
-			DB:            dbClient.DB.Database("kiae"),
-			K8sClient:     k8sClientSet,
-			RuntimeClient: runtimeClient,
-			OamClient:     oamClientSet,
-			KpackClient:   kpackClientSet,
-		},
+		db:  dbClient.DB.Database("kiae"),
+		kcs: kubeClients,
 	}, nil
+}
+
+func (s *Server) DB() *mongo.Database {
+	return s.db
 }
 
 func (s *Server) Run() error {
@@ -90,7 +64,7 @@ func (s *Server) Run() error {
 	}
 
 	gs := grpc.NewServer()
-	app.RegisterAppServiceServer(gs, service.NewAppService(s.ss))
+	app.RegisterAppServiceServer(gs, service.NewAppService(s.db, s.kcs))
 	go func() {
 		log.Printf("grpc server listening at %v", lis.Addr())
 		if err := gs.Serve(lis); err != nil {
@@ -98,7 +72,7 @@ func (s *Server) Run() error {
 		}
 	}()
 
-	resolver := graph.NewResolver(s.ss.K8sClient)
+	resolver := graph.NewResolver(s.kcs.K8sCs)
 	if err := resolver.Run(context.Background()); err != nil {
 		return err
 	}
@@ -139,15 +113,15 @@ func (s *Server) runGateway() error {
 	// Register gRPC server endpoint
 	// Note: Make sure the gRPC server is running properly and accessible
 	mux := runtime.NewServeMux(runtime.WithUnescapingMode(runtime.UnescapingModeAllExceptReserved))
-	_ = provider.RegisterProviderServiceHandlerServer(ctx, mux, service.NewProviderService(s.ss))
-	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
-	_ = image.RegisterImageServiceHandlerServer(ctx, mux, service.NewProjectImageSvc(s.ss))
-	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.ss))
-	_ = egress.RegisterEgressServiceHandlerServer(ctx, mux, service.NewEgressService(s.ss))
-	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.ss))
-	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, service.NewRouteService(s.ss))
+	_ = provider.RegisterProviderServiceHandlerServer(ctx, mux, service.NewProviderService(s.db, s.kcs))
+	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.db, s.kcs))
+	_ = image.RegisterImageServiceHandlerServer(ctx, mux, service.NewProjectImageSvc(s.db, s.kcs))
+	_ = app.RegisterAppServiceHandlerServer(ctx, mux, service.NewAppService(s.db, s.kcs))
+	_ = egress.RegisterEgressServiceHandlerServer(ctx, mux, service.NewEgressService(s.db, s.kcs))
+	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, service.NewEntryService(s.db, s.kcs))
+	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, service.NewRouteService(s.db, s.kcs))
 
-	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, service.NewMiddlewareService(s.ss))
+	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, service.NewMiddlewareService(s.db, s.kcs))
 	// opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	// err := app.RegisterAppServiceHandlerFromEndpoint(ctx, mux, "localhost:8888", opts)
 	// if err != nil {
@@ -156,7 +130,7 @@ func (s *Server) runGateway() error {
 
 	// Start HTTP server (and proxy calls to gRPC server endpoint)
 	http.Handle("/", mux)
-	service.NewOauth2Service(s.ss).SetupHandler()
+	service.NewOauth2Service(s.db, s.kcs).SetupHandler()
 	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
 	http.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
