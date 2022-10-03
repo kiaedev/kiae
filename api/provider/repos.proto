@@ -29,7 +29,7 @@ message Repo {
 
 message ListBranchesRequest {
     string provider = 1;
-    string pid = 2;
+    string repo_name = 2;
 }
 
 message ListBranchesResponse {
@@ -39,25 +39,26 @@ message ListBranchesResponse {
 
 message Branch {
     string name = 2;
-    bool default = 3;
-
-    google.protobuf.Timestamp created_at = 101;
-    google.protobuf.Timestamp updated_at = 103;
+    Commit commit = 9;
 }
 
-message ListCommitsRequest {
+message ListTagsRequest {
     string provider = 1;
-    string pid = 2;
-    string ref_name = 3;
+    string repo_name = 2;
 }
 
-message ListCommitsResponse {
-    repeated Commit items = 1;
+message ListTagsResponse {
+    repeated Tag items = 1;
     int64 total = 2;
 }
 
+message Tag {
+    string name = 2;
+    Commit commit = 9;
+}
+
 message Commit {
-    string commit_id = 4; // @gotags: bson:"commit_id,omitempty"
+    string sha1 = 4; // @gotags: bson:"sha1,omitempty"
     string short_id = 5; // @gotags: bson:"short_id,omitempty"
     string message = 6; // @gotags: bson:"message,omitempty"
     string committer_name = 7; // @gotags: bson:"committer_name,omitempty"

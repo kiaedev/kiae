@@ -46,7 +46,7 @@ func (g *Bitbucket) ListBranches(ctx context.Context, fullName string) ([]*provi
 	panic("implement me")
 }
 
-func (g *Bitbucket) ListCommits(ctx context.Context, fullName, refName string) ([]*provider.Commit, error) {
+func (g *Bitbucket) ListTags(ctx context.Context, fullName string) ([]*provider.Tag, error) {
 	// TODO implement me
 	panic("implement me")
 }

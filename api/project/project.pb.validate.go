@@ -80,9 +80,9 @@ func (m *Project) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if l := utf8.RuneCountInString(m.GetGit()); l < 10 || l > 512 {
+	if l := utf8.RuneCountInString(m.GetGitRepo()); l < 10 || l > 512 {
 		err := ProjectValidationError{
-			field:  "Git",
+			field:  "GitRepo",
 			reason: "value length must be between 10 and 512 runes, inclusive",
 		}
 		if !all {
@@ -90,6 +90,8 @@ func (m *Project) validate(all bool) error {
 		}
 		errors = append(errors, err)
 	}
+
+	// no validation rules for ImageRepo
 
 	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {

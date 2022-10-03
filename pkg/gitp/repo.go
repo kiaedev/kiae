@@ -10,7 +10,7 @@ import (
 type Provider interface {
 	ListRepos(ctx context.Context) ([]*provider.Repo, error)
 	ListBranches(ctx context.Context, fullName string) ([]*provider.Branch, error)
-	ListCommits(ctx context.Context, fullName, refName string) ([]*provider.Commit, error)
+	ListTags(ctx context.Context, fullName string) ([]*provider.Tag, error)
 }
 
 type Constructor func(token string) Provider

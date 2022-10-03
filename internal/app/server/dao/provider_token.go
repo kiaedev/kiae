@@ -41,6 +41,7 @@ func (p *ProviderTokenDao) Create(ctx context.Context, in *provider.Token) (*pro
 }
 
 func (p *ProviderTokenDao) Upsert(ctx context.Context, in *provider.Token) (*provider.Token, error) {
+	in.Id = "" // clean the immutable field
 	in.CreatedAt = timestamppb.Now()
 	in.UpdatedAt = timestamppb.Now()
 	_, err := p.collection.UpdateOne(ctx, bson.M{"provider": in.Provider}, bson.M{"$set": in}, options.Update().SetUpsert(true))

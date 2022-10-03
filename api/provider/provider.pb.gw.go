@@ -411,10 +411,6 @@ func local_request_ProviderService_ListRepos_0(ctx context.Context, marshaler ru
 
 }
 
-var (
-	filter_ProviderService_ListBranches_0 = &utilities.DoubleArray{Encoding: map[string]int{"provider": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-)
-
 func request_ProviderService_ListBranches_0(ctx context.Context, marshaler runtime.Marshaler, client ProviderServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListBranchesRequest
 	var metadata runtime.ServerMetadata
@@ -436,11 +432,14 @@ func request_ProviderService_ListBranches_0(ctx context.Context, marshaler runti
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider", err)
 	}
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["repo_name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "repo_name")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ProviderService_ListBranches_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.RepoName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "repo_name", err)
 	}
 
 	msg, err := client.ListBranches(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -469,11 +468,14 @@ func local_request_ProviderService_ListBranches_0(ctx context.Context, marshaler
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider", err)
 	}
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["repo_name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "repo_name")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ProviderService_ListBranches_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.RepoName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "repo_name", err)
 	}
 
 	msg, err := server.ListBranches(ctx, &protoReq)
@@ -481,12 +483,8 @@ func local_request_ProviderService_ListBranches_0(ctx context.Context, marshaler
 
 }
 
-var (
-	filter_ProviderService_ListCommits_0 = &utilities.DoubleArray{Encoding: map[string]int{"provider": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-)
-
-func request_ProviderService_ListCommits_0(ctx context.Context, marshaler runtime.Marshaler, client ProviderServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListCommitsRequest
+func request_ProviderService_ListTags_0(ctx context.Context, marshaler runtime.Marshaler, client ProviderServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListTagsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -506,20 +504,23 @@ func request_ProviderService_ListCommits_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider", err)
 	}
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ProviderService_ListCommits_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["repo_name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "repo_name")
 	}
 
-	msg, err := client.ListCommits(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	protoReq.RepoName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "repo_name", err)
+	}
+
+	msg, err := client.ListTags(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_ProviderService_ListCommits_0(ctx context.Context, marshaler runtime.Marshaler, server ProviderServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListCommitsRequest
+func local_request_ProviderService_ListTags_0(ctx context.Context, marshaler runtime.Marshaler, server ProviderServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListTagsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -539,14 +540,17 @@ func local_request_ProviderService_ListCommits_0(ctx context.Context, marshaler 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider", err)
 	}
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ProviderService_ListCommits_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["repo_name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "repo_name")
 	}
 
-	msg, err := server.ListCommits(ctx, &protoReq)
+	protoReq.RepoName, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "repo_name", err)
+	}
+
+	msg, err := server.ListTags(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -732,7 +736,7 @@ func RegisterProviderServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/provider.ProviderService/ListBranches", runtime.WithHTTPPathPattern("/api/v1/projects/{provider}/branches"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/provider.ProviderService/ListBranches", runtime.WithHTTPPathPattern("/api/v1/providers/{provider}/repos/{repo_name}/branches"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -749,19 +753,19 @@ func RegisterProviderServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 
 	})
 
-	mux.Handle("GET", pattern_ProviderService_ListCommits_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ProviderService_ListTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/provider.ProviderService/ListCommits", runtime.WithHTTPPathPattern("/api/v1/projects/{provider}/commits"))
+		ctx, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/provider.ProviderService/ListTags", runtime.WithHTTPPathPattern("/api/v1/providers/{provider}/repos/{repo_name}/commits"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_ProviderService_ListCommits_0(ctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_ProviderService_ListTags_0(ctx, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
@@ -769,7 +773,7 @@ func RegisterProviderServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 			return
 		}
 
-		forward_ProviderService_ListCommits_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ProviderService_ListTags_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -966,7 +970,7 @@ func RegisterProviderServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/provider.ProviderService/ListBranches", runtime.WithHTTPPathPattern("/api/v1/projects/{provider}/branches"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/provider.ProviderService/ListBranches", runtime.WithHTTPPathPattern("/api/v1/providers/{provider}/repos/{repo_name}/branches"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -982,24 +986,24 @@ func RegisterProviderServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 
 	})
 
-	mux.Handle("GET", pattern_ProviderService_ListCommits_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_ProviderService_ListTags_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
-		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/provider.ProviderService/ListCommits", runtime.WithHTTPPathPattern("/api/v1/projects/{provider}/commits"))
+		ctx, err = runtime.AnnotateContext(ctx, mux, req, "/provider.ProviderService/ListTags", runtime.WithHTTPPathPattern("/api/v1/providers/{provider}/repos/{repo_name}/commits"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ProviderService_ListCommits_0(ctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_ProviderService_ListTags_0(ctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ProviderService_ListCommits_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_ProviderService_ListTags_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -1021,9 +1025,9 @@ var (
 
 	pattern_ProviderService_ListRepos_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "providers", "provider", "repos"}, ""))
 
-	pattern_ProviderService_ListBranches_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "projects", "provider", "branches"}, ""))
+	pattern_ProviderService_ListBranches_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "providers", "provider", "repos", "repo_name", "branches"}, ""))
 
-	pattern_ProviderService_ListCommits_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "projects", "provider", "commits"}, ""))
+	pattern_ProviderService_ListTags_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"api", "v1", "providers", "provider", "repos", "repo_name", "commits"}, ""))
 )
 
 var (
@@ -1043,5 +1047,5 @@ var (
 
 	forward_ProviderService_ListBranches_0 = runtime.ForwardResponseMessage
 
-	forward_ProviderService_ListCommits_0 = runtime.ForwardResponseMessage
+	forward_ProviderService_ListTags_0 = runtime.ForwardResponseMessage
 )

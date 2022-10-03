@@ -31,7 +31,7 @@ type ProviderServiceClient interface {
 	Delete(ctx context.Context, in *kiae.IdRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListRepos(ctx context.Context, in *ListReposRequest, opts ...grpc.CallOption) (*ListReposResponse, error)
 	ListBranches(ctx context.Context, in *ListBranchesRequest, opts ...grpc.CallOption) (*ListBranchesResponse, error)
-	ListCommits(ctx context.Context, in *ListCommitsRequest, opts ...grpc.CallOption) (*ListCommitsResponse, error)
+	ListTags(ctx context.Context, in *ListTagsRequest, opts ...grpc.CallOption) (*ListTagsResponse, error)
 }
 
 type providerServiceClient struct {
@@ -105,9 +105,9 @@ func (c *providerServiceClient) ListBranches(ctx context.Context, in *ListBranch
 	return out, nil
 }
 
-func (c *providerServiceClient) ListCommits(ctx context.Context, in *ListCommitsRequest, opts ...grpc.CallOption) (*ListCommitsResponse, error) {
-	out := new(ListCommitsResponse)
-	err := c.cc.Invoke(ctx, "/provider.ProviderService/ListCommits", in, out, opts...)
+func (c *providerServiceClient) ListTags(ctx context.Context, in *ListTagsRequest, opts ...grpc.CallOption) (*ListTagsResponse, error) {
+	out := new(ListTagsResponse)
+	err := c.cc.Invoke(ctx, "/provider.ProviderService/ListTags", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ type ProviderServiceServer interface {
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
 	ListRepos(context.Context, *ListReposRequest) (*ListReposResponse, error)
 	ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error)
-	ListCommits(context.Context, *ListCommitsRequest) (*ListCommitsResponse, error)
+	ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
 	mustEmbedUnimplementedProviderServiceServer()
 }
 
@@ -154,8 +154,8 @@ func (UnimplementedProviderServiceServer) ListRepos(context.Context, *ListReposR
 func (UnimplementedProviderServiceServer) ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListBranches not implemented")
 }
-func (UnimplementedProviderServiceServer) ListCommits(context.Context, *ListCommitsRequest) (*ListCommitsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListCommits not implemented")
+func (UnimplementedProviderServiceServer) ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTags not implemented")
 }
 func (UnimplementedProviderServiceServer) mustEmbedUnimplementedProviderServiceServer() {}
 
@@ -296,20 +296,20 @@ func _ProviderService_ListBranches_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProviderService_ListCommits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListCommitsRequest)
+func _ProviderService_ListTags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTagsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProviderServiceServer).ListCommits(ctx, in)
+		return srv.(ProviderServiceServer).ListTags(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/provider.ProviderService/ListCommits",
+		FullMethod: "/provider.ProviderService/ListTags",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProviderServiceServer).ListCommits(ctx, req.(*ListCommitsRequest))
+		return srv.(ProviderServiceServer).ListTags(ctx, req.(*ListTagsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -350,8 +350,8 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProviderService_ListBranches_Handler,
 		},
 		{
-			MethodName: "ListCommits",
-			Handler:    _ProviderService_ListCommits_Handler,
+			MethodName: "ListTags",
+			Handler:    _ProviderService_ListTags_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -18,7 +18,13 @@ message Image {
     string tag = 5;
     string commit = 6;
     string url = 8;
-    string status = 9;
+    enum Status {
+        BUILDING = 0;
+        PUBLISHED = 1;
+        EXPIRED = 2;
+        FAILED = 3;
+    }
+    Status status = 9;
 
     google.protobuf.Timestamp created_at = 101;
     google.protobuf.Timestamp updated_at = 103;

@@ -1718,7 +1718,7 @@
                   "type": "string"
                 },
                 "status": {
-                  "type": "string"
+                  "$ref": "#/definitions/imageImageStatus"
                 },
                 "createdAt": {
                   "type": "string",
@@ -2329,7 +2329,10 @@
                 "intro": {
                   "type": "string"
                 },
-                "git": {
+                "gitRepo": {
+                  "type": "string"
+                },
+                "imageRepo": {
                   "type": "string"
                 },
                 "createdAt": {
@@ -2392,7 +2395,10 @@
                 "intro": {
                   "type": "string"
                 },
-                "git": {
+                "gitRepo": {
+                  "type": "string"
+                },
+                "imageRepo": {
                   "type": "string"
                 },
                 "createdAt": {
@@ -2535,7 +2541,7 @@
                   "type": "string"
                 },
                 "status": {
-                  "type": "string"
+                  "$ref": "#/definitions/imageImageStatus"
                 },
                 "createdAt": {
                   "type": "string",
@@ -2607,7 +2613,7 @@
                   "type": "string"
                 },
                 "status": {
-                  "type": "string"
+                  "$ref": "#/definitions/imageImageStatus"
                 },
                 "createdAt": {
                   "type": "string",
@@ -2623,84 +2629,6 @@
         ],
         "tags": [
           "ImageService"
-        ]
-      }
-    },
-    "/api/v1/projects/{provider}/branches": {
-      "get": {
-        "operationId": "ProviderService_ListBranches",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/providerListBranchesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "provider",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "pid",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "ProviderService"
-        ]
-      }
-    },
-    "/api/v1/projects/{provider}/commits": {
-      "get": {
-        "operationId": "ProviderService_ListCommits",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/providerListCommitsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/googlerpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "provider",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "pid",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "refName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "ProviderService"
         ]
       }
     },
@@ -2985,6 +2913,78 @@
         "parameters": [
           {
             "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ProviderService"
+        ]
+      }
+    },
+    "/api/v1/providers/{provider}/repos/{repoName}/branches": {
+      "get": {
+        "operationId": "ProviderService_ListBranches",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/providerListBranchesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "repoName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ProviderService"
+        ]
+      }
+    },
+    "/api/v1/providers/{provider}/repos/{repoName}/commits": {
+      "get": {
+        "operationId": "ProviderService_ListTags",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/providerListTagsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "repoName",
             "in": "path",
             "required": true,
             "type": "string"
@@ -3416,7 +3416,7 @@
           "type": "string"
         },
         "status": {
-          "type": "string"
+          "$ref": "#/definitions/imageImageStatus"
         },
         "createdAt": {
           "type": "string",
@@ -3442,6 +3442,16 @@
           "format": "int64"
         }
       }
+    },
+    "imageImageStatus": {
+      "type": "string",
+      "enum": [
+        "BUILDING",
+        "PUBLISHED",
+        "EXPIRED",
+        "FAILED"
+      ],
+      "default": "BUILDING"
     },
     "kiaeOpStatus": {
       "type": "string",
@@ -3599,7 +3609,10 @@
         "intro": {
           "type": "string"
         },
-        "git": {
+        "gitRepo": {
+          "type": "string"
+        },
+        "imageRepo": {
           "type": "string"
         },
         "createdAt": {
@@ -3637,23 +3650,15 @@
         "name": {
           "type": "string"
         },
-        "default": {
-          "type": "boolean"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
+        "commit": {
+          "$ref": "#/definitions/providerCommit"
         }
       }
     },
     "providerCommit": {
       "type": "object",
       "properties": {
-        "commitId": {
+        "sha1": {
           "type": "string"
         },
         "shortId": {
@@ -3693,21 +3698,6 @@
         }
       }
     },
-    "providerListCommitsResponse": {
-      "type": "object",
-      "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/providerCommit"
-          }
-        },
-        "total": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
     "providerListReposResponse": {
       "type": "object",
       "properties": {
@@ -3730,6 +3720,21 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/providerProvider"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "providerListTagsResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/providerTag"
           }
         },
         "total": {
@@ -3831,6 +3836,17 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "providerTag": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "commit": {
+          "$ref": "#/definitions/providerCommit"
         }
       }
     },

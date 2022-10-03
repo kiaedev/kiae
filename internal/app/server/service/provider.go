@@ -96,18 +96,42 @@ func oauth2Endpoint(pvd *provider.Provider) oauth2.Endpoint {
 }
 
 func (s *ProviderService) ListRepos(ctx context.Context, in *provider.ListReposRequest) (*provider.ListReposResponse, error) {
-	pvt, err := s.getProviderToken(ctx, in.Provider)
-	if err != nil {
-		return nil, err
-	}
-
-	pv, err := gitp.Select(pvt.Provider, pvt.AccessToken)
+	pv, err := s.getProvider(ctx, in.Provider)
 	if err != nil {
 		return nil, err
 	}
 
 	results, err := pv.ListRepos(ctx)
 	return &provider.ListReposResponse{Items: results, Total: int64(len(results))}, err
+}
+
+func (s *ProviderService) ListBranches(ctx context.Context, in *provider.ListBranchesRequest) (*provider.ListBranchesResponse, error) {
+	pv, err := s.getProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := pv.ListBranches(ctx, in.RepoName)
+	return &provider.ListBranchesResponse{Items: results, Total: int64(len(results))}, err
+}
+
+func (s *ProviderService) ListTags(ctx context.Context, in *provider.ListTagsRequest) (*provider.ListTagsResponse, error) {
+	pv, err := s.getProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := pv.ListTags(ctx, in.RepoName)
+	return &provider.ListTagsResponse{Items: results, Total: int64(len(results))}, err
+}
+
+func (s *ProviderService) getProvider(ctx context.Context, providerName string) (gitp.Provider, error) {
+	pvt, err := s.getProviderToken(ctx, providerName)
+	if err != nil {
+		return nil, err
+	}
+
+	return gitp.Select(pvt.Provider, pvt.AccessToken)
 }
 
 func (s *ProviderService) getProviderToken(ctx context.Context, name string) (*provider.Token, error) {

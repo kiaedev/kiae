@@ -2,7 +2,6 @@ package gitp
 
 import (
 	"context"
-	"net/url"
 
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/xanzy/go-gitlab"
@@ -43,7 +42,7 @@ func (g *Gitlab) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
 }
 
 func (g *Gitlab) ListBranches(ctx context.Context, fullName string) ([]*provider.Branch, error) {
-	results, _, err := g.Branches.ListBranches(url.PathEscape(fullName), &gitlab.ListBranchesOptions{})
+	results, _, err := g.Branches.ListBranches(fullName, &gitlab.ListBranchesOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -51,34 +50,39 @@ func (g *Gitlab) ListBranches(ctx context.Context, fullName string) ([]*provider
 	branches := make([]*provider.Branch, 0)
 	for _, ret := range results {
 		branches = append(branches, &provider.Branch{
-			Name:      ret.Name,
-			Default:   ret.Default,
-			CreatedAt: timestamppb.New(ret.Commit.CreatedAt.Local()),
-			UpdatedAt: timestamppb.New(ret.Commit.CommittedDate.Local()),
+			Name:   ret.Name,
+			Commit: pCommitFromGl(ret.Commit),
 		})
 	}
 
 	return branches, nil
 }
 
-func (g *Gitlab) ListCommits(ctx context.Context, fullName, refName string) ([]*provider.Commit, error) {
-	results, _, err := g.Commits.ListCommits(url.PathEscape(fullName), &gitlab.ListCommitsOptions{RefName: gitlab.String(refName)})
+func (g *Gitlab) ListTags(ctx context.Context, fullName string) ([]*provider.Tag, error) {
+	results, _, err := g.Tags.ListTags(fullName, &gitlab.ListTagsOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	commits := make([]*provider.Commit, 0)
+	commits := make([]*provider.Tag, 0)
 	for _, ret := range results {
-		commits = append(commits, &provider.Commit{
-			CommitId:       ret.ID,
-			ShortId:        ret.ShortID,
-			Message:        ret.Message,
-			CommitterName:  ret.CommitterName,
-			CommitterEmail: ret.CommitterEmail,
-			CreatedAt:      timestamppb.New(ret.CreatedAt.Local()),
-			UpdatedAt:      timestamppb.New(ret.CommittedDate.Local()),
+		commits = append(commits, &provider.Tag{
+			Name:   ret.Name,
+			Commit: pCommitFromGl(ret.Commit),
 		})
 	}
 
 	return commits, nil
+}
+
+func pCommitFromGl(commit *gitlab.Commit) *provider.Commit {
+	return &provider.Commit{
+		Sha1:           commit.ID,
+		ShortId:        commit.ShortID,
+		Message:        commit.Message,
+		CommitterName:  commit.CommitterName,
+		CommitterEmail: commit.CommitterEmail,
+		CreatedAt:      timestamppb.New(commit.CreatedAt.Local()),
+		UpdatedAt:      timestamppb.New(commit.CommittedDate.Local()),
+	}
 }

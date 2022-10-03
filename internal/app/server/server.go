@@ -136,7 +136,7 @@ func (s *Server) runGateway() error {
 
 	// Register gRPC server endpoint
 	// Note: Make sure the gRPC server is running properly and accessible
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(runtime.WithUnescapingMode(runtime.UnescapingModeAllExceptReserved))
 	_ = provider.RegisterProviderServiceHandlerServer(ctx, mux, service.NewProviderService(s.ss))
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, service.NewProjectService(s.ss))
 	_ = image.RegisterImageServiceHandlerServer(ctx, mux, service.NewProjectImageSvc(s.ss))

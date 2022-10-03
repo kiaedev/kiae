@@ -40,8 +40,10 @@ func (p *ProjectService) Read(ctx context.Context, in *kiae.IdRequest) (*project
 }
 
 func setDefaultProjectProperties(in *project.Project) {
+	imageRegistry := "saltbo/"
+	in.ImageRepo = imageRegistry + in.Name
+
 	// todo 从配置中获取镜像仓库地址
-	// imageRegistry := "registry.example.com/some-namespace/"
 	// in.Images = []*project.Image{
 	// 	{
 	// 		Name:      in.Name,

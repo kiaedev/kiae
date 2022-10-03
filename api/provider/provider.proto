@@ -54,13 +54,13 @@ service ProviderService {
 
     rpc ListBranches (ListBranchesRequest) returns (ListBranchesResponse) {
         option (google.api.http) = {
-            get: "/api/v1/projects/{provider}/branches"
+            get: "/api/v1/providers/{provider}/repos/{repo_name}/branches"
         };
     }
 
-    rpc ListCommits (ListCommitsRequest) returns (ListCommitsResponse) {
+    rpc ListTags (ListTagsRequest) returns (ListTagsResponse) {
         option (google.api.http) = {
-            get: "/api/v1/projects/{provider}/commits"
+            get: "/api/v1/providers/{provider}/repos/{repo_name}/commits"
         };
     }
 }

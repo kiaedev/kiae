@@ -57,39 +57,45 @@ func (g *Github) ListBranches(ctx context.Context, fullName string) ([]*provider
 	branches := make([]*provider.Branch, 0)
 	for _, ret := range results {
 		branches = append(branches, &provider.Branch{
-			Name:      ret.GetName(),
-			CreatedAt: timestamppb.New(ret.Commit.Commit.Committer.Date.Local()),
-			UpdatedAt: timestamppb.New(ret.Commit.Commit.Committer.Date.Local()),
+			Name:   ret.GetName(),
+			Commit: pCommitFromGh(ret.Commit.GetCommit()),
 		})
 	}
 
 	return branches, nil
 }
 
-func (g *Github) ListCommits(ctx context.Context, fullName, refName string) ([]*provider.Commit, error) {
+func (g *Github) ListTags(ctx context.Context, fullName string) ([]*provider.Tag, error) {
 	owner, repo := getOwnerRepo(fullName)
-	results, _, err := g.Repositories.ListCommits(ctx, owner, repo, &github.CommitsListOptions{SHA: refName})
+	results, _, err := g.Repositories.ListTags(ctx, owner, repo, &github.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	commits := make([]*provider.Commit, 0)
+	tags := make([]*provider.Tag, 0)
 	for _, ret := range results {
-		commits = append(commits, &provider.Commit{
-			CommitId:       ret.Commit.GetSHA(),
-			ShortId:        ret.Commit.GetSHA()[:7],
-			Message:        ret.Commit.GetMessage(),
-			CommitterName:  ret.Committer.GetName(),
-			CommitterEmail: ret.Committer.GetEmail(),
-			CreatedAt:      timestamppb.New(ret.Commit.Committer.Date.Local()),
-			UpdatedAt:      timestamppb.New(ret.Commit.Committer.Date.Local()),
+		tags = append(tags, &provider.Tag{
+			Name:   ret.GetName(),
+			Commit: pCommitFromGh(ret.Commit),
 		})
 	}
 
-	return commits, nil
+	return tags, nil
 }
 
 func getOwnerRepo(fullName string) (string, string) {
 	items := strings.Split(fullName, "/")
 	return items[0], items[1]
+}
+
+func pCommitFromGh(commit *github.Commit) *provider.Commit {
+	return &provider.Commit{
+		Sha1:           commit.GetSHA(),
+		ShortId:        commit.GetSHA()[:7],
+		Message:        commit.GetMessage(),
+		CommitterName:  commit.Committer.GetName(),
+		CommitterEmail: commit.Committer.GetEmail(),
+		CreatedAt:      timestamppb.New(commit.Committer.Date.Local()),
+		UpdatedAt:      timestamppb.New(commit.Committer.Date.Local()),
+	}
 }
