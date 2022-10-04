@@ -25,7 +25,6 @@ import (
 	"flag"
 	"path/filepath"
 
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/tools/clientcmd"
@@ -58,17 +57,12 @@ to quickly create a Cobra application.`,
 			return err
 		}
 
-		kubeClients, err := kcs.NewKubeClients(config)
+		s, err := server.NewServer(config)
 		if err != nil {
 			return err
 		}
 
-		s, err := server.NewServer(kubeClients)
-		if err != nil {
-			return err
-		}
-
-		return s.Run()
+		return s.Run(cmd.Context())
 	},
 }
 

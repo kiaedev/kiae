@@ -8,21 +8,20 @@ import (
 	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/pivotal/kpack/pkg/apis/build/v1alpha2"
 	kpack "github.com/pivotal/kpack/pkg/client/clientset/versioned"
-	"go.mongodb.org/mongo-driver/mongo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ImageWatcher struct {
-	kpackCs *kpack.Clientset
-
 	imgSvc *ProjectImageSvc
+
+	kpackCs *kpack.Clientset
 }
 
-func NewImageWatcher(db *mongo.Database, kClients *kcs.KubeClients) *ImageWatcher {
+func NewImageWatcher(imgSvc *ProjectImageSvc, kClients *kcs.KubeClients) *ImageWatcher {
 	iw := &ImageWatcher{
-		kpackCs: kClients.KpackCs,
+		imgSvc: imgSvc,
 
-		imgSvc: NewProjectImageSvc(db, kClients),
+		kpackCs: kClients.KpackCs,
 	}
 	go iw.checkNotDoneStatus(context.Background())
 	return iw

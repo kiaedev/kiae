@@ -1,4 +1,4 @@
-package watcher
+package watch
 
 import (
 	"context"
@@ -31,11 +31,10 @@ func NewWatcher(kcs *kcs.KubeClients) (*Watcher, error) {
 	}, nil
 }
 
-func (w *Watcher) Run(ctx context.Context) error {
+func (w *Watcher) Start(ctx context.Context) {
 	go w.k8sInformer.Core().V1().Pods().Informer().Run(ctx.Done())
 	go w.velaInformers.Core().V1beta1().Applications().Informer().Run(ctx.Done())
 	go w.kpackInformers.Kpack().V1alpha2().Images().Informer().Run(ctx.Done())
-	return nil
 }
 
 func (w *Watcher) Pods(ns string, matchLabels map[string]string) ([]*corev1.Pod, error) {

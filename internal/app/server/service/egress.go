@@ -6,9 +6,7 @@ import (
 	"github.com/kiaedev/kiae/api/egress"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -19,11 +17,8 @@ type EgressService struct {
 	daoEgress *dao.EgressDao
 }
 
-func NewEgressService(db *mongo.Database, kClients *kcs.KubeClients) *EgressService {
-	return &EgressService{
-		appSvc:    NewAppService(db, kClients),
-		daoEgress: dao.NewEgressDao(db),
-	}
+func NewEgressService(appSvc *AppService, daoEgress *dao.EgressDao) *EgressService {
+	return &EgressService{appSvc: appSvc, daoEgress: daoEgress}
 }
 
 func (s *EgressService) List(ctx context.Context, in *egress.ListRequest) (*egress.ListResponse, error) {

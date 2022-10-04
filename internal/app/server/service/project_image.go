@@ -12,7 +12,6 @@ import (
 	"github.com/pivotal/kpack/pkg/apis/core/v1alpha1"
 	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,10 +26,10 @@ type ProjectImageSvc struct {
 	kPackClient alpha2.KpackV1alpha2Interface
 }
 
-func NewProjectImageSvc(db *mongo.Database, kClients *kcs.KubeClients) *ProjectImageSvc {
+func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, kClients *kcs.KubeClients) *ProjectImageSvc {
 	return &ProjectImageSvc{
-		daoProj:     dao.NewProject(db),
-		daoProjImg:  dao.NewProjectImageDao(db),
+		daoProj:     daoProj,
+		daoProjImg:  daoProjImg,
 		kPackClient: kClients.KpackCs.KpackV1alpha2(),
 	}
 }

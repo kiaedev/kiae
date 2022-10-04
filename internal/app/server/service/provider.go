@@ -7,10 +7,8 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/kiaedev/kiae/pkg/gitp"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	bb "golang.org/x/oauth2/bitbucket"
 	gh "golang.org/x/oauth2/github"
@@ -26,12 +24,10 @@ type ProviderService struct {
 	daoProviderToken *dao.ProviderTokenDao
 }
 
-func NewProviderService(db *mongo.Database, kClients *kcs.KubeClients) *ProviderService {
-	return &ProviderService{
-		daoProvider:      dao.NewProviderDao(db),
-		daoProviderToken: dao.NewProviderTokenDao(db),
-	}
+func NewProviderService(daoProvider *dao.ProviderDao, daoProviderToken *dao.ProviderTokenDao) *ProviderService {
+	return &ProviderService{daoProvider: daoProvider, daoProviderToken: daoProviderToken}
 }
+
 func (s *ProviderService) Prepare(context.Context, *emptypb.Empty) (*provider.PreparesResponse, error) {
 	items := []*provider.Prepare{
 		{Name: "github", AuthorizeUrl: gh.Endpoint.AuthURL, TokenUrl: gh.Endpoint.TokenURL, Scopes: []string{"repo", "admin:repo_hook"}},

@@ -6,9 +6,7 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ProjectService struct {
@@ -17,10 +15,8 @@ type ProjectService struct {
 	daoProj *dao.ProjectDao
 }
 
-func NewProjectService(db *mongo.Database, kClients *kcs.KubeClients) *ProjectService {
-	return &ProjectService{
-		daoProj: dao.NewProject(db),
-	}
+func NewProjectService(daoProj *dao.ProjectDao) *ProjectService {
+	return &ProjectService{daoProj: daoProj}
 }
 
 func (p *ProjectService) List(ctx context.Context, in *project.ListRequest) (*project.ListResponse, error) {

@@ -8,12 +8,10 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/middleware"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	mw_provider "github.com/kiaedev/kiae/internal/pkg/mw-provider"
 	"github.com/kiaedev/kiae/internal/pkg/render/components"
 	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -34,14 +32,8 @@ type MiddlewareService struct {
 	appSvc        *AppService
 }
 
-func NewMiddlewareService(db *mongo.Database, kClients *kcs.KubeClients) *MiddlewareService {
-	return &MiddlewareService{
-		kc:            kClients.K8sCs,
-		rc:            kClients.RuntimeClient,
-		appSvc:        NewAppService(db, kClients),
-		daoMwInstance: dao.NewMiddlewareInstanceDao(db),
-		daoMwClaim:    dao.NewMiddlewareClaimDao(db),
-	}
+func NewMiddlewareService(rc client.Client, kc *kubernetes.Clientset, daoMwInstance *dao.MiddlewareInstance, daoMwClaim *dao.MiddlewareClaim, appSvc *AppService) *MiddlewareService {
+	return &MiddlewareService{rc: rc, kc: kc, daoMwInstance: daoMwInstance, daoMwClaim: daoMwClaim, appSvc: appSvc}
 }
 
 func (s *MiddlewareService) List(ctx context.Context, in *middleware.ListRequest) (*middleware.ListResponse, error) {

@@ -7,8 +7,6 @@ import (
 
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -20,12 +18,8 @@ type Oauth2 struct {
 	daoToken *dao.ProviderTokenDao
 }
 
-func NewOauth2Service(db *mongo.Database, kClients *kcs.KubeClients) *Oauth2 {
-	return &Oauth2{
-		projSvc:  NewProjectService(db, kClients),
-		pvdSvc:   NewProviderService(db, kClients),
-		daoToken: dao.NewProviderTokenDao(db),
-	}
+func NewOauth2Service(projSvc *ProjectService, pvdSvc *ProviderService, daoToken *dao.ProviderTokenDao) *Oauth2 {
+	return &Oauth2{projSvc: projSvc, pvdSvc: pvdSvc, daoToken: daoToken}
 }
 
 func (s *Oauth2) SetupHandler() {

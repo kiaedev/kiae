@@ -5,29 +5,20 @@ import (
 	"log"
 
 	"github.com/kiaedev/kiae/api/graph/model"
-	"github.com/kiaedev/kiae/internal/app/server/watcher"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/kiaedev/kiae/internal/app/server/watch"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
 type AppPodsService struct {
-	w        *watcher.Watcher
-	db       *mongo.Database
-	kClients *kcs.KubeClients
+	w *watch.Watcher
+
 	podsChan map[string]chan []*model.Pod // TODO: lock?
 }
 
-func NewAppPodsService(w *watcher.Watcher, db *mongo.Database, kClients *kcs.KubeClients) *AppPodsService {
-	return &AppPodsService{
-		w:        w,
-		db:       db,
-		kClients: kClients,
-
-		podsChan: make(map[string]chan []*model.Pod),
-	}
+func NewAppPodsService(w *watch.Watcher) *AppPodsService {
+	return &AppPodsService{w: w, podsChan: make(map[string]chan []*model.Pod)}
 }
 
 func (s *AppPodsService) OnAdd(obj interface{}) {

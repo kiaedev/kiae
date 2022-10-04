@@ -6,9 +6,7 @@ import (
 	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -19,11 +17,8 @@ type EntryService struct {
 	daoEntry *dao.EntryDao
 }
 
-func NewEntryService(db *mongo.Database, kClients *kcs.KubeClients) *EntryService {
-	return &EntryService{
-		appSvc:   NewAppService(db, kClients),
-		daoEntry: dao.NewEntryDao(db),
-	}
+func NewEntryService(appSvc *AppService, daoEntry *dao.EntryDao) *EntryService {
+	return &EntryService{appSvc: appSvc, daoEntry: daoEntry}
 }
 
 func (s *EntryService) List(ctx context.Context, in *entry.ListRequest) (*entry.ListResponse, error) {
