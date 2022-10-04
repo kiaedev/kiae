@@ -1,11 +1,10 @@
-package watcher
+package service
 
 import (
 	"context"
 	"log"
 
 	"github.com/kiaedev/kiae/api/image"
-	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/pivotal/kpack/pkg/apis/build/v1alpha2"
 	kpack "github.com/pivotal/kpack/pkg/client/clientset/versioned"
@@ -16,15 +15,17 @@ import (
 type ImageWatcher struct {
 	kpackCs *kpack.Clientset
 
-	imgSvc *service.ProjectImageSvc
+	imgSvc *ProjectImageSvc
 }
 
 func NewImageWatcher(db *mongo.Database, kClients *kcs.KubeClients) *ImageWatcher {
-	return &ImageWatcher{
+	iw := &ImageWatcher{
 		kpackCs: kClients.KpackCs,
 
-		imgSvc: service.NewProjectImageSvc(db, kClients),
+		imgSvc: NewProjectImageSvc(db, kClients),
 	}
+	go iw.checkNotDoneStatus(context.Background())
+	return iw
 }
 
 func (i *ImageWatcher) OnAdd(obj interface{}) {

@@ -27,6 +27,7 @@ import (
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
+	"github.com/kiaedev/kiae/internal/app/server/watcher"
 	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/koding/websocketproxy"
@@ -36,24 +37,34 @@ import (
 )
 
 type Server struct {
-	db  *mongo.Database
-	kcs *kcs.KubeClients
+	db            *mongo.Database
+	kcs           *kcs.KubeClients
+	watcher       *watcher.Watcher
+	graphResolver *graph.Resolver
 }
 
-func NewServer(kubeClients *kcs.KubeClients) (*Server, error) {
+func NewServer(kClients *kcs.KubeClients) (*Server, error) {
 	dbClient, err := mongoutil.New(viper.GetString("dsn"))
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to mysql: %v", err)
 	}
 
-	return &Server{
-		db:  dbClient.DB.Database("kiae"),
-		kcs: kubeClients,
-	}, nil
-}
+	db := dbClient.DB.Database("kiae")
+	w, err := watcher.NewWatcher(kClients)
+	if err != nil {
+		return nil, err
+	}
 
-func (s *Server) DB() *mongo.Database {
-	return s.db
+	appPodSvc := service.NewAppPodsService(w, db, kClients)
+	w.SetupPodsEventHandler(appPodSvc)
+	w.SetupImagesEventHandler(service.NewImageWatcher(db, kClients))
+	return &Server{
+		db:  db,
+		kcs: kClients,
+
+		graphResolver: graph.NewResolver(appPodSvc),
+		watcher:       w,
+	}, nil
 }
 
 func (s *Server) Run() error {
@@ -72,17 +83,17 @@ func (s *Server) Run() error {
 		}
 	}()
 
-	resolver := graph.NewResolver(s.kcs.K8sCs)
-	if err := resolver.Run(context.Background()); err != nil {
-		return err
-	}
-
-	s.runGraphql(resolver)
+	s.runWatcher()
+	s.runGraphql()
 	return s.runGateway()
 }
 
-func (s *Server) runGraphql(resolver *graph.Resolver) {
-	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
+func (s *Server) runWatcher() {
+	_ = s.watcher.Run(context.Background())
+}
+
+func (s *Server) runGraphql() {
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: s.graphResolver}))
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{

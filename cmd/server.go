@@ -25,7 +25,6 @@ import (
 	"flag"
 	"path/filepath"
 
-	"github.com/kiaedev/kiae/internal/app/watcher"
 	"github.com/kiaedev/kiae/internal/pkg/kcs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -66,15 +65,6 @@ to quickly create a Cobra application.`,
 
 		s, err := server.NewServer(kubeClients)
 		if err != nil {
-			return err
-		}
-
-		w, err := watcher.NewWatcher(s.DB(), kubeClients)
-		if err != nil {
-			return err
-		}
-
-		if err := w.Run(cmd.Context()); err != nil {
 			return err
 		}
 
