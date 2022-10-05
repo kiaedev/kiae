@@ -26,8 +26,11 @@ type Container {
     name: String!
     image: String!
     status: String!
+    errMsg: String!
     version: String!
     restartCount: Int!
+    restartReason: String!
+    restartErrMsg: String!
     createdAt: DateTime!
 }
 

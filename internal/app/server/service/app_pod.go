@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/kiaedev/kiae/api/graph/model"
@@ -66,12 +67,16 @@ func (s *AppPodsService) Pods(ctx context.Context, ns, appName string) ([]*model
 		containers := make([]*model.Container, 0)
 		for _, container := range pod.Spec.Containers {
 			containerStatus := containerStatusMap[container.Name]
+			status, errMsg := formatContainerStatus(containerStatus.State)
+			restartReason, restartRrrMsg := formatContainerStatus(containerStatus.LastTerminationState)
 			containers = append(containers, &model.Container{
-				Name:  container.Name,
-				Image: container.Image,
-				// Status: containerStatus.State,
-
-				RestartCount: int(containerStatus.RestartCount),
+				Name:          container.Name,
+				Image:         container.Image,
+				Status:        status,
+				ErrMsg:        errMsg,
+				RestartCount:  int(containerStatus.RestartCount),
+				RestartReason: restartReason,
+				RestartErrMsg: restartRrrMsg,
 			})
 		}
 		pods = append(pods, &model.Pod{
@@ -87,6 +92,26 @@ func (s *AppPodsService) Pods(ctx context.Context, ns, appName string) ([]*model
 	}
 
 	return pods, nil
+}
+
+func formatContainerStatus(state corev1.ContainerState) (string, string) {
+	if state.Running != nil {
+		return "Running", ""
+	}
+
+	if terminated := state.Terminated; terminated != nil {
+		return terminated.Reason, fmt.Sprintf("exitCode: %d\r\nerrMsg:%s", terminated.ExitCode, terminated.Message)
+	}
+
+	if waiting := state.Waiting; waiting != nil {
+		return waiting.Reason, waiting.Message
+	}
+
+	return "Unknown", "None"
+}
+
+func formatContainerRestartReason(state corev1.ContainerState) (interface{}, interface{}) {
+	return formatContainerStatus(state)
 }
 
 func (s *AppPodsService) SubPods(ctx context.Context, ns string, app string) chan []*model.Pod {

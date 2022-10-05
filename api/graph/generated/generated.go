@@ -46,12 +46,15 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Container struct {
-		CreatedAt    func(childComplexity int) int
-		Image        func(childComplexity int) int
-		Name         func(childComplexity int) int
-		RestartCount func(childComplexity int) int
-		Status       func(childComplexity int) int
-		Version      func(childComplexity int) int
+		CreatedAt     func(childComplexity int) int
+		ErrMsg        func(childComplexity int) int
+		Image         func(childComplexity int) int
+		Name          func(childComplexity int) int
+		RestartCount  func(childComplexity int) int
+		RestartErrMsg func(childComplexity int) int
+		RestartReason func(childComplexity int) int
+		Status        func(childComplexity int) int
+		Version       func(childComplexity int) int
 	}
 
 	Pod struct {
@@ -103,6 +106,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Container.CreatedAt(childComplexity), true
 
+	case "Container.errMsg":
+		if e.complexity.Container.ErrMsg == nil {
+			break
+		}
+
+		return e.complexity.Container.ErrMsg(childComplexity), true
+
 	case "Container.image":
 		if e.complexity.Container.Image == nil {
 			break
@@ -123,6 +133,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Container.RestartCount(childComplexity), true
+
+	case "Container.restartErrMsg":
+		if e.complexity.Container.RestartErrMsg == nil {
+			break
+		}
+
+		return e.complexity.Container.RestartErrMsg(childComplexity), true
+
+	case "Container.restartReason":
+		if e.complexity.Container.RestartReason == nil {
+			break
+		}
+
+		return e.complexity.Container.RestartReason(childComplexity), true
 
 	case "Container.status":
 		if e.complexity.Container.Status == nil {
@@ -315,8 +339,11 @@ type Container {
     name: String!
     image: String!
     status: String!
+    errMsg: String!
     version: String!
     restartCount: Int!
+    restartReason: String!
+    restartErrMsg: String!
     createdAt: DateTime!
 }
 
@@ -564,6 +591,50 @@ func (ec *executionContext) fieldContext_Container_status(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Container_errMsg(ctx context.Context, field graphql.CollectedField, obj *model.Container) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Container_errMsg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ErrMsg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Container_errMsg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Container",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Container_version(ctx context.Context, field graphql.CollectedField, obj *model.Container) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Container_version(ctx, field)
 	if err != nil {
@@ -647,6 +718,94 @@ func (ec *executionContext) fieldContext_Container_restartCount(ctx context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Container_restartReason(ctx context.Context, field graphql.CollectedField, obj *model.Container) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Container_restartReason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RestartReason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Container_restartReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Container",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Container_restartErrMsg(ctx context.Context, field graphql.CollectedField, obj *model.Container) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Container_restartErrMsg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RestartErrMsg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Container_restartErrMsg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Container",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -829,10 +988,16 @@ func (ec *executionContext) fieldContext_Pod_containers(ctx context.Context, fie
 				return ec.fieldContext_Container_image(ctx, field)
 			case "status":
 				return ec.fieldContext_Container_status(ctx, field)
+			case "errMsg":
+				return ec.fieldContext_Container_errMsg(ctx, field)
 			case "version":
 				return ec.fieldContext_Container_version(ctx, field)
 			case "restartCount":
 				return ec.fieldContext_Container_restartCount(ctx, field)
+			case "restartReason":
+				return ec.fieldContext_Container_restartReason(ctx, field)
+			case "restartErrMsg":
+				return ec.fieldContext_Container_restartErrMsg(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Container_createdAt(ctx, field)
 			}
@@ -3163,6 +3328,13 @@ func (ec *executionContext) _Container(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "errMsg":
+
+			out.Values[i] = ec._Container_errMsg(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "version":
 
 			out.Values[i] = ec._Container_version(ctx, field, obj)
@@ -3173,6 +3345,20 @@ func (ec *executionContext) _Container(ctx context.Context, sel ast.SelectionSet
 		case "restartCount":
 
 			out.Values[i] = ec._Container_restartCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "restartReason":
+
+			out.Values[i] = ec._Container_restartReason(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "restartErrMsg":
+
+			out.Values[i] = ec._Container_restartErrMsg(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

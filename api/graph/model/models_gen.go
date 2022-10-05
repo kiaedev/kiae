@@ -3,12 +3,15 @@
 package model
 
 type Container struct {
-	Name         string `json:"name"`
-	Image        string `json:"image"`
-	Status       string `json:"status"`
-	Version      string `json:"version"`
-	RestartCount int    `json:"restartCount"`
-	CreatedAt    string `json:"createdAt"`
+	Name          string `json:"name"`
+	Image         string `json:"image"`
+	Status        string `json:"status"`
+	ErrMsg        string `json:"errMsg"`
+	Version       string `json:"version"`
+	RestartCount  int    `json:"restartCount"`
+	RestartReason string `json:"restartReason"`
+	RestartErrMsg string `json:"restartErrMsg"`
+	CreatedAt     string `json:"createdAt"`
 }
 
 type Pod struct {
