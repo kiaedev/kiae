@@ -48,12 +48,13 @@ func NewServer(config *rest.Config) (*Server, error) {
 func (s *Server) Run(ctx context.Context) error {
 	s.watcher.Start(ctx)
 
+	s.setupProxiesEndpoints()
 	s.setupGraphQLEndpoints()
 	return s.runHTTPServer(ctx)
 }
 
 func (s *Server) setupProxiesEndpoints() {
-	// service.NewOauth2Service(s.db, s.kcs).SetupHandler()
+	s.svcSets.Oauth2.SetupHandler()
 
 	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }

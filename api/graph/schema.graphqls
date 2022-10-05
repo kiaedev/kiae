@@ -31,7 +31,7 @@ type Container {
     restartCount: Int!
     restartReason: String!
     restartErrMsg: String!
-    createdAt: DateTime!
+    startedAt: DateTime!
 }
 
 type Query {

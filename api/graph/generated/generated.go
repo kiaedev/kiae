@@ -46,13 +46,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Container struct {
-		CreatedAt     func(childComplexity int) int
 		ErrMsg        func(childComplexity int) int
 		Image         func(childComplexity int) int
 		Name          func(childComplexity int) int
 		RestartCount  func(childComplexity int) int
 		RestartErrMsg func(childComplexity int) int
 		RestartReason func(childComplexity int) int
+		StartedAt     func(childComplexity int) int
 		Status        func(childComplexity int) int
 		Version       func(childComplexity int) int
 	}
@@ -99,13 +99,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Container.createdAt":
-		if e.complexity.Container.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Container.CreatedAt(childComplexity), true
-
 	case "Container.errMsg":
 		if e.complexity.Container.ErrMsg == nil {
 			break
@@ -147,6 +140,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Container.RestartReason(childComplexity), true
+
+	case "Container.startedAt":
+		if e.complexity.Container.StartedAt == nil {
+			break
+		}
+
+		return e.complexity.Container.StartedAt(childComplexity), true
 
 	case "Container.status":
 		if e.complexity.Container.Status == nil {
@@ -344,7 +344,7 @@ type Container {
     restartCount: Int!
     restartReason: String!
     restartErrMsg: String!
-    createdAt: DateTime!
+    startedAt: DateTime!
 }
 
 type Query {
@@ -811,8 +811,8 @@ func (ec *executionContext) fieldContext_Container_restartErrMsg(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Container_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Container) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Container_createdAt(ctx, field)
+func (ec *executionContext) _Container_startedAt(ctx context.Context, field graphql.CollectedField, obj *model.Container) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Container_startedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -825,7 +825,7 @@ func (ec *executionContext) _Container_createdAt(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
+		return obj.StartedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -842,7 +842,7 @@ func (ec *executionContext) _Container_createdAt(ctx context.Context, field grap
 	return ec.marshalNDateTime2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Container_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Container_startedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Container",
 		Field:      field,
@@ -998,8 +998,8 @@ func (ec *executionContext) fieldContext_Pod_containers(ctx context.Context, fie
 				return ec.fieldContext_Container_restartReason(ctx, field)
 			case "restartErrMsg":
 				return ec.fieldContext_Container_restartErrMsg(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Container_createdAt(ctx, field)
+			case "startedAt":
+				return ec.fieldContext_Container_startedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Container", field.Name)
 		},
@@ -3363,9 +3363,9 @@ func (ec *executionContext) _Container(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "createdAt":
+		case "startedAt":
 
-			out.Values[i] = ec._Container_createdAt(ctx, field, obj)
+			out.Values[i] = ec._Container_startedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

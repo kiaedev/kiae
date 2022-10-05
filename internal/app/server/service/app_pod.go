@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/kiaedev/kiae/api/graph/model"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
@@ -77,6 +78,7 @@ func (s *AppPodsService) Pods(ctx context.Context, ns, appName string) ([]*model
 				RestartCount:  int(containerStatus.RestartCount),
 				RestartReason: restartReason,
 				RestartErrMsg: restartRrrMsg,
+				StartedAt:     formatContainerStartedAt(containerStatus).Format(time.RFC3339),
 			})
 		}
 		pods = append(pods, &model.Pod{
@@ -110,8 +112,20 @@ func formatContainerStatus(state corev1.ContainerState) (string, string) {
 	return "Unknown", "None"
 }
 
-func formatContainerRestartReason(state corev1.ContainerState) (interface{}, interface{}) {
-	return formatContainerStatus(state)
+func formatContainerStartedAt(status corev1.ContainerStatus) metav1.Time {
+	if running := status.State.Running; running != nil {
+		return running.StartedAt
+	}
+
+	if terminated := status.State.Terminated; terminated != nil {
+		return terminated.StartedAt
+	}
+
+	if lastTerminated := status.LastTerminationState.Terminated; lastTerminated != nil {
+		return lastTerminated.FinishedAt
+	}
+
+	return metav1.Time{}
 }
 
 func (s *AppPodsService) SubPods(ctx context.Context, ns string, app string) chan []*model.Pod {

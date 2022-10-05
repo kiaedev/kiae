@@ -11,7 +11,7 @@ type Container struct {
 	RestartCount  int    `json:"restartCount"`
 	RestartReason string `json:"restartReason"`
 	RestartErrMsg string `json:"restartErrMsg"`
-	CreatedAt     string `json:"createdAt"`
+	StartedAt     string `json:"startedAt"`
 }
 
 type Pod struct {
