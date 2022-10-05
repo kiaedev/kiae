@@ -65,6 +65,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	middlewareClaim := dao.NewMiddlewareClaimDao(database)
 	egressDao := dao.NewEgressDao(database)
 	appService := service.NewAppService(projectDao, appDao, entryDao, routeDao, middlewareInstance, middlewareClaim, egressDao, clientset, versionedClientset)
+	appStatusService := service.NewAppStatusService(client, versionedClientset, appService)
 	egressService := service.NewEgressService(appService, egressDao)
 	entryService := service.NewEntryService(appService, entryDao)
 	projectImageDao := dao.NewProjectImageDao(database)
@@ -80,6 +81,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
+		AppStatusService:  appStatusService,
 		EgressService:     egressService,
 		EntryService:      entryService,
 		ImageWatcher:      imageWatcher,

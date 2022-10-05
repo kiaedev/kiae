@@ -110,5 +110,6 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, s.svcSets.MiddlewareService)
 
 	s.watcher.SetupPodsEventHandler(s.svcSets.AppPodsService)
+	s.watcher.SetupApplicationsEventHandler(s.svcSets.AppStatusService)
 	s.watcher.SetupImagesEventHandler(s.svcSets.ImageWatcher)
 }

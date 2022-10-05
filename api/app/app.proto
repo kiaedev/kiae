@@ -178,6 +178,8 @@ enum Status {
     STATUS_CREATED = 0;
     STATUS_RUNNING = 1;
     STATUS_STOPPED = 2;
+    STATUS_DEPLOYING = 3;
+    STATUS_UNHEALTHY = 4;
 }
 
 message UpdateRequest {

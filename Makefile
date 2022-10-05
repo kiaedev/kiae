@@ -1,9 +1,12 @@
 
-build: gen
-	go build -v -o build/ .
+gen:
+	go generate ./...
+
+gen-api:
+	go generate ./api/generate.go
 
 gen-wire:
 	go generate ./internal/app/server/wire_gen.go
 
-gen-all:
-	go generate ./...
+build: gen
+	go build -v -o build/ .

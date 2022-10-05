@@ -31,6 +31,15 @@ func (p *AppDao) Get(ctx context.Context, id string) (*app.Application, error) {
 	return &proj, nil
 }
 
+func (p *AppDao) GetByName(ctx context.Context, name string) (*app.Application, error) {
+	var rt app.Application
+	if err := p.collection.FindOne(ctx, bson.M{"name": name}).Decode(&rt); err != nil {
+		return nil, err
+	}
+
+	return &rt, nil
+}
+
 func (p *AppDao) List(ctx context.Context, m bson.M) ([]*app.Application, int64, error) {
 	var results []*app.Application
 	total, err := mongoutil.ListAndCount(ctx, p.collection, m, &results)

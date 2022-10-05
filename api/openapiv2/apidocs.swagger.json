@@ -3245,7 +3245,9 @@
       "enum": [
         "STATUS_CREATED",
         "STATUS_RUNNING",
-        "STATUS_STOPPED"
+        "STATUS_STOPPED",
+        "STATUS_DEPLOYING",
+        "STATUS_UNHEALTHY"
       ],
       "default": "STATUS_CREATED"
     },

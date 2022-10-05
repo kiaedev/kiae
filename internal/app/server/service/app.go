@@ -164,6 +164,11 @@ func (s *AppService) DoAction(ctx context.Context, in *app.ActionPayload) (*app.
 	return s.daoApp.Update(ctx, existedApp)
 }
 
+func (s *AppService) updateStatus(ctx context.Context, ap *app.Application, status app.Status) (*app.Application, error) {
+	ap.Status = status
+	return s.daoApp.Update(ctx, ap)
+}
+
 func (s *AppService) createAppComponent(ctx context.Context, appPb *app.Application, proj *project.Project) error {
 	appCli := s.oamClient.CoreV1beta1().Applications(kiaeutil.BuildAppNs(appPb.Env))
 	oApp, err := appCli.Get(ctx, appPb.Name, metav1.GetOptions{})
