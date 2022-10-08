@@ -14,6 +14,24 @@ type Container struct {
 	StartedAt     string `json:"startedAt"`
 }
 
+type Event struct {
+	UID            string          `json:"uid"`
+	Name           string          `json:"name"`
+	Count          int             `json:"count"`
+	Type           string          `json:"type"`
+	Reason         string          `json:"reason"`
+	Message        string          `json:"message"`
+	Action         string          `json:"action"`
+	InvolvedObject *InvolvedObject `json:"involvedObject"`
+	StartedAt      string          `json:"startedAt"`
+}
+
+type InvolvedObject struct {
+	Kind      string `json:"kind"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+}
+
 type Pod struct {
 	Name         string       `json:"name"`
 	Namespace    string       `json:"namespace"`

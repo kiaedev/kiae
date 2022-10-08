@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kiaedev/kiae/api/graph/generated"
 	"github.com/kiaedev/kiae/api/graph/model"
@@ -12,12 +13,18 @@ import (
 
 // Pods is the resolver for the pods field.
 func (r *queryResolver) Pods(ctx context.Context, ns string, app *string) ([]*model.Pod, error) {
-	return r.appPodsSvc.Pods(ctx, ns, *app)
+	return r.AppPodsSvc.Pods(ctx, ns, *app)
+}
+
+// Events is the resolver for the events field.
+func (r *queryResolver) Events(ctx context.Context, oName string) ([]*model.Event, error) {
+	query := fmt.Sprintf("{oname=~\"%s.*\"}", oName)
+	return r.AppEventsSvc.List(ctx, query)
 }
 
 // Pods is the resolver for the pods field.
 func (r *subscriptionResolver) Pods(ctx context.Context, ns string, app *string) (<-chan []*model.Pod, error) {
-	return r.appPodsSvc.SubPods(ctx, ns, *app), nil
+	return r.AppPodsSvc.SubPods(ctx, ns, *app), nil
 }
 
 // Query returns generated.QueryResolver implementation.

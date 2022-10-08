@@ -10,6 +10,7 @@ type Subscription{
 }
 
 scalar DateTime
+scalar Timestamp
 
 type Pod {
     name: String!
@@ -34,6 +35,25 @@ type Container {
     startedAt: DateTime!
 }
 
+type Event {
+    uid: String!
+    name: String!
+    count: Int!
+    type: String!
+    reason: String!
+    message: String!
+    action: String!
+    involvedObject: InvolvedObject!
+    startedAt: DateTime!
+}
+
+type InvolvedObject {
+    kind: String!
+    namespace: String!
+    name: String!
+}
+
 type Query {
     pods(ns: String!, app: String): [Pod!]!
+    events(oName: String!): [Event!]!
 }

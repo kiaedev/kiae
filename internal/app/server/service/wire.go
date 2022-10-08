@@ -8,6 +8,7 @@ type ServiceSets struct {
 	*AppService
 	*AppPodsService
 	*AppStatusService
+	*AppEventService
 	*EgressService
 	*EntryService
 	*ImageWatcher
@@ -23,6 +24,7 @@ var ProviderSet = wire.NewSet(
 	NewAppService,
 	NewAppPodsService,
 	NewAppStatusService,
+	NewAppEventService,
 	NewEgressService,
 	NewEntryService,
 	NewImageWatcher,

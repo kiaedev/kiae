@@ -12,6 +12,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
 	"github.com/kiaedev/kiae/internal/pkg/kcs"
+	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,14 +28,19 @@ func dbConstructor() (*mongo.Database, error) {
 	return dbClient.DB.Database("kiae"), nil
 }
 
+func lokiConstructor() (*loki.Client, error) {
+	return loki.NewLoki("http://localhost:3100"), nil
+}
+
 func buildInjectors(config *rest.Config) (*Server, error) {
 	wire.Build(
 		dbConstructor,
+		lokiConstructor,
 		kcs.ProviderSet,
 		dao.ProviderSet,
 		service.ProviderSet,
 		watch.NewWatcher,
-		graph.NewResolver,
+		wire.Struct(new(graph.Resolver), "*"),
 		wire.Struct(new(Server), "*"),
 	)
 

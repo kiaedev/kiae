@@ -13,6 +13,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
 	"github.com/kiaedev/kiae/internal/pkg/kcs"
+	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	versioned2 "github.com/pivotal/kpack/pkg/client/clientset/versioned"
@@ -56,7 +57,15 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		return nil, err
 	}
 	appPodsService := service.NewAppPodsService(watcher)
-	resolver := graph.NewResolver(appPodsService)
+	lokiClient, err := lokiConstructor()
+	if err != nil {
+		return nil, err
+	}
+	appEventService := service.NewAppEventService(lokiClient)
+	resolver := &graph.Resolver{
+		AppPodsSvc:   appPodsService,
+		AppEventsSvc: appEventService,
+	}
 	projectDao := dao.NewProject(database)
 	appDao := dao.NewApp(database)
 	entryDao := dao.NewEntryDao(database)
@@ -82,6 +91,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		AppService:        appService,
 		AppPodsService:    appPodsService,
 		AppStatusService:  appStatusService,
+		AppEventService:   appEventService,
 		EgressService:     egressService,
 		EntryService:      entryService,
 		ImageWatcher:      imageWatcher,
@@ -111,4 +121,8 @@ func dbConstructor() (*mongo.Database, error) {
 	}
 
 	return dbClient.DB.Database("kiae"), nil
+}
+
+func lokiConstructor() (*loki.Client, error) {
+	return loki.NewLoki("http://localhost:3100"), nil
 }
