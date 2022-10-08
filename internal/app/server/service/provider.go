@@ -64,11 +64,11 @@ func (s *ProviderService) Update(ctx context.Context, in *provider.UpdateRequest
 
 func (s *ProviderService) handlePatch(in *provider.UpdateRequest, existedProvider *provider.Provider) {
 	// payload := in.Payload
-	for _, path := range in.GetUpdateMask().Paths {
-		if path == "status" {
-			// existedProvider.Status = payload.Status
-		}
-	}
+	// for _, path := range in.GetUpdateMask().Paths {
+	// 	if path == "status" {
+	// 		existedProvider.Status = payload.Status
+	// 	}
+	// }
 }
 
 func (s *ProviderService) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {

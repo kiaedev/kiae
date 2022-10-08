@@ -28,6 +28,10 @@ func New(dsn string) (*Database, error) {
 
 func ListAndCount(ctx context.Context, mc *mongo.Collection, filter bson.M, results interface{}) (int64, error) {
 	total, err := mc.CountDocuments(ctx, filter)
+	if err != nil {
+		return -1, err
+	}
+
 	cursor, err := mc.Find(ctx, filter)
 	if err != nil {
 		return -1, err

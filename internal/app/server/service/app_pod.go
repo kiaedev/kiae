@@ -10,7 +10,6 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/watch"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 )
 
 type AppPodsService struct {
@@ -44,7 +43,7 @@ func (s *AppPodsService) pubLatestPods(ns, appName string) {
 		return
 	}
 
-	pods, err := s.Pods(nil, ns, appName)
+	pods, err := s.Pods(context.Background(), ns, appName)
 	if err != nil {
 		log.Printf("failed to list pods: %v", err)
 	}
@@ -139,13 +138,4 @@ func (s *AppPodsService) SubPods(ctx context.Context, ns string, app string) cha
 
 	s.pubLatestPods(ns, app)
 	return s.podsChan[ns+app]
-}
-
-func buildAppSelector(app *string) (labels.Selector, error) {
-	matchLabels := make(map[string]string)
-	if app != nil {
-		matchLabels["kiae.dev/component"] = *app
-	}
-
-	return metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: matchLabels})
 }
