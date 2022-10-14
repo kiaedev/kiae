@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/google/wire"
+	"github.com/gorilla/mux"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/service"
@@ -37,6 +38,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		dbConstructor,
 		lokiConstructor,
 		kcs.ProviderSet,
+		mux.NewRouter,
 		dao.ProviderSet,
 		service.ProviderSet,
 		watch.NewWatcher,

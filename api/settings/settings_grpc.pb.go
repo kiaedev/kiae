@@ -53,15 +53,14 @@ func (c *settingsServiceClient) Update(ctx context.Context, in *UpdateRequest, o
 }
 
 // SettingsServiceServer is the server API for SettingsService service.
-// All implementations must embed UnimplementedSettingsServiceServer
+// All implementations should embed UnimplementedSettingsServiceServer
 // for forward compatibility
 type SettingsServiceServer interface {
 	List(context.Context, *ListRequest) (*ListReply, error)
 	Update(context.Context, *UpdateRequest) (*UpdateReply, error)
-	mustEmbedUnimplementedSettingsServiceServer()
 }
 
-// UnimplementedSettingsServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedSettingsServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedSettingsServiceServer struct {
 }
 
@@ -71,7 +70,6 @@ func (UnimplementedSettingsServiceServer) List(context.Context, *ListRequest) (*
 func (UnimplementedSettingsServiceServer) Update(context.Context, *UpdateRequest) (*UpdateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
-func (UnimplementedSettingsServiceServer) mustEmbedUnimplementedSettingsServiceServer() {}
 
 // UnsafeSettingsServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to SettingsServiceServer will

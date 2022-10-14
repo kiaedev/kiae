@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package cluster;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+
+
+option go_package = "github.com/kiaedev/kiae/api/cluster";
+
+service ClusterService {
+    rpc List (ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/clusters"
+        };
+    }
+    rpc Create (Cluster) returns (Cluster) {
+        option (google.api.http) = {
+            post: "/api/v1/clusters"
+            body: "*"
+        };
+    }
+    rpc Update (UpdateRequest) returns (Cluster) {
+        option (google.api.http) = {
+            put: "/api/v1/clusters/{payload.id}",
+            body: "payload",
+            additional_bindings: {
+                patch: "/api/v1/clusters/{payload.id}"
+                body: "payload"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/clusters/{id}"
+        };
+    }
+}
+
+message ListRequest {
+    string appid = 1;
+}
+
+message ListResponse {
+    repeated Cluster items = 1;
+    int64 total = 2;
+}
+
+message UpdateRequest {
+    Cluster payload = 1;
+    google.protobuf.FieldMask update_mask = 2;
+}
+
+message Cluster {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string name = 2;
+    string intro = 3;
+    string idc = 6;
+    repeated string tags = 7;
+    string kubeconfig = 8;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+

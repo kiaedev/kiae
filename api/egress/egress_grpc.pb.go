@@ -75,17 +75,16 @@ func (c *egressServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, op
 }
 
 // EgressServiceServer is the server API for EgressService service.
-// All implementations must embed UnimplementedEgressServiceServer
+// All implementations should embed UnimplementedEgressServiceServer
 // for forward compatibility
 type EgressServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Create(context.Context, *Egress) (*Egress, error)
 	Update(context.Context, *Egress) (*Egress, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedEgressServiceServer()
 }
 
-// UnimplementedEgressServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedEgressServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedEgressServiceServer struct {
 }
 
@@ -101,7 +100,6 @@ func (UnimplementedEgressServiceServer) Update(context.Context, *Egress) (*Egres
 func (UnimplementedEgressServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedEgressServiceServer) mustEmbedUnimplementedEgressServiceServer() {}
 
 // UnsafeEgressServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to EgressServiceServer will

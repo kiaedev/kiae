@@ -115,7 +115,7 @@ func (c *providerServiceClient) ListTags(ctx context.Context, in *ListTagsReques
 }
 
 // ProviderServiceServer is the server API for ProviderService service.
-// All implementations must embed UnimplementedProviderServiceServer
+// All implementations should embed UnimplementedProviderServiceServer
 // for forward compatibility
 type ProviderServiceServer interface {
 	Prepare(context.Context, *emptypb.Empty) (*PreparesResponse, error)
@@ -126,10 +126,9 @@ type ProviderServiceServer interface {
 	ListRepos(context.Context, *ListReposRequest) (*ListReposResponse, error)
 	ListBranches(context.Context, *ListBranchesRequest) (*ListBranchesResponse, error)
 	ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
-	mustEmbedUnimplementedProviderServiceServer()
 }
 
-// UnimplementedProviderServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedProviderServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedProviderServiceServer struct {
 }
 
@@ -157,7 +156,6 @@ func (UnimplementedProviderServiceServer) ListBranches(context.Context, *ListBra
 func (UnimplementedProviderServiceServer) ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTags not implemented")
 }
-func (UnimplementedProviderServiceServer) mustEmbedUnimplementedProviderServiceServer() {}
 
 // UnsafeProviderServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ProviderServiceServer will

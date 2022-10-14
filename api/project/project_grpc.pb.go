@@ -85,7 +85,7 @@ func (c *projectServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, o
 }
 
 // ProjectServiceServer is the server API for ProjectService service.
-// All implementations must embed UnimplementedProjectServiceServer
+// All implementations should embed UnimplementedProjectServiceServer
 // for forward compatibility
 type ProjectServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
@@ -93,10 +93,9 @@ type ProjectServiceServer interface {
 	Update(context.Context, *Project) (*Project, error)
 	Read(context.Context, *kiae.IdRequest) (*Project, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedProjectServiceServer()
 }
 
-// UnimplementedProjectServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedProjectServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedProjectServiceServer struct {
 }
 
@@ -115,7 +114,6 @@ func (UnimplementedProjectServiceServer) Read(context.Context, *kiae.IdRequest) 
 func (UnimplementedProjectServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
 // UnsafeProjectServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ProjectServiceServer will

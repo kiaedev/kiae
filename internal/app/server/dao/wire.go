@@ -6,6 +6,7 @@ var ProviderSet = wire.NewSet(
 	NewApp,
 	NewEgressDao,
 	NewEntryDao,
+	NewClusterDao,
 	NewMiddlewareClaimDao,
 	NewMiddlewareInstanceDao,
 	NewProject,

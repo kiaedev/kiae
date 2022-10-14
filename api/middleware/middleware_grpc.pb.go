@@ -115,7 +115,7 @@ func (c *middlewareServiceClient) ClaimDelete(ctx context.Context, in *kiae.IdRe
 }
 
 // MiddlewareServiceServer is the server API for MiddlewareService service.
-// All implementations must embed UnimplementedMiddlewareServiceServer
+// All implementations should embed UnimplementedMiddlewareServiceServer
 // for forward compatibility
 type MiddlewareServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
@@ -126,10 +126,9 @@ type MiddlewareServiceServer interface {
 	ClaimCreate(context.Context, *Claim) (*Claim, error)
 	ClaimUpdate(context.Context, *Claim) (*Claim, error)
 	ClaimDelete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedMiddlewareServiceServer()
 }
 
-// UnimplementedMiddlewareServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedMiddlewareServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedMiddlewareServiceServer struct {
 }
 
@@ -157,7 +156,6 @@ func (UnimplementedMiddlewareServiceServer) ClaimUpdate(context.Context, *Claim)
 func (UnimplementedMiddlewareServiceServer) ClaimDelete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClaimDelete not implemented")
 }
-func (UnimplementedMiddlewareServiceServer) mustEmbedUnimplementedMiddlewareServiceServer() {}
 
 // UnsafeMiddlewareServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to MiddlewareServiceServer will

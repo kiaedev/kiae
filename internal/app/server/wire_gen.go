@@ -8,6 +8,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/service"
@@ -26,6 +27,7 @@ import (
 // Injectors from wire.go:
 
 func buildInjectors(config *rest.Config) (*Server, error) {
+	router := mux.NewRouter()
 	database, err := dbConstructor()
 	if err != nil {
 		return nil, err
@@ -75,6 +77,8 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	egressDao := dao.NewEgressDao(database)
 	appService := service.NewAppService(projectDao, appDao, entryDao, routeDao, middlewareInstance, middlewareClaim, egressDao, clientset, versionedClientset)
 	appStatusService := service.NewAppStatusService(client, versionedClientset, appService)
+	clusterDao := dao.NewClusterDao(database)
+	clusterService := service.NewClusterService(clusterDao)
 	egressService := service.NewEgressService(appService, egressDao)
 	entryService := service.NewEntryService(appService, entryDao)
 	projectImageDao := dao.NewProjectImageDao(database)
@@ -92,6 +96,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		AppPodsService:    appPodsService,
 		AppStatusService:  appStatusService,
 		AppEventService:   appEventService,
+		ClusterService:    clusterService,
 		EgressService:     egressService,
 		EntryService:      entryService,
 		ImageWatcher:      imageWatcher,
@@ -103,9 +108,10 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		RouteService:      routeService,
 	}
 	server := &Server{
+		Router:        router,
 		db:            database,
-		kcs:           kubeClients,
 		watcher:       watcher,
+		kcs:           kubeClients,
 		graphResolver: resolver,
 		svcSets:       serviceSets,
 	}

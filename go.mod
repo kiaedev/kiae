@@ -10,6 +10,7 @@ require (
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/wire v0.5.0
+	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c

@@ -75,17 +75,16 @@ func (c *routeServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opt
 }
 
 // RouteServiceServer is the server API for RouteService service.
-// All implementations must embed UnimplementedRouteServiceServer
+// All implementations should embed UnimplementedRouteServiceServer
 // for forward compatibility
 type RouteServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Create(context.Context, *Route) (*Route, error)
 	Update(context.Context, *UpdateRequest) (*Route, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedRouteServiceServer()
 }
 
-// UnimplementedRouteServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedRouteServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedRouteServiceServer struct {
 }
 
@@ -101,7 +100,6 @@ func (UnimplementedRouteServiceServer) Update(context.Context, *UpdateRequest) (
 func (UnimplementedRouteServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedRouteServiceServer) mustEmbedUnimplementedRouteServiceServer() {}
 
 // UnsafeRouteServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to RouteServiceServer will

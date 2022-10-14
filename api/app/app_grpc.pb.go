@@ -155,7 +155,7 @@ func (c *appServiceClient) EnvDelete(ctx context.Context, in *AppEnv, opts ...gr
 }
 
 // AppServiceServer is the server API for AppService service.
-// All implementations must embed UnimplementedAppServiceServer
+// All implementations should embed UnimplementedAppServiceServer
 // for forward compatibility
 type AppServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
@@ -170,10 +170,9 @@ type AppServiceServer interface {
 	EnvCreate(context.Context, *AppEnv) (*Environment, error)
 	EnvUpdate(context.Context, *AppEnv) (*Environment, error)
 	EnvDelete(context.Context, *AppEnv) (*emptypb.Empty, error)
-	mustEmbedUnimplementedAppServiceServer()
 }
 
-// UnimplementedAppServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedAppServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedAppServiceServer struct {
 }
 
@@ -213,7 +212,6 @@ func (UnimplementedAppServiceServer) EnvUpdate(context.Context, *AppEnv) (*Envir
 func (UnimplementedAppServiceServer) EnvDelete(context.Context, *AppEnv) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnvDelete not implemented")
 }
-func (UnimplementedAppServiceServer) mustEmbedUnimplementedAppServiceServer() {}
 
 // UnsafeAppServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to AppServiceServer will

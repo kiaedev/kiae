@@ -75,17 +75,16 @@ func (c *imageServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opt
 }
 
 // ImageServiceServer is the server API for ImageService service.
-// All implementations must embed UnimplementedImageServiceServer
+// All implementations should embed UnimplementedImageServiceServer
 // for forward compatibility
 type ImageServiceServer interface {
 	List(context.Context, *ImageListRequest) (*ImageListResponse, error)
 	Create(context.Context, *Image) (*Image, error)
 	Update(context.Context, *Image) (*Image, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedImageServiceServer()
 }
 
-// UnimplementedImageServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedImageServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedImageServiceServer struct {
 }
 
@@ -101,7 +100,6 @@ func (UnimplementedImageServiceServer) Update(context.Context, *Image) (*Image, 
 func (UnimplementedImageServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedImageServiceServer) mustEmbedUnimplementedImageServiceServer() {}
 
 // UnsafeImageServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ImageServiceServer will

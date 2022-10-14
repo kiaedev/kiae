@@ -75,17 +75,16 @@ func (c *entryServiceClient) Delete(ctx context.Context, in *kiae.IdRequest, opt
 }
 
 // EntryServiceServer is the server API for EntryService service.
-// All implementations must embed UnimplementedEntryServiceServer
+// All implementations should embed UnimplementedEntryServiceServer
 // for forward compatibility
 type EntryServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Create(context.Context, *Entry) (*Entry, error)
 	Update(context.Context, *UpdateRequest) (*Entry, error)
 	Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error)
-	mustEmbedUnimplementedEntryServiceServer()
 }
 
-// UnimplementedEntryServiceServer must be embedded to have forward compatible implementations.
+// UnimplementedEntryServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedEntryServiceServer struct {
 }
 
@@ -101,7 +100,6 @@ func (UnimplementedEntryServiceServer) Update(context.Context, *UpdateRequest) (
 func (UnimplementedEntryServiceServer) Delete(context.Context, *kiae.IdRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedEntryServiceServer) mustEmbedUnimplementedEntryServiceServer() {}
 
 // UnsafeEntryServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to EntryServiceServer will
