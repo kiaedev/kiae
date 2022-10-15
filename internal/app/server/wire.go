@@ -12,7 +12,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
+	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/spf13/viper"
@@ -37,11 +37,12 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	wire.Build(
 		dbConstructor,
 		lokiConstructor,
-		kcs.ProviderSet,
+		klient.ProviderSet,
 		mux.NewRouter,
 		dao.ProviderSet,
 		service.ProviderSet,
 		watch.NewWatcher,
+		watch.NewMultiClusterInformers,
 		wire.Struct(new(graph.Resolver), "*"),
 		wire.Struct(new(Server), "*"),
 	)

@@ -8,7 +8,7 @@ import (
 	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
+	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/pivotal/kpack/pkg/apis/core/v1alpha1"
 	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,7 +26,7 @@ type ProjectImageSvc struct {
 	kPackClient alpha2.KpackV1alpha2Interface
 }
 
-func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, kClients *kcs.KubeClients) *ProjectImageSvc {
+func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, kClients *klient.LocalClients) *ProjectImageSvc {
 	return &ProjectImageSvc{
 		daoProj:     daoProj,
 		daoProjImg:  daoProjImg,

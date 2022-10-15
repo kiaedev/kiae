@@ -652,6 +652,8 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLA
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
+github.com/oam-dev/cluster-gateway v1.5.0 h1:S4WxrhWHF09lSEvi3YjCFNifH83G6Jb1Cjnj94Q9GVo=
+github.com/oam-dev/cluster-gateway v1.5.0/go.mod h1:qnCczkXtTY7h0SqxjZqAAyKQPwrJjLIFy+IdeoaYKCU=
 github.com/oam-dev/kubevela-core-api v1.2.6 h1:4lobLtDJaRF4rGsXkzd92r+402VG3c8z/ye6f8qlJo8=
 github.com/oam-dev/kubevela-core-api v1.2.6/go.mod h1:kUyGWYsNdOOW8JJjy13CxPfy0WYGJywPIUTH1JtYlJc=
 github.com/oam-dev/terraform-controller v0.4.6 h1:QH9JTZT+SA9HaXpY1sdf7qnDSgl+7hlseC4HqY7LcDM=

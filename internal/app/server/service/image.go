@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/kiaedev/kiae/api/image"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
+	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/pivotal/kpack/pkg/apis/build/v1alpha2"
 	kpack "github.com/pivotal/kpack/pkg/client/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +17,7 @@ type ImageWatcher struct {
 	kpackCs *kpack.Clientset
 }
 
-func NewImageWatcher(imgSvc *ProjectImageSvc, kClients *kcs.KubeClients) *ImageWatcher {
+func NewImageWatcher(imgSvc *ProjectImageSvc, kClients *klient.LocalClients) *ImageWatcher {
 	iw := &ImageWatcher{
 		imgSvc: imgSvc,
 

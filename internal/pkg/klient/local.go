@@ -1,4 +1,4 @@
-package kcs
+package klient
 
 import (
 	"github.com/google/wire"
@@ -9,7 +9,7 @@ import (
 	ctrClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type KubeClients struct {
+type LocalClients struct {
 	K8sCs   *kubernetes.Clientset
 	VelaCs  *vela.Clientset
 	KpackCs *kpack.Clientset
@@ -22,7 +22,7 @@ var ProviderSet = wire.NewSet(
 	vela.NewForConfig,
 	kpack.NewForConfig,
 	CtrRuntimeClient,
-	wire.Struct(new(KubeClients), "*"),
+	wire.Struct(new(LocalClients), "*"),
 )
 
 func CtrRuntimeClient(config *rest.Config) (ctrClient.Client, error) {

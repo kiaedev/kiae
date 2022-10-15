@@ -13,13 +13,13 @@ import (
 )
 
 type AppPodsService struct {
-	w *watch.Watcher
+	mci *watch.MultiClusterInformers
 
 	podsChan map[string]chan []*model.Pod // TODO: lock?
 }
 
-func NewAppPodsService(w *watch.Watcher) *AppPodsService {
-	return &AppPodsService{w: w, podsChan: make(map[string]chan []*model.Pod)}
+func NewAppPodsService(mci *watch.MultiClusterInformers) *AppPodsService {
+	return &AppPodsService{mci: mci, podsChan: make(map[string]chan []*model.Pod)}
 }
 
 func (s *AppPodsService) OnAdd(obj interface{}) {
@@ -52,7 +52,7 @@ func (s *AppPodsService) pubLatestPods(ns, appName string) {
 }
 
 func (s *AppPodsService) Pods(ctx context.Context, ns, appName string) ([]*model.Pod, error) {
-	rt, err := s.w.Pods(ns, map[string]string{"kiae.dev/component": appName})
+	rt, err := s.mci.Pods(ns, map[string]string{"kiae.dev/component": appName})
 	if err != nil {
 		return nil, err
 	}

@@ -13,7 +13,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
+	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
@@ -28,10 +28,6 @@ import (
 
 func buildInjectors(config *rest.Config) (*Server, error) {
 	router := mux.NewRouter()
-	database, err := dbConstructor()
-	if err != nil {
-		return nil, err
-	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
@@ -44,21 +40,22 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := kcs.CtrRuntimeClient(config)
+	client, err := klient.CtrRuntimeClient(config)
 	if err != nil {
 		return nil, err
 	}
-	kubeClients := &kcs.KubeClients{
+	localClients := &klient.LocalClients{
 		K8sCs:         clientset,
 		VelaCs:        versionedClientset,
 		KpackCs:       clientset2,
 		RuntimeClient: client,
 	}
-	watcher, err := watch.NewWatcher(kubeClients)
+	multiClusterInformers := watch.NewMultiClusterInformers(config)
+	watcher, err := watch.NewWatcher(localClients, multiClusterInformers)
 	if err != nil {
 		return nil, err
 	}
-	appPodsService := service.NewAppPodsService(watcher)
+	appPodsService := service.NewAppPodsService(multiClusterInformers)
 	lokiClient, err := lokiConstructor()
 	if err != nil {
 		return nil, err
@@ -67,6 +64,10 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	resolver := &graph.Resolver{
 		AppPodsSvc:   appPodsService,
 		AppEventsSvc: appEventService,
+	}
+	database, err := dbConstructor()
+	if err != nil {
+		return nil, err
 	}
 	projectDao := dao.NewProject(database)
 	appDao := dao.NewApp(database)
@@ -78,12 +79,12 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	appService := service.NewAppService(projectDao, appDao, entryDao, routeDao, middlewareInstance, middlewareClaim, egressDao, clientset, versionedClientset)
 	appStatusService := service.NewAppStatusService(client, versionedClientset, appService)
 	clusterDao := dao.NewClusterDao(database)
-	clusterService := service.NewClusterService(clusterDao)
+	clusterService := service.NewClusterService(clusterDao, multiClusterInformers)
 	egressService := service.NewEgressService(appService, egressDao)
 	entryService := service.NewEntryService(appService, entryDao)
 	projectImageDao := dao.NewProjectImageDao(database)
-	projectImageSvc := service.NewProjectImageSvc(projectDao, projectImageDao, kubeClients)
-	imageWatcher := service.NewImageWatcher(projectImageSvc, kubeClients)
+	projectImageSvc := service.NewProjectImageSvc(projectDao, projectImageDao, localClients)
+	imageWatcher := service.NewImageWatcher(projectImageSvc, localClients)
 	middlewareService := service.NewMiddlewareService(client, clientset, middlewareInstance, middlewareClaim, appService)
 	projectService := service.NewProjectService(projectDao)
 	providerDao := dao.NewProviderDao(database)
@@ -109,9 +110,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	}
 	server := &Server{
 		Router:        router,
-		db:            database,
 		watcher:       watcher,
-		kcs:           kubeClients,
 		graphResolver: resolver,
 		svcSets:       serviceSets,
 	}

@@ -28,21 +28,16 @@ import (
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
-	"github.com/kiaedev/kiae/internal/pkg/kcs"
-	"github.com/kiaedev/kiae/internal/pkg/kubeproxy"
 	"github.com/koding/websocketproxy"
-	"go.mongodb.org/mongo-driver/mongo"
 	"k8s.io/client-go/rest"
 )
 
 type Server struct {
 	*mux.Router
-	db            *mongo.Database
-	watcher       *watch.Watcher
-	kcs           *kcs.KubeClients
-	graphResolver *graph.Resolver
 
-	svcSets *service.ServiceSets
+	watcher       *watch.Watcher
+	graphResolver *graph.Resolver
+	svcSets       *service.ServiceSets
 }
 
 func NewServer(config *rest.Config) (*Server, error) {
@@ -50,9 +45,12 @@ func NewServer(config *rest.Config) (*Server, error) {
 }
 
 func (s *Server) Run(ctx context.Context) error {
+	s.watcher.SetupPodsEventHandler(s.svcSets.AppPodsService)
+	s.watcher.SetupApplicationsEventHandler(s.svcSets.AppStatusService)
+	s.watcher.SetupImagesEventHandler(s.svcSets.ImageWatcher)
 	s.watcher.Start(ctx)
 
-	s.Use(s.svcSets.ClusterService.Middleware)
+	// s.Use(s.svcSets.ClusterService.Middleware)
 	s.setupProxiesEndpoints()
 	s.setupGraphQLEndpoints()
 	return s.runHTTPServer(ctx)
@@ -64,7 +62,9 @@ func (s *Server) setupProxiesEndpoints() {
 	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
 	http.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
-	http.Handle("/proxies/kube/", http.StripPrefix("/proxies/kube", kubeproxy.NewProxy()))
+
+	// removed，replaced by the cluster-gateway
+	// http.Handle("/proxies/kube/", http.StripPrefix("/proxies/kube", kubeproxy.NewProxy()))
 }
 
 func (s *Server) setupGraphQLEndpoints() {
@@ -116,8 +116,4 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, s.svcSets.RouteService)
 	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, s.svcSets.MiddlewareService)
 	_ = cluster.RegisterClusterServiceHandlerServer(ctx, mux, s.svcSets.ClusterService)
-
-	s.watcher.SetupPodsEventHandler(s.svcSets.AppPodsService)
-	s.watcher.SetupApplicationsEventHandler(s.svcSets.AppStatusService)
-	s.watcher.SetupImagesEventHandler(s.svcSets.ImageWatcher)
 }
