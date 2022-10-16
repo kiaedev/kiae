@@ -22,6 +22,7 @@ var ProviderSet = wire.NewSet(
 	vela.NewForConfig,
 	kpack.NewForConfig,
 	CtrRuntimeClient,
+	NewProxy,
 	wire.Struct(new(LocalClients), "*"),
 )
 

@@ -48,6 +48,12 @@ func (s *AppStatusService) updateStatus(va *v1beta1.Application) {
 		return
 	}
 
+	// fixme: 停止时误把stopped状态改为了running
+	// 先更新的component，后改的数据库，这里的判定大概率判定不到
+	if ap.Status == app.Status_STATUS_STOPPED {
+		return
+	}
+
 	if _, err := s.appSvc.updateStatus(ctx, ap, buildAppStatus(va)); err != nil {
 		return
 	}

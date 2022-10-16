@@ -29,6 +29,7 @@ import (
 	"github.com/kiaedev/kiae/api/route"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
+	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/koding/websocketproxy"
 	"k8s.io/client-go/rest"
 )
@@ -39,6 +40,7 @@ type Server struct {
 	watcher       *watch.Watcher
 	graphResolver *graph.Resolver
 	svcSets       *service.ServiceSets
+	proxy         *klient.Proxy
 }
 
 func NewServer(config *rest.Config) (*Server, error) {
@@ -64,8 +66,8 @@ func (s *Server) setupProxiesEndpoints() {
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
 	s.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
 
-	// removed，replaced by the cluster-gateway
-	// http.Handle("/proxies/kube/", http.StripPrefix("/proxies/kube", kubeproxy.NewProxy()))
+	// proxy for k8s api
+	s.PathPrefix("/proxies/kube/").Handler(http.StripPrefix("/proxies/kube", s.proxy))
 }
 
 func (s *Server) setupGraphQLEndpoints() {

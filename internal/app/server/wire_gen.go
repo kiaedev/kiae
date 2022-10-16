@@ -111,11 +111,13 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		RouteService:      routeService,
 		DeploymentService: deploymentService,
 	}
+	proxy := klient.NewProxy(config)
 	server := &Server{
 		Router:        router,
 		watcher:       watcher,
 		graphResolver: resolver,
 		svcSets:       serviceSets,
+		proxy:         proxy,
 	}
 	return server, nil
 }
