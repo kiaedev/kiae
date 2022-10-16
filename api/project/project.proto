@@ -51,6 +51,11 @@ message Project {
     string git_repo = 4 [(validate.rules).string = {min_len: 10, max_len: 512}];
     string image_repo = 5;
 
+    string builder_id = 6; // @gotags: bson:"builder_id,omitempty"
+    repeated string build_envs = 8; // @gotags: json:"build_args,omitempty"
+    string run_command = 9; // @gotags: json:"run_command,omitempty"
+    string run_args = 10; // @gotags: json:"run_args,omitempty"
+
     google.protobuf.Timestamp created_at = 101;
     google.protobuf.Timestamp created_by = 102;
     google.protobuf.Timestamp updated_at = 103;

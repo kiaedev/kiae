@@ -46,6 +46,10 @@ template: {
 							name:      "kapp"
 							image:     parameter.image
 							resources: parameter.resources
+							if parameter["args"] != _|_ {
+								args: parameter.args
+							}
+
 							if parameter["ports"] != _|_ {
 								ports: [ for v in parameter.ports {
 									{
@@ -119,6 +123,8 @@ template: {
 
 		// +usage=Specify image pull secrets for your service
 		imagePullSecrets?: [...string]
+
+		args?: [...string]
 
 		// +usage=Which ports do you want customer traffic sent to, defaults to 80
 		ports: [...{

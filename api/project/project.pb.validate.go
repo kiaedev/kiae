@@ -93,6 +93,12 @@ func (m *Project) validate(all bool) error {
 
 	// no validation rules for ImageRepo
 
+	// no validation rules for BuilderId
+
+	// no validation rules for RunCommand
+
+	// no validation rules for RunArgs
+
 	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {
 		case interface{ ValidateAll() error }:

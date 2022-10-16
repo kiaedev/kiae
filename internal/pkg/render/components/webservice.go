@@ -1,6 +1,8 @@
 package components
 
 import (
+	"strings"
+
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/pkg/render/traits"
@@ -18,6 +20,7 @@ type KWebservice struct {
 	Image            string                  `json:"image"`
 	ImagePullPolicy  string                  `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets []string                `json:"imagePullSecrets,omitempty"`
+	Args             []string                `json:"args"`
 	Ports            []*project.Port         `json:"ports"`
 	Replicas         uint32                  `json:"replicas"`
 	Resources        v1.ResourceRequirements `json:"resources"`
@@ -46,6 +49,7 @@ func NewKWebservice(ap *app.Application, proj *project.Project) *KWebservice {
 		Annotations: ap.Annotations,
 		Image:       ap.Image,
 		// ImagePullSecrets: "",
+		Args:      strings.Split(proj.RunArgs, " "),
 		Replicas:  ap.Replicas,
 		Ports:     ap.Ports,
 		Resources: utils.BuildResources(ap.Size, 0.5),

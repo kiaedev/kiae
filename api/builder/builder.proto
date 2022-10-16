@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package builder;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+
+option go_package = "github.com/kiaedev/kiae/api/builder";
+
+message Builder {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string name = 3;
+    string intro = 4;
+
+    string image_repo = 5; // @gotags: bson:"image_repo,omitempty"
+    string stack_id = 6; // @gotags: bson:"stack_id,omitempty"
+    string build_image = 7; // @gotags: bson:"build_image,omitempty"
+    string run_image = 8; // @gotags: bson:"run_image,omitempty"
+    repeated Pack packs = 9;
+
+    enum Status {
+        PENDING = 0;
+        BUILDING = 1;
+        PUBLISHED = 2;
+        EXPIRED = 3;
+        FAILED = 4;
+    }
+    Status status = 10;
+
+    google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
+    google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
+}
+
+message Pack {
+    string lang = 2;
+    string image = 3;
+    repeated Env envs = 4;
+}
+
+message Env {
+    string name = 1;
+    string intro = 2;
+    string default_value = 3;
+}
+
+message BuilderListRequest {
+
+}
+
+message BuilderListResponse {
+    repeated Builder items = 1;
+    int64 total = 2;
+}
+
+message SuggestedStack {
+    string name = 1;
+    string intro = 2;
+    string stack_id = 6; // @gotags: bson:"stack_id,omitempty"
+    string build_image = 7; // @gotags: bson:"build_image,omitempty"
+    string run_image = 8; // @gotags: bson:"run_image,omitempty"
+}
+
+message SuggestedStackListResponse {
+    repeated SuggestedStack items = 1;
+}
+
+service BuilderService {
+    rpc SuggestedStacks (google.protobuf.Empty) returns (SuggestedStackListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/builder-suggested-stacks"
+        };
+    }
+    rpc List (BuilderListRequest) returns (BuilderListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/builders"
+        };
+    }
+    rpc Create (Builder) returns (Builder) {
+        option (google.api.http) = {
+            post: "/api/v1/builders"
+            body: "*"
+        };
+    }
+    rpc Update (Builder) returns (Builder) {
+        option (google.api.http) = {
+            put: "/api/v1/builders/{id}",
+            body: "*",
+            additional_bindings: {
+                patch: "/api/v1/builders/{id}"
+                body: "*"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/builders/{id}"
+        };
+    }
+}

@@ -16,6 +16,9 @@
       "name": "AppService"
     },
     {
+      "name": "BuilderService"
+    },
+    {
       "name": "ClusterService"
     },
     {
@@ -1671,6 +1674,257 @@
         ]
       }
     },
+    "/api/v1/builder-suggested-stacks": {
+      "get": {
+        "operationId": "BuilderService_SuggestedStacks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/builderSuggestedStackListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "BuilderService"
+        ]
+      }
+    },
+    "/api/v1/builders": {
+      "get": {
+        "operationId": "BuilderService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/builderBuilderListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "BuilderService"
+        ]
+      },
+      "post": {
+        "operationId": "BuilderService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/builderBuilder"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/builderBuilder"
+            }
+          }
+        ],
+        "tags": [
+          "BuilderService"
+        ]
+      }
+    },
+    "/api/v1/builders/{id}": {
+      "delete": {
+        "operationId": "BuilderService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "BuilderService"
+        ]
+      },
+      "put": {
+        "operationId": "BuilderService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/builderBuilder"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "intro": {
+                  "type": "string"
+                },
+                "imageRepo": {
+                  "type": "string"
+                },
+                "stackId": {
+                  "type": "string"
+                },
+                "buildImage": {
+                  "type": "string"
+                },
+                "runImage": {
+                  "type": "string"
+                },
+                "packs": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/builderPack"
+                  }
+                },
+                "status": {
+                  "$ref": "#/definitions/builderBuilderStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "BuilderService"
+        ]
+      },
+      "patch": {
+        "operationId": "BuilderService_Update2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/builderBuilder"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "intro": {
+                  "type": "string"
+                },
+                "imageRepo": {
+                  "type": "string"
+                },
+                "stackId": {
+                  "type": "string"
+                },
+                "buildImage": {
+                  "type": "string"
+                },
+                "runImage": {
+                  "type": "string"
+                },
+                "packs": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/builderPack"
+                  }
+                },
+                "status": {
+                  "$ref": "#/definitions/builderBuilderStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "BuilderService"
+        ]
+      }
+    },
     "/api/v1/clusters": {
       "get": {
         "operationId": "ClusterService_List",
@@ -2577,6 +2831,21 @@
                 "imageRepo": {
                   "type": "string"
                 },
+                "builderId": {
+                  "type": "string"
+                },
+                "buildEnvs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "runCommand": {
+                  "type": "string"
+                },
+                "runArgs": {
+                  "type": "string"
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -2641,6 +2910,21 @@
                   "type": "string"
                 },
                 "imageRepo": {
+                  "type": "string"
+                },
+                "builderId": {
+                  "type": "string"
+                },
+                "buildEnvs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "runCommand": {
+                  "type": "string"
+                },
+                "runArgs": {
                   "type": "string"
                 },
                 "createdAt": {
@@ -3799,6 +4083,137 @@
       ],
       "default": "STATUS_CREATED"
     },
+    "builderBuilder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "imageRepo": {
+          "type": "string"
+        },
+        "stackId": {
+          "type": "string"
+        },
+        "buildImage": {
+          "type": "string"
+        },
+        "runImage": {
+          "type": "string"
+        },
+        "packs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/builderPack"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/builderBuilderStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "builderBuilderListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/builderBuilder"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "builderBuilderStatus": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "BUILDING",
+        "PUBLISHED",
+        "EXPIRED",
+        "FAILED"
+      ],
+      "default": "PENDING"
+    },
+    "builderEnv": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "string"
+        }
+      }
+    },
+    "builderPack": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "envs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/builderEnv"
+          }
+        }
+      }
+    },
+    "builderSuggestedStack": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "stackId": {
+          "type": "string"
+        },
+        "buildImage": {
+          "type": "string"
+        },
+        "runImage": {
+          "type": "string"
+        }
+      }
+    },
+    "builderSuggestedStackListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/builderSuggestedStack"
+          }
+        }
+      }
+    },
     "clusterCluster": {
       "type": "object",
       "properties": {
@@ -4283,6 +4698,21 @@
           "type": "string"
         },
         "imageRepo": {
+          "type": "string"
+        },
+        "builderId": {
+          "type": "string"
+        },
+        "buildEnvs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runCommand": {
+          "type": "string"
+        },
+        "runArgs": {
           "type": "string"
         },
         "createdAt": {

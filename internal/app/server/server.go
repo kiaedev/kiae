@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
+	"github.com/kiaedev/kiae/api/builder"
 	"github.com/kiaedev/kiae/api/cluster"
 	"github.com/kiaedev/kiae/api/deployment"
 	"github.com/kiaedev/kiae/api/egress"
@@ -119,5 +120,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, s.svcSets.EntryService)
 	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, s.svcSets.RouteService)
 	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, s.svcSets.MiddlewareService)
+
 	_ = cluster.RegisterClusterServiceHandlerServer(ctx, mux, s.svcSets.ClusterService)
+	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
 }
