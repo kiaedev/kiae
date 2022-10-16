@@ -15,6 +15,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c
 	github.com/ktrysmt/go-bitbucket v0.9.54
+	github.com/oam-dev/cluster-gateway v1.5.0
 	github.com/oam-dev/kubevela-core-api v1.2.6
 	github.com/pivotal/kpack v0.7.1
 	github.com/saltbo/gopkg v0.0.0-20210820093533-07a5e6511706
@@ -74,7 +75,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de // indirect
-	github.com/oam-dev/cluster-gateway v1.5.0 // indirect
 	github.com/oam-dev/terraform-controller v0.4.6 // indirect
 	github.com/onsi/gomega v1.17.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect

@@ -17,6 +17,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/cluster"
+	"github.com/kiaedev/kiae/api/deployment"
 	"github.com/kiaedev/kiae/api/egress"
 	"github.com/kiaedev/kiae/api/entry"
 	"github.com/kiaedev/kiae/api/graph"
@@ -61,7 +62,7 @@ func (s *Server) setupProxiesEndpoints() {
 
 	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
-	http.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
+	s.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
 
 	// removed，replaced by the cluster-gateway
 	// http.Handle("/proxies/kube/", http.StripPrefix("/proxies/kube", kubeproxy.NewProxy()))
@@ -110,6 +111,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = provider.RegisterProviderServiceHandlerServer(ctx, mux, s.svcSets.ProviderService)
 	_ = project.RegisterProjectServiceHandlerServer(ctx, mux, s.svcSets.ProjectService)
 	_ = image.RegisterImageServiceHandlerServer(ctx, mux, s.svcSets.ProjectImageSvc)
+	_ = deployment.RegisterDeploymentServiceHandlerServer(ctx, mux, s.svcSets.DeploymentService)
 	_ = app.RegisterAppServiceHandlerServer(ctx, mux, s.svcSets.AppService)
 	_ = egress.RegisterEgressServiceHandlerServer(ctx, mux, s.svcSets.EgressService)
 	_ = entry.RegisterEntryServiceHandlerServer(ctx, mux, s.svcSets.EntryService)

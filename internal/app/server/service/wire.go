@@ -19,6 +19,7 @@ type ServiceSets struct {
 	*ProjectImageSvc
 	*ProviderService
 	*RouteService
+	*DeploymentService
 }
 
 var ProviderSet = wire.NewSet(
@@ -33,6 +34,7 @@ var ProviderSet = wire.NewSet(
 	NewOauth2Service,
 	NewProjectService,
 	NewProjectImageSvc,
+	NewDeploymentService,
 	NewProviderService,
 	NewRouteService,
 	NewClusterService,

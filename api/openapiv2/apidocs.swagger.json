@@ -19,6 +19,9 @@
       "name": "ClusterService"
     },
     {
+      "name": "DeploymentService"
+    },
+    {
       "name": "EgressService"
     },
     {
@@ -1947,10 +1950,13 @@
                 "tag": {
                   "type": "string"
                 },
-                "commit": {
+                "commitId": {
                   "type": "string"
                 },
-                "url": {
+                "commitMsg": {
+                  "type": "string"
+                },
+                "commitAuthor": {
                   "type": "string"
                 },
                 "status": {
@@ -2662,6 +2668,43 @@
         ]
       }
     },
+    "/api/v1/projects/{id}/deployments/{id}": {
+      "delete": {
+        "operationId": "DeploymentService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DeploymentService"
+        ]
+      }
+    },
     "/api/v1/projects/{id}/images/{id}": {
       "delete": {
         "operationId": "ImageService_Delete",
@@ -2699,6 +2742,254 @@
         ]
       }
     },
+    "/api/v1/projects/{pid}/deployments": {
+      "get": {
+        "operationId": "DeploymentService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/deploymentDeploymentListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DeploymentService"
+        ]
+      },
+      "post": {
+        "operationId": "DeploymentService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/deploymentDeployment"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "appid": {
+                  "type": "string"
+                },
+                "imageId": {
+                  "type": "string"
+                },
+                "imageUrl": {
+                  "type": "string"
+                },
+                "commitId": {
+                  "type": "string"
+                },
+                "commitMsg": {
+                  "type": "string"
+                },
+                "commitAuthor": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/deploymentDeploymentStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DeploymentService"
+        ]
+      }
+    },
+    "/api/v1/projects/{pid}/deployments/{id}": {
+      "put": {
+        "operationId": "DeploymentService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/deploymentDeployment"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appid": {
+                  "type": "string"
+                },
+                "imageId": {
+                  "type": "string"
+                },
+                "imageUrl": {
+                  "type": "string"
+                },
+                "commitId": {
+                  "type": "string"
+                },
+                "commitMsg": {
+                  "type": "string"
+                },
+                "commitAuthor": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/deploymentDeploymentStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DeploymentService"
+        ]
+      },
+      "patch": {
+        "operationId": "DeploymentService_Update2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/deploymentDeployment"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appid": {
+                  "type": "string"
+                },
+                "imageId": {
+                  "type": "string"
+                },
+                "imageUrl": {
+                  "type": "string"
+                },
+                "commitId": {
+                  "type": "string"
+                },
+                "commitMsg": {
+                  "type": "string"
+                },
+                "commitAuthor": {
+                  "type": "string"
+                },
+                "status": {
+                  "$ref": "#/definitions/deploymentDeploymentStatus"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "DeploymentService"
+        ]
+      }
+    },
     "/api/v1/projects/{pid}/images": {
       "get": {
         "operationId": "ImageService_List",
@@ -2722,6 +3013,21 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSPECIFIED",
+              "PENDING",
+              "BUILDING",
+              "PUBLISHED",
+              "EXPIRED",
+              "FAILED"
+            ],
+            "default": "UNSPECIFIED"
           }
         ],
         "tags": [
@@ -2770,10 +3076,13 @@
                 "tag": {
                   "type": "string"
                 },
-                "commit": {
+                "commitId": {
                   "type": "string"
                 },
-                "url": {
+                "commitMsg": {
+                  "type": "string"
+                },
+                "commitAuthor": {
                   "type": "string"
                 },
                 "status": {
@@ -2842,10 +3151,13 @@
                 "tag": {
                   "type": "string"
                 },
-                "commit": {
+                "commitId": {
                   "type": "string"
                 },
-                "url": {
+                "commitMsg": {
+                  "type": "string"
+                },
+                "commitAuthor": {
                   "type": "string"
                 },
                 "status": {
@@ -3536,6 +3848,72 @@
         }
       }
     },
+    "deploymentDeployment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "string"
+        },
+        "appid": {
+          "type": "string"
+        },
+        "imageId": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "commitId": {
+          "type": "string"
+        },
+        "commitMsg": {
+          "type": "string"
+        },
+        "commitAuthor": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/deploymentDeploymentStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "deploymentDeploymentListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/deploymentDeployment"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "deploymentDeploymentStatus": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "BUILDING",
+        "PUBLISHED",
+        "EXPIRED",
+        "FAILED"
+      ],
+      "default": "PENDING"
+    },
     "egressEgress": {
       "type": "object",
       "properties": {
@@ -3696,10 +4074,13 @@
         "tag": {
           "type": "string"
         },
-        "commit": {
+        "commitId": {
           "type": "string"
         },
-        "url": {
+        "commitMsg": {
+          "type": "string"
+        },
+        "commitAuthor": {
           "type": "string"
         },
         "status": {
@@ -3733,13 +4114,14 @@
     "imageImageStatus": {
       "type": "string",
       "enum": [
+        "UNSPECIFIED",
         "PENDING",
         "BUILDING",
         "PUBLISHED",
         "EXPIRED",
         "FAILED"
       ],
-      "default": "PENDING"
+      "default": "UNSPECIFIED"
     },
     "kiaeOpStatus": {
       "type": "string",

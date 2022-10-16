@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package deployment;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+
+option go_package = "github.com/kiaedev/kiae/api/deployment";
+
+message Deployment {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string pid = 2;
+    string appid = 3;
+
+    string image_id = 5; // @gotags: bson:"image_id,omitempty"
+    string image_url = 6; // @gotags: bson:"image_url,omitempty"
+    string commit_id = 7; // @gotags: bson:"commit_id,omitempty"
+    string commit_msg = 8; // @gotags: bson:"commit_msg,omitempty"
+    string commit_author = 9; // @gotags: bson:"commit_author,omitempty"
+
+    enum Status {
+        PENDING = 0;
+        BUILDING = 1;
+        PUBLISHED = 2;
+        EXPIRED = 3;
+        FAILED = 4;
+    }
+    Status status = 10;
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+
+message DeploymentListRequest {
+    string pid = 1;
+}
+
+message DeploymentListResponse {
+    repeated Deployment items = 1;
+    int64 total = 2;
+}
+
+service DeploymentService {
+    rpc List (DeploymentListRequest) returns (DeploymentListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/projects/{pid}/deployments"
+        };
+    }
+    rpc Create (Deployment) returns (Deployment) {
+        option (google.api.http) = {
+            post: "/api/v1/projects/{pid}/deployments"
+            body: "*"
+        };
+    }
+    rpc Update (Deployment) returns (Deployment) {
+        option (google.api.http) = {
+            put: "/api/v1/projects/{pid}/deployments/{id}",
+            body: "*",
+            additional_bindings: {
+                patch: "/api/v1/projects/{pid}/deployments/{id}"
+                body: "*"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/projects/{id}/deployments/{id}"
+        };
+    }
+}

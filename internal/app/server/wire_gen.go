@@ -92,6 +92,8 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	providerService := service.NewProviderService(providerDao, providerTokenDao)
 	oauth2 := service.NewOauth2Service(projectService, providerService, providerTokenDao)
 	routeService := service.NewRouteService(appService, routeDao)
+	deploymentDao := dao.NewDeploymentDao(database)
+	deploymentService := service.NewDeploymentService(deploymentDao, projectImageSvc, appService)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
@@ -107,6 +109,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		ProjectImageSvc:   projectImageSvc,
 		ProviderService:   providerService,
 		RouteService:      routeService,
+		DeploymentService: deploymentService,
 	}
 	server := &Server{
 		Router:        router,
