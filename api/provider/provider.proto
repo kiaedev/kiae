@@ -60,7 +60,7 @@ service ProviderService {
 
     rpc ListTags (ListTagsRequest) returns (ListTagsResponse) {
         option (google.api.http) = {
-            get: "/api/v1/providers/{provider}/repos/{repo_name}/commits"
+            get: "/api/v1/providers/{provider}/repos/{repo_name}/tags"
         };
     }
 }

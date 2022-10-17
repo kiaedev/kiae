@@ -77,6 +77,9 @@ func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 		return nil, fmt.Errorf("image %s is already exist", in.Name)
 	}
 
+	// todo set builder
+	// todo update the secret for git
+
 	kImage.SetName(in.Name)
 	kImage.Spec.ServiceAccountName = "tutorial-service-account"
 	kImage.Spec.Builder.Kind = "Builder"

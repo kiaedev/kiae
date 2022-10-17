@@ -7,9 +7,11 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
+	"github.com/pivotal/kpack/pkg/apis/build/v1alpha2"
 	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type BuilderSvc struct {
@@ -33,11 +35,12 @@ func (s *BuilderSvc) List(ctx context.Context, in *builder.BuilderListRequest) (
 
 func (s *BuilderSvc) Create(ctx context.Context, in *builder.Builder) (*builder.Builder, error) {
 
-	// kpBuilder := &v1alpha2.Builder{}
-	// imgCli := s.kPackClient.Builders("default")
-	// if _, err := imgCli.Create(ctx, kpBuilder, metav1.CreateOptions{}); err != nil {
-	// 	return nil, err
-	// }
+	kpBuilder := &v1alpha2.Builder{}
+
+	imgCli := s.kPackClient.Builders("default")
+	if _, err := imgCli.Create(ctx, kpBuilder, metav1.CreateOptions{}); err != nil {
+		return nil, err
+	}
 
 	return s.daoBuilder.Create(ctx, in)
 }
@@ -47,15 +50,15 @@ func (s *BuilderSvc) Update(ctx context.Context, in *builder.Builder) (*builder.
 }
 
 func (s *BuilderSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
-	// img, err := s.daoBuilder.Get(ctx, in.Id)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	builderBp, err := s.daoBuilder.Get(ctx, in.Id)
+	if err != nil {
+		return nil, err
+	}
 
-	// imgCli := s.kPackClient.Builders("default")
-	// if err := imgCli.Delete(ctx, img.Name, metav1.DeleteOptions{}); err != nil {
-	// 	return nil, err
-	// }
+	imgCli := s.kPackClient.Builders("default")
+	if err := imgCli.Delete(ctx, builderBp.Name, metav1.DeleteOptions{}); err != nil {
+		return nil, err
+	}
 
 	return &emptypb.Empty{}, s.daoBuilder.Delete(ctx, in.Id)
 }

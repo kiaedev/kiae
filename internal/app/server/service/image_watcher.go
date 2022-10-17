@@ -67,6 +67,7 @@ func (i *ImageWatcher) syncImageStatus(ctx context.Context, imageName string) {
 		}
 		if state.Terminated != nil && state.Terminated.ExitCode > 0 {
 			failed = true
+			break
 		}
 	}
 

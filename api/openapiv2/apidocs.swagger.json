@@ -3791,7 +3791,7 @@
         ]
       }
     },
-    "/api/v1/providers/{provider}/repos/{repoName}/commits": {
+    "/api/v1/providers/{provider}/repos/{repoName}/tags": {
       "get": {
         "operationId": "ProviderService_ListTags",
         "responses": {

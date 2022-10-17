@@ -61,8 +61,6 @@ func (s *Server) Run(ctx context.Context) error {
 }
 
 func (s *Server) setupProxiesEndpoints() {
-	s.svcSets.Oauth2.SetupHandler()
-
 	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
 	s.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
@@ -123,4 +121,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 
 	_ = cluster.RegisterClusterServiceHandlerServer(ctx, mux, s.svcSets.ClusterService)
 	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
+
+	s.svcSets.Oauth2.SetupHandler(s.Router)
+
 }

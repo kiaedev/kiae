@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/gorilla/mux"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"golang.org/x/oauth2"
@@ -22,9 +23,9 @@ func NewOauth2Service(projSvc *ProjectService, pvdSvc *ProviderService, daoToken
 	return &Oauth2{projSvc: projSvc, pvdSvc: pvdSvc, daoToken: daoToken}
 }
 
-func (s *Oauth2) SetupHandler() {
-	http.HandleFunc("/oauth2/authorize", s.authorize)
-	http.HandleFunc("/oauth2/callback", s.callback)
+func (s *Oauth2) SetupHandler(router *mux.Router) {
+	router.HandleFunc("/oauth2/authorize", s.authorize)
+	router.HandleFunc("/oauth2/callback", s.callback)
 }
 
 func (s *Oauth2) authorize(w http.ResponseWriter, r *http.Request) {

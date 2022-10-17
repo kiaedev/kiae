@@ -26,7 +26,7 @@ func NewGithub(token string) Provider {
 }
 
 func (g *Github) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
-	repos, _, err := g.Repositories.List(ctx, "", &github.RepositoryListOptions{})
+	repos, _, err := g.Repositories.List(ctx, "", &github.RepositoryListOptions{ListOptions: github.ListOptions{PerPage: 100}})
 	if err != nil {
 		return nil, err
 	}
@@ -37,8 +37,8 @@ func (g *Github) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
 			Name:      repo.GetName(),
 			FullName:  repo.GetFullName(),
 			Intro:     repo.GetDescription(),
-			GitUrl:    repo.GetGitURL(),
-			HttpUrl:   repo.GetURL(),
+			GitUrl:    repo.GetSSHURL(),
+			HttpUrl:   repo.GetCloneURL(),
 			CreatedAt: timestamppb.New(repo.CreatedAt.Time),
 			UpdatedAt: timestamppb.New(repo.UpdatedAt.Time),
 		})
@@ -56,9 +56,11 @@ func (g *Github) ListBranches(ctx context.Context, fullName string) ([]*provider
 
 	branches := make([]*provider.Branch, 0)
 	for _, ret := range results {
+		c, _, _ := g.Repositories.GetCommit(ctx, owner, repo, ret.Commit.GetSHA())
+		c.Commit.SHA = github.String(ret.Commit.GetSHA())
 		branches = append(branches, &provider.Branch{
 			Name:   ret.GetName(),
-			Commit: pCommitFromGh(ret.Commit.GetCommit()),
+			Commit: pCommitFromGh(c.GetCommit()),
 		})
 	}
 
@@ -74,9 +76,11 @@ func (g *Github) ListTags(ctx context.Context, fullName string) ([]*provider.Tag
 
 	tags := make([]*provider.Tag, 0)
 	for _, ret := range results {
+		c, _, _ := g.Repositories.GetCommit(ctx, owner, repo, ret.Commit.GetSHA())
+		c.Commit.SHA = github.String(ret.Commit.GetSHA())
 		tags = append(tags, &provider.Tag{
 			Name:   ret.GetName(),
-			Commit: pCommitFromGh(ret.Commit),
+			Commit: pCommitFromGh(c.GetCommit()),
 		})
 	}
 
