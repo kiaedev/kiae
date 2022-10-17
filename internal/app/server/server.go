@@ -120,6 +120,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, s.svcSets.MiddlewareService)
 
 	_ = cluster.RegisterClusterServiceHandlerServer(ctx, mux, s.svcSets.ClusterService)
+	_ = image.RegisterRegistryServiceHandlerServer(ctx, mux, s.svcSets.ImageRegistrySvc)
 	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
 
 	s.svcSets.Oauth2.SetupHandler(s.Router)

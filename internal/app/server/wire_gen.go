@@ -96,6 +96,8 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	deploymentService := service.NewDeploymentService(deploymentDao, projectImageSvc, appService)
 	builderDao := dao.NewBuilderDao(database)
 	builderSvc := service.NewBuilderSvc(builderDao, localClients)
+	imageRegistryDao := dao.NewRegistryDao(database)
+	imageRegistrySvc := service.NewImageRegistrySvc(imageRegistryDao)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
@@ -113,6 +115,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		RouteService:      routeService,
 		DeploymentService: deploymentService,
 		BuilderSvc:        builderSvc,
+		ImageRegistrySvc:  imageRegistrySvc,
 	}
 	proxy := klient.NewProxy(config)
 	server := &Server{

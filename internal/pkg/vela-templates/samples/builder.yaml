@@ -1,0 +1,17 @@
+# app.yaml
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: builder-test
+spec:
+  components:
+    - name: aaa
+      type: k-kpack-builder
+      properties:
+        imageNs: saltbo
+        stackId: io.buildpacks.stacks.bionic
+        buildImage: paketobuildpacks/build:base-cnb
+        runImage: paketobuildpacks/run:base-cnb
+        packs:
+          - id: paketo-buildpacks/go
+            image: paketobuildpacks/go

@@ -14,7 +14,7 @@ message Builder {
     string name = 3;
     string intro = 4;
 
-    string image_repo = 5; // @gotags: bson:"image_repo,omitempty"
+    string registry_id = 5; // @gotags: bson:"registry_id,omitempty"
     string stack_id = 6; // @gotags: bson:"stack_id,omitempty"
     string build_image = 7; // @gotags: bson:"build_image,omitempty"
     string run_image = 8; // @gotags: bson:"run_image,omitempty"

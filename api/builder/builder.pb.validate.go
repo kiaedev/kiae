@@ -62,7 +62,7 @@ func (m *Builder) validate(all bool) error {
 
 	// no validation rules for Intro
 
-	// no validation rules for ImageRepo
+	// no validation rules for RegistryId
 
 	// no validation rules for StackId
 

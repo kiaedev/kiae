@@ -7,23 +7,27 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
-	"github.com/pivotal/kpack/pkg/apis/build/v1alpha2"
-	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
+	"github.com/kiaedev/kiae/internal/pkg/render/components"
+	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
+	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned/typed/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela-core-api/pkg/oam/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type BuilderSvc struct {
-	daoBuilder *dao.BuilderDao
+	daoBuilder       *dao.BuilderDao
+	imageRegistrySvc *ImageRegistrySvc
 
-	kPackClient alpha2.KpackV1alpha2Interface
+	valaClient v1beta1.CoreV1beta1Interface
 }
 
 func NewBuilderSvc(daoProjImg *dao.BuilderDao, kClients *klient.LocalClients) *BuilderSvc {
 	return &BuilderSvc{
-		daoBuilder:  daoProjImg,
-		kPackClient: kClients.KpackCs.KpackV1alpha2(),
+		daoBuilder: daoProjImg,
+		valaClient: kClients.VelaCs.CoreV1beta1(),
 	}
 }
 
@@ -34,11 +38,27 @@ func (s *BuilderSvc) List(ctx context.Context, in *builder.BuilderListRequest) (
 }
 
 func (s *BuilderSvc) Create(ctx context.Context, in *builder.Builder) (*builder.Builder, error) {
+	registry, err := s.imageRegistrySvc.imageRegistryDao.Get(ctx, in.RegistryId)
+	if err != nil {
+		return nil, err
+	}
 
-	kpBuilder := &v1alpha2.Builder{}
+	cli := s.valaClient.Applications("kiae-system")
+	vap, err := cli.Get(ctx, in.Name, metav1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return nil, err
+	}
 
-	imgCli := s.kPackClient.Builders("default")
-	if _, err := imgCli.Create(ctx, kpBuilder, metav1.CreateOptions{}); err != nil {
+	vap.SetName(in.Name)
+	coreComponent := components.NewKpackBuilder(in, registry)
+	vap.Spec.Components = append(vap.Spec.Components, common.ApplicationComponent{
+		Name:       coreComponent.GetName(),
+		Type:       coreComponent.GetType(),
+		Properties: util.Object2RawExtension(coreComponent),
+		Traits:     coreComponent.GetTraits(),
+	})
+
+	if _, err := cli.Create(ctx, vap, metav1.CreateOptions{}); err != nil {
 		return nil, err
 	}
 
@@ -55,8 +75,8 @@ func (s *BuilderSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.E
 		return nil, err
 	}
 
-	imgCli := s.kPackClient.Builders("default")
-	if err := imgCli.Delete(ctx, builderBp.Name, metav1.DeleteOptions{}); err != nil {
+	cli := s.valaClient.Applications("kiae-system")
+	if err := cli.Delete(ctx, builderBp.Name, metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 

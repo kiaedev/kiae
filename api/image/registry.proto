@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package image;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+
+option go_package = "github.com/kiaedev/kiae/api/image";
+
+message Registry {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string name = 2;
+    string intro = 4;
+
+    string server = 5;
+    string username = 6;
+    string password = 7;
+
+    enum Status {
+        PENDING = 0;
+        READY = 1;
+    }
+    Status status = 10;
+
+    google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
+    google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
+}
+
+message RegistryListRequest {
+    string pid = 1;
+}
+
+message RegistryListResponse {
+    repeated Registry items = 1;
+    int64 total = 2;
+}
+
+service RegistryService {
+    rpc List (RegistryListRequest) returns (RegistryListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/registries"
+        };
+    }
+    rpc Create (Registry) returns (Registry) {
+        option (google.api.http) = {
+            post: "/api/v1/registries"
+            body: "*"
+        };
+    }
+    rpc Update (Registry) returns (Registry) {
+        option (google.api.http) = {
+            put: "/api/v1/registries/{id}",
+            body: "*",
+            additional_bindings: {
+                patch: "/api/v1/registries/{id}"
+                body: "*"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/registries/{id}"
+        };
+    }
+}
