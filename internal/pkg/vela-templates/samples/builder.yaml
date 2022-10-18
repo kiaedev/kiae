@@ -5,10 +5,11 @@ metadata:
   name: builder-test
 spec:
   components:
-    - name: aaa
+    - name: builder-test
       type: k-kpack-builder
       properties:
-        imageNs: saltbo
+        imageTag: saltbo/kiae-builder-default
+        imageRegistry: kpack-reg-dockerhub
         stackId: io.buildpacks.stacks.bionic
         buildImage: paketobuildpacks/build:base-cnb
         runImage: paketobuildpacks/run:base-cnb

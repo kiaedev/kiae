@@ -15,19 +15,24 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 type BuilderSvc struct {
 	daoBuilder       *dao.BuilderDao
 	imageRegistrySvc *ImageRegistrySvc
 
-	valaClient v1beta1.CoreV1beta1Interface
+	valaApp v1beta1.ApplicationInterface
+	kubeSA  v1.ServiceAccountInterface
 }
 
-func NewBuilderSvc(daoProjImg *dao.BuilderDao, kClients *klient.LocalClients) *BuilderSvc {
+func NewBuilderSvc(daoProjImg *dao.BuilderDao, imageRegistrySvc *ImageRegistrySvc, kClients *klient.LocalClients) *BuilderSvc {
 	return &BuilderSvc{
-		daoBuilder: daoProjImg,
-		valaClient: kClients.VelaCs.CoreV1beta1(),
+		daoBuilder:       daoProjImg,
+		imageRegistrySvc: imageRegistrySvc,
+
+		valaApp: kClients.VelaCs.CoreV1beta1().Applications("kiae-system"),
+		kubeSA:  kClients.K8sCs.CoreV1().ServiceAccounts("kiae-system"),
 	}
 }
 
@@ -43,25 +48,26 @@ func (s *BuilderSvc) Create(ctx context.Context, in *builder.Builder) (*builder.
 		return nil, err
 	}
 
-	cli := s.valaClient.Applications("kiae-system")
-	vap, err := cli.Get(ctx, in.Name, metav1.GetOptions{})
+	vap, err := s.valaApp.Get(ctx, in.Name, metav1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
 		return nil, err
 	}
 
 	vap.SetName(in.Name)
-	coreComponent := components.NewKpackBuilder(in, registry)
+	kpackBuilder := components.NewKpackBuilder(in)
+	kpackBuilder.SetupRegistry(registry, RegistrySecretName(registry))
 	vap.Spec.Components = append(vap.Spec.Components, common.ApplicationComponent{
-		Name:       coreComponent.GetName(),
-		Type:       coreComponent.GetType(),
-		Properties: util.Object2RawExtension(coreComponent),
-		Traits:     coreComponent.GetTraits(),
+		Name:       kpackBuilder.GetName(),
+		Type:       kpackBuilder.GetType(),
+		Properties: util.Object2RawExtension(kpackBuilder),
+		Traits:     kpackBuilder.GetTraits(),
 	})
 
-	if _, err := cli.Create(ctx, vap, metav1.CreateOptions{}); err != nil {
+	if _, err := s.valaApp.Create(ctx, vap, metav1.CreateOptions{}); err != nil {
 		return nil, err
 	}
 
+	in.Artifact = kpackBuilder.ImageTag
 	return s.daoBuilder.Create(ctx, in)
 }
 
@@ -75,8 +81,7 @@ func (s *BuilderSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.E
 		return nil, err
 	}
 
-	cli := s.valaClient.Applications("kiae-system")
-	if err := cli.Delete(ctx, builderBp.Name, metav1.DeleteOptions{}); err != nil {
+	if err := s.valaApp.Delete(ctx, builderBp.Name, metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 

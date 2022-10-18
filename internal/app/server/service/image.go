@@ -18,18 +18,18 @@ import (
 )
 
 type ProjectImageSvc struct {
-	image.UnimplementedImageServiceServer
-
 	daoProj    *dao.ProjectDao
 	daoProjImg *dao.ProjectImageDao
+	daoBuilder *dao.BuilderDao
 
 	kPackClient alpha2.KpackV1alpha2Interface
 }
 
-func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, kClients *klient.LocalClients) *ProjectImageSvc {
+func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, daoBuilder *dao.BuilderDao, kClients *klient.LocalClients) *ProjectImageSvc {
 	return &ProjectImageSvc{
 		daoProj:     daoProj,
 		daoProjImg:  daoProjImg,
+		daoBuilder:  daoBuilder,
 		kPackClient: kClients.KpackCs.KpackV1alpha2(),
 	}
 }
@@ -46,6 +46,11 @@ func (s *ProjectImageSvc) List(ctx context.Context, in *image.ImageListRequest) 
 
 func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.Image, error) {
 	proj, err := s.daoProj.Get(ctx, in.Pid)
+	if err != nil {
+		return nil, err
+	}
+
+	builder, err := s.daoBuilder.Get(ctx, proj.BuilderId)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +82,12 @@ func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 		return nil, fmt.Errorf("image %s is already exist", in.Name)
 	}
 
-	// todo set builder
 	// todo update the secret for git
 
 	kImage.SetName(in.Name)
 	kImage.Spec.ServiceAccountName = "tutorial-service-account"
 	kImage.Spec.Builder.Kind = "Builder"
-	kImage.Spec.Builder.Name = "my-builder"
+	kImage.Spec.Builder.Name = builder.Name
 	kImage.Spec.Tag = in.Image
 	kImage.Spec.Source.Git = &v1alpha1.Git{URL: ssh2https(proj.GitRepo), Revision: in.CommitId}
 	if _, err := imgCli.Create(ctx, kImage, metav1.CreateOptions{}); err != nil {

@@ -83,7 +83,8 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	egressService := service.NewEgressService(appService, egressDao)
 	entryService := service.NewEntryService(appService, entryDao)
 	projectImageDao := dao.NewProjectImageDao(database)
-	projectImageSvc := service.NewProjectImageSvc(projectDao, projectImageDao, localClients)
+	builderDao := dao.NewBuilderDao(database)
+	projectImageSvc := service.NewProjectImageSvc(projectDao, projectImageDao, builderDao, localClients)
 	imageWatcher := service.NewImageWatcher(projectImageSvc, localClients)
 	middlewareService := service.NewMiddlewareService(client, clientset, middlewareInstance, middlewareClaim, appService)
 	projectService := service.NewProjectService(projectDao)
@@ -94,10 +95,9 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	routeService := service.NewRouteService(appService, routeDao)
 	deploymentDao := dao.NewDeploymentDao(database)
 	deploymentService := service.NewDeploymentService(deploymentDao, projectImageSvc, appService)
-	builderDao := dao.NewBuilderDao(database)
-	builderSvc := service.NewBuilderSvc(builderDao, localClients)
 	imageRegistryDao := dao.NewRegistryDao(database)
-	imageRegistrySvc := service.NewImageRegistrySvc(imageRegistryDao)
+	imageRegistrySvc := service.NewImageRegistrySvc(imageRegistryDao, localClients)
+	builderSvc := service.NewBuilderSvc(builderDao, imageRegistrySvc, localClients)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,

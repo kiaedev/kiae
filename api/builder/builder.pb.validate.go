@@ -106,6 +106,8 @@ func (m *Builder) validate(all bool) error {
 
 	// no validation rules for Status
 
+	// no validation rules for Artifact
+
 	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {
 		case interface{ ValidateAll() error }:
@@ -262,9 +264,11 @@ func (m *Pack) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Lang
+	// no validation rules for Id
 
 	// no validation rules for Image
+
+	// no validation rules for Lang
 
 	for idx, item := range m.GetEnvs() {
 		_, _ = idx, item

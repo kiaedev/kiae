@@ -1838,6 +1838,9 @@
                 "status": {
                   "$ref": "#/definitions/builderBuilderStatus"
                 },
+                "artifact": {
+                  "type": "string"
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -1910,6 +1913,9 @@
                 },
                 "status": {
                   "$ref": "#/definitions/builderBuilderStatus"
+                },
+                "artifact": {
+                  "type": "string"
                 },
                 "createdAt": {
                   "type": "string",
@@ -4338,6 +4344,9 @@
         "status": {
           "$ref": "#/definitions/builderBuilderStatus"
         },
+        "artifact": {
+          "type": "string"
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -4391,10 +4400,13 @@
     "builderPack": {
       "type": "object",
       "properties": {
-        "lang": {
+        "id": {
           "type": "string"
         },
         "image": {
+          "type": "string"
+        },
+        "lang": {
           "type": "string"
         },
         "envs": {

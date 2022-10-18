@@ -19,7 +19,7 @@ template: {
 		metadata: name: uniName
 		spec: {
 			serviceAccountName: uniName
-			tag:                parameter.imageNs + "/" + context.name
+			tag:                parameter.imageTag
 			stack: {
 				name: uniName
 				kind: "ClusterStack"
@@ -63,14 +63,14 @@ template: {
 			apiVersion: "v1"
 			kind:       "ServiceAccount"
 			metadata: name: uniName
-			spec: {
-				secrets: []
-			}
+			secrets: [{name: parameter.imageRegistry}]
 		}
 	}
 	parameter: {
 
-		imageNs: string
+		imageTag: string
+
+		imageRegistry: string
 
 		stackId: string
 

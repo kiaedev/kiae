@@ -28,14 +28,16 @@ message Builder {
         FAILED = 4;
     }
     Status status = 10;
+    string artifact = 11;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"
 }
 
 message Pack {
-    string lang = 2;
-    string image = 3;
+    string id = 1;
+    string image = 2;
+    string lang = 3;
     repeated Env envs = 4;
 }
 
