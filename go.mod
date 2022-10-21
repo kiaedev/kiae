@@ -7,6 +7,7 @@ require (
 	github.com/crossplane-contrib/provider-sql v0.5.0
 	github.com/crossplane/crossplane-runtime v0.14.1-0.20210722005935-0b469fcc77cd
 	github.com/envoyproxy/protoc-gen-validate v0.6.2
+	github.com/favadi/protoc-go-inject-tag v1.4.0
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/wire v0.5.0
