@@ -55,9 +55,7 @@ func (s *Oauth2) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// s.pvdSvc.getProvider()
-	username := "saltbo"
-	if err := s.pvdSvc.saveToken(ctx, providerName, username, token); err != nil {
+	if err := s.pvdSvc.saveToken(ctx, providerName, token); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

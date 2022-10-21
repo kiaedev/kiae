@@ -19,6 +19,11 @@ func NewGitlab(token string) Provider {
 	}
 }
 
+func (g *Gitlab) AuthedUser(ctx context.Context) (string, error) {
+	u, _, err := g.Users.CurrentUser()
+	return u.Username, err
+}
+
 func (g *Gitlab) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
 	projects, _, err := g.Projects.ListProjects(&gitlab.ListProjectsOptions{Owned: gitlab.Bool(true)})
 	if err != nil {

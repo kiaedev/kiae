@@ -19,6 +19,11 @@ func NewBitbucket(token string) Provider {
 	}
 }
 
+func (g *Bitbucket) AuthedUser(ctx context.Context) (string, error) {
+	u, err := g.User.Profile()
+	return u.Username, err
+}
+
 func (g *Bitbucket) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
 	repos, err := g.Repositories.ListForAccount(&bitbucket.RepositoriesOptions{})
 	if err != nil {

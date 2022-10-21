@@ -25,7 +25,7 @@ func NewGithub(token string) Provider {
 	}
 }
 
-func (g *Github) GetUser(ctx context.Context) (string, error) {
+func (g *Github) AuthedUser(ctx context.Context) (string, error) {
 	u, _, err := g.Users.Get(ctx, "")
 	return u.GetName(), err
 }

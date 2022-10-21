@@ -8,6 +8,7 @@ import (
 )
 
 type Provider interface {
+	AuthedUser(ctx context.Context) (string, error)
 	ListRepos(ctx context.Context) ([]*provider.Repo, error)
 	ListBranches(ctx context.Context, fullName string) ([]*provider.Branch, error)
 	ListTags(ctx context.Context, fullName string) ([]*provider.Tag, error)

@@ -167,10 +167,20 @@ func (s *ProviderService) refreshToken(ctx context.Context, providerName string,
 		return err
 	}
 
-	return s.saveToken(ctx, "saltbo", providerName, newToken)
+	return s.saveToken(ctx, providerName, newToken)
 }
 
-func (s *ProviderService) saveToken(ctx context.Context, providerName, username string, token *oauth2.Token) (err error) {
+func (s *ProviderService) saveToken(ctx context.Context, providerName string, token *oauth2.Token) (err error) {
+	pvd, err := s.getProvider(ctx, providerName)
+	if err != nil {
+		return err
+	}
+
+	username, err := pvd.AuthedUser(ctx)
+	if err != nil {
+		return err
+	}
+
 	secret := token2Secret(username, token)
 	secret.SetName(TokenSecretName(ctx, providerName))
 	secret.Annotations = map[string]string{
@@ -190,7 +200,12 @@ func (s *ProviderService) saveToken(ctx context.Context, providerName, username 
 }
 
 func TokenSecretName(ctx context.Context, gitProvider string) string {
-	return fmt.Sprintf("%s-%s", "1000", gitProvider)
+	userid := ctx.Value("userid")
+	if userid == "" {
+		userid = "1000"
+	}
+
+	return fmt.Sprintf("%s-%s", userid, gitProvider)
 }
 
 func secret2Token(secret *corev1.Secret) *oauth2.Token {
