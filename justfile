@@ -20,12 +20,11 @@ gen-api:
 gen-wire:
 	go generate ./internal/app/server/wire_gen.go
 
-build: gen
+build:
 	go build -v -o build/ .
 
-test: build
+test:
   go test ./...
 
-# install just from crates.io
 install:
   go install .
