@@ -1,0 +1,41 @@
+name: build
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.x
+      - name: Check out code
+        uses: actions/checkout@v1
+      - uses: extractions/setup-just@v1
+      - name: Run Unit tests.
+        run: just test
+      - name: Upload Coverage report to CodeCov
+        uses: codecov/codecov-action@v1
+        with:
+#          token: ${{secrets.CODECOV_TOKEN}}
+          file: .coverprofile
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    needs: [test]
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.x
+      - name: Check out code
+        uses: actions/checkout@v1
+      - uses: extractions/setup-just@v1
+      - name: Build
+        run: just build
