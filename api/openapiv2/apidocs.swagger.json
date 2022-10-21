@@ -2837,7 +2837,7 @@
                 "gitRepo": {
                   "type": "string"
                 },
-                "imageRepo": {
+                "gitProvider": {
                   "type": "string"
                 },
                 "builderId": {
@@ -2918,7 +2918,7 @@
                 "gitRepo": {
                   "type": "string"
                 },
-                "imageRepo": {
+                "gitProvider": {
                   "type": "string"
                 },
                 "builderId": {
@@ -3971,6 +3971,12 @@
                 "password": {
                   "type": "string"
                 },
+                "namespaces": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "status": {
                   "$ref": "#/definitions/imageRegistryStatus"
                 },
@@ -4034,6 +4040,12 @@
                 },
                 "password": {
                   "type": "string"
+                },
+                "namespaces": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "status": {
                   "$ref": "#/definitions/imageRegistryStatus"
@@ -4793,6 +4805,12 @@
         "password": {
           "type": "string"
         },
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "status": {
           "$ref": "#/definitions/imageRegistryStatus"
         },
@@ -4988,7 +5006,7 @@
         "gitRepo": {
           "type": "string"
         },
-        "imageRepo": {
+        "gitProvider": {
           "type": "string"
         },
         "builderId": {

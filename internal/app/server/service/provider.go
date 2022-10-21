@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
+	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/gitp"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/oauth2"
@@ -14,18 +16,24 @@ import (
 	gh "golang.org/x/oauth2/github"
 	gl "golang.org/x/oauth2/gitlab"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 type ProviderService struct {
-	provider.UnimplementedProviderServiceServer
+	daoProvider *dao.ProviderDao
 
-	daoProvider      *dao.ProviderDao
-	daoProviderToken *dao.ProviderTokenDao
+	kubeSecret v1.SecretInterface
 }
 
-func NewProviderService(daoProvider *dao.ProviderDao, daoProviderToken *dao.ProviderTokenDao) *ProviderService {
-	return &ProviderService{daoProvider: daoProvider, daoProviderToken: daoProviderToken}
+func NewProviderService(daoProvider *dao.ProviderDao, kClients *klient.LocalClients) *ProviderService {
+	return &ProviderService{
+		daoProvider: daoProvider,
+
+		kubeSecret: kClients.K8sCs.CoreV1().Secrets("kiae-builder"),
+	}
 }
 
 func (s *ProviderService) Prepare(context.Context, *emptypb.Empty) (*provider.PreparesResponse, error) {
@@ -75,13 +83,13 @@ func (s *ProviderService) Delete(ctx context.Context, in *kiae.IdRequest) (*empt
 	return &emptypb.Empty{}, s.daoProvider.Delete(ctx, in.Id)
 }
 
-func (s *ProviderService) GetProvider(ctx context.Context, providerName string) (*provider.Provider, *oauth2.Config, error) {
+func (s *ProviderService) GetOauth2Config(ctx context.Context, providerName string) (*oauth2.Config, error) {
 	pvd, err := s.daoProvider.GetByName(ctx, providerName)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return pvd, &oauth2.Config{
+	return &oauth2.Config{
 		ClientID:     pvd.ClientId,
 		ClientSecret: pvd.ClientSecret,
 		Endpoint:     oauth2Endpoint(pvd),
@@ -124,48 +132,86 @@ func (s *ProviderService) ListTags(ctx context.Context, in *provider.ListTagsReq
 }
 
 func (s *ProviderService) getProvider(ctx context.Context, providerName string) (gitp.Provider, error) {
-	pvt, err := s.getProviderToken(ctx, providerName)
+	ot, err := s.getProviderToken(ctx, providerName)
 	if err != nil {
 		return nil, err
 	}
 
-	return gitp.Select(pvt.Provider, pvt.AccessToken)
+	return gitp.Select(providerName, ot.AccessToken)
 }
 
-func (s *ProviderService) getProviderToken(ctx context.Context, name string) (*provider.Token, error) {
-	pvt, err := s.daoProviderToken.GetByProvider(ctx, name)
+func (s *ProviderService) getProviderToken(ctx context.Context, providerName string) (*oauth2.Token, error) {
+	secret, err := s.kubeSecret.Get(ctx, TokenSecretName(ctx, providerName), metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	if pvt.ExpiresAt.AsTime().Before(time.Now()) {
-		if err := s.refreshToken(ctx, pvt); err != nil {
+	token := secret2Token(secret)
+	if token.Expiry.Before(time.Now()) {
+		if err := s.refreshToken(ctx, providerName, token); err != nil {
 			return nil, err
 		}
 	}
 
-	return pvt, nil
+	return token, nil
 }
 
-func (s *ProviderService) refreshToken(ctx context.Context, pvt *provider.Token) error {
-	_, cfg, err := s.GetProvider(ctx, pvt.Provider)
+func (s *ProviderService) refreshToken(ctx context.Context, providerName string, token *oauth2.Token) error {
+	cfg, err := s.GetOauth2Config(ctx, providerName)
 	if err != nil {
 		return err
 	}
 
-	token := &oauth2.Token{
-		AccessToken:  pvt.AccessToken,
-		RefreshToken: pvt.RefreshToken,
-		Expiry:       pvt.ExpiresAt.AsTime(),
-	}
 	newToken, err := cfg.TokenSource(ctx, token).Token()
 	if err != nil {
 		return err
 	}
 
-	pvt.AccessToken = newToken.AccessToken
-	pvt.RefreshToken = newToken.RefreshToken
-	pvt.ExpiresAt = timestamppb.New(token.Expiry)
-	_, err = s.daoProviderToken.Upsert(ctx, pvt)
-	return err
+	return s.saveToken(ctx, "saltbo", providerName, newToken)
+}
+
+func (s *ProviderService) saveToken(ctx context.Context, providerName, username string, token *oauth2.Token) (err error) {
+	secret := token2Secret(username, token)
+	secret.SetName(TokenSecretName(ctx, providerName))
+	secret.Annotations = map[string]string{
+		"kiae.dev/git-provider": providerName,
+	}
+
+	_, err = s.kubeSecret.Get(ctx, secret.Name, metav1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return
+	} else if errors.IsNotFound(err) {
+		_, err = s.kubeSecret.Create(ctx, secret, metav1.CreateOptions{})
+		return
+	}
+
+	_, err = s.kubeSecret.Update(ctx, secret, metav1.UpdateOptions{})
+	return
+}
+
+func TokenSecretName(ctx context.Context, gitProvider string) string {
+	return fmt.Sprintf("%s-%s", "1000", gitProvider)
+}
+
+func secret2Token(secret *corev1.Secret) *oauth2.Token {
+	m := secret.Data
+	expiry, _ := time.Parse(time.Layout, string(m["expires_at"]))
+	return &oauth2.Token{
+		AccessToken:  string(m["access_token"]),
+		RefreshToken: string(m["refresh_token"]),
+		Expiry:       expiry,
+	}
+}
+
+func token2Secret(username string, ot *oauth2.Token) *corev1.Secret {
+	return &corev1.Secret{
+		Type: "kubernetes.io/basic-auth",
+		StringData: map[string]string{
+			"username":      username,
+			"password":      ot.AccessToken,
+			"access_token":  ot.AccessToken,
+			"refresh_token": ot.RefreshToken,
+			"expires_at":    ot.Expiry.Format(time.Layout),
+		},
+	}
 }

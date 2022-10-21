@@ -3,14 +3,16 @@ package service
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/kiae"
+	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
-	"github.com/pivotal/kpack/pkg/apis/core/v1alpha1"
-	alpha2 "github.com/pivotal/kpack/pkg/client/clientset/versioned/typed/build/v1alpha2"
+	"github.com/kiaedev/kiae/internal/pkg/render/components"
+	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
+	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned/typed/core.oam.dev/v1beta1"
+	"github.com/oam-dev/kubevela-core-api/pkg/oam/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -22,15 +24,21 @@ type ProjectImageSvc struct {
 	daoProjImg *dao.ProjectImageDao
 	daoBuilder *dao.BuilderDao
 
-	kPackClient alpha2.KpackV1alpha2Interface
+	svcRegistry *ImageRegistrySvc
+	svcProvider *ProviderService
+	velaApp     v1beta1.ApplicationInterface
 }
 
-func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, daoBuilder *dao.BuilderDao, kClients *klient.LocalClients) *ProjectImageSvc {
+func NewProjectImageSvc(daoProj *dao.ProjectDao, daoProjImg *dao.ProjectImageDao, daoBuilder *dao.BuilderDao,
+	svcRegistry *ImageRegistrySvc, svcProvider *ProviderService, kClients *klient.LocalClients) *ProjectImageSvc {
 	return &ProjectImageSvc{
 		daoProj:     daoProj,
 		daoProjImg:  daoProjImg,
 		daoBuilder:  daoBuilder,
-		kPackClient: kClients.KpackCs.KpackV1alpha2(),
+		svcRegistry: svcRegistry,
+		svcProvider: svcProvider,
+
+		velaApp: kClients.VelaCs.CoreV1beta1().Applications("kiae-builder"),
 	}
 }
 
@@ -50,11 +58,6 @@ func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 		return nil, err
 	}
 
-	builder, err := s.daoBuilder.Get(ctx, proj.BuilderId)
-	if err != nil {
-		return nil, err
-	}
-
 	_, total, err := s.daoProjImg.List(ctx, bson.M{"pid": in.Pid, "image": in.Image})
 	if err != nil {
 		return nil, err
@@ -62,39 +65,55 @@ func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 		return nil, fmt.Errorf("image already exists: %s", in.Image)
 	}
 
-	if in.Image == "" {
-		in.Image = fmt.Sprintf("%s:%s", proj.ImageRepo, in.CommitId[:7])
+	// for import a image from external hub
+	if in.Image != "" {
+		in.SetImage(in.Image)
+		goto DIRECT
 	}
 
-	imageItems := strings.Split(in.Image, ":")
-	tag := "latest"
-	if len(imageItems) == 2 {
-		tag = imageItems[1]
-	}
-
-	in.Tag = tag
-	in.Name = fmt.Sprintf("%s-%s", proj.Name, tag)
-	imgCli := s.kPackClient.Images("default")
-	kImage, err := imgCli.Get(ctx, in.Name, metav1.GetOptions{})
-	if err != nil && !errors.IsNotFound(err) {
-		return nil, err
-	} else if err == nil {
-		return nil, fmt.Errorf("image %s is already exist", in.Name)
-	}
-
-	// todo update the secret for git
-
-	kImage.SetName(in.Name)
-	kImage.Spec.ServiceAccountName = "tutorial-service-account"
-	kImage.Spec.Builder.Kind = "Builder"
-	kImage.Spec.Builder.Name = builder.Name
-	kImage.Spec.Tag = in.Image
-	kImage.Spec.Source.Git = &v1alpha1.Git{URL: ssh2https(proj.GitRepo), Revision: in.CommitId}
-	if _, err := imgCli.Create(ctx, kImage, metav1.CreateOptions{}); err != nil {
+	// create a new image from the git source repository
+	if err := s.buildNewImage(ctx, in, proj); err != nil {
 		return nil, err
 	}
 
+DIRECT:
 	return s.daoProjImg.Create(ctx, in)
+}
+
+func (s *ProjectImageSvc) buildNewImage(ctx context.Context, in *image.Image, proj *project.Project) error {
+	if _, err := s.svcProvider.getProviderToken(ctx, proj.GitProvider); err != nil {
+		return err
+	}
+
+	builder, err := s.daoBuilder.Get(ctx, proj.BuilderId)
+	if err != nil {
+		return err
+	}
+
+	imgReg, err := s.svcRegistry.imageRegistryDao.Get(ctx, builder.RegistryId)
+	if err != nil {
+		return err
+	}
+
+	in.SetImage(imgReg.BuildImageWithTag(proj.Name, in.CommitId[:7]))
+	vap, err := s.velaApp.Get(ctx, in.Name, metav1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	} else if err == nil {
+		return fmt.Errorf("image %s is already exist", in.Name)
+	}
+
+	vap.SetName(in.Name)
+	tokenSecretName := TokenSecretName(ctx, proj.GitProvider)
+	kpackImage := components.NewKpackImage(in, builder.Name, proj.GitHTTPSUrl(), imgReg.GetSecretName(), tokenSecretName)
+	vap.Spec.Components = append(vap.Spec.Components, common.ApplicationComponent{
+		Name:       kpackImage.GetName(),
+		Type:       kpackImage.GetType(),
+		Properties: util.Object2RawExtension(kpackImage),
+		Traits:     kpackImage.GetTraits(),
+	})
+	_, err = s.velaApp.Create(ctx, vap, metav1.CreateOptions{})
+	return err
 }
 
 func (s *ProjectImageSvc) Update(ctx context.Context, in *image.Image) (*image.Image, error) {
@@ -107,8 +126,7 @@ func (s *ProjectImageSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*empt
 		return nil, err
 	}
 
-	imgCli := s.kPackClient.Images("default")
-	if err := imgCli.Delete(ctx, img.Name, metav1.DeleteOptions{}); err != nil {
+	if err := s.velaApp.Delete(ctx, img.Name, metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 
@@ -130,9 +148,4 @@ func (s *ProjectImageSvc) ListNotDoneStatus(ctx context.Context) ([]*image.Image
 		bson.M{"status": image.Image_PUBLISHED}, bson.M{"status": image.Image_FAILED}},
 	})
 	return results, err
-}
-
-func ssh2https(gitssh string) string {
-	gitssh = strings.Replace(gitssh, ":", "/", -1)
-	return strings.Replace(gitssh, "git@", "https://", -1)
 }

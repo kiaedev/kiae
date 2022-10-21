@@ -49,9 +49,8 @@ message Project {
     string name = 2 [(validate.rules).string = {max_len: 32, min_len: 3}];
     string intro = 3 [(validate.rules).string = {max_len: 150, min_len: 5}];
     string git_repo = 4 [(validate.rules).string = {min_len: 10, max_len: 512}];
-    string image_repo = 5;
-
-    string builder_id = 6; // @gotags: bson:"builder_id,omitempty"
+    string git_provider = 5; // @gotags: bson:"git_provider,omitempty"
+    string builder_id = 7; // @gotags: bson:"builder_id,omitempty"
     repeated string build_envs = 8; // @gotags: json:"build_args,omitempty"
     string run_command = 9; // @gotags: json:"run_command,omitempty"
     string run_args = 10; // @gotags: json:"run_args,omitempty"

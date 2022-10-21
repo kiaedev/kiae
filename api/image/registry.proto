@@ -17,6 +17,7 @@ message Registry {
     string server = 5;
     string username = 6;
     string password = 7;
+    repeated string namespaces = 8;
 
     enum Status {
         PENDING = 0;

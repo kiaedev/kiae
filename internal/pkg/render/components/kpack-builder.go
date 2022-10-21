@@ -3,7 +3,6 @@ package components
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/kiaedev/kiae/api/builder"
 	"github.com/kiaedev/kiae/api/image"
@@ -20,24 +19,21 @@ type KpackBuilder struct {
 	Packs         []*builder.Pack `json:"packs"`
 }
 
-func NewKpackBuilder(builderPb *builder.Builder) *KpackBuilder {
+func NewKpackBuilder(builderPb *builder.Builder, registry *image.Registry) *KpackBuilder {
+	imageName := filepath.Join("kiae-builders", builderPb.Name)
+	if registry.IsDockerhub() {
+		imageName = fmt.Sprintf("kiae-builder-%s", builderPb.Name)
+	}
+
 	return &KpackBuilder{
-		Name:       builderPb.Name,
-		StackID:    builderPb.StackId,
-		BuildImage: builderPb.BuildImage,
-		RunImage:   builderPb.RunImage,
-		Packs:      builderPb.Packs,
+		ImageTag:      registry.BuildImage(imageName),
+		ImageRegistry: registry.GetSecretName(),
+		Name:          builderPb.Name,
+		StackID:       builderPb.StackId,
+		BuildImage:    builderPb.BuildImage,
+		RunImage:      builderPb.RunImage,
+		Packs:         builderPb.Packs,
 	}
-}
-
-func (m *KpackBuilder) SetupRegistry(imgRegistry *image.Registry, imgRegistrySecret string) {
-	imageTag := filepath.Join(imgRegistry.Server, "kiae-builders", m.Name)
-	if strings.Contains(imgRegistry.Server, "docker.io") {
-		imageTag = filepath.Join(imgRegistry.Username, fmt.Sprintf("kiae-builder-%s", m.Name))
-	}
-
-	m.ImageTag = imageTag
-	m.ImageRegistry = imgRegistrySecret
 }
 
 func (m *KpackBuilder) GetName() string {

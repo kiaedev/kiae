@@ -15,7 +15,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 type BuilderSvc struct {
@@ -23,7 +22,6 @@ type BuilderSvc struct {
 	imageRegistrySvc *ImageRegistrySvc
 
 	valaApp v1beta1.ApplicationInterface
-	kubeSA  v1.ServiceAccountInterface
 }
 
 func NewBuilderSvc(daoProjImg *dao.BuilderDao, imageRegistrySvc *ImageRegistrySvc, kClients *klient.LocalClients) *BuilderSvc {
@@ -31,8 +29,7 @@ func NewBuilderSvc(daoProjImg *dao.BuilderDao, imageRegistrySvc *ImageRegistrySv
 		daoBuilder:       daoProjImg,
 		imageRegistrySvc: imageRegistrySvc,
 
-		valaApp: kClients.VelaCs.CoreV1beta1().Applications("kiae-system"),
-		kubeSA:  kClients.K8sCs.CoreV1().ServiceAccounts("kiae-system"),
+		valaApp: kClients.VelaCs.CoreV1beta1().Applications("kiae-builder"),
 	}
 }
 
@@ -54,8 +51,7 @@ func (s *BuilderSvc) Create(ctx context.Context, in *builder.Builder) (*builder.
 	}
 
 	vap.SetName(in.Name)
-	kpackBuilder := components.NewKpackBuilder(in)
-	kpackBuilder.SetupRegistry(registry, RegistrySecretName(registry))
+	kpackBuilder := components.NewKpackBuilder(in, registry)
 	vap.Spec.Components = append(vap.Spec.Components, common.ApplicationComponent{
 		Name:       kpackBuilder.GetName(),
 		Type:       kpackBuilder.GetType(),

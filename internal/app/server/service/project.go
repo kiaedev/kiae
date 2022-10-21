@@ -25,7 +25,6 @@ func (p *ProjectService) List(ctx context.Context, in *project.ListRequest) (*pr
 }
 
 func (p *ProjectService) Create(ctx context.Context, in *project.Project) (*project.Project, error) {
-	setDefaultProjectProperties(in)
 	return p.daoProj.Create(ctx, in)
 }
 
@@ -35,20 +34,4 @@ func (p *ProjectService) Update(ctx context.Context, in *project.Project) (*proj
 
 func (p *ProjectService) Read(ctx context.Context, in *kiae.IdRequest) (*project.Project, error) {
 	return p.daoProj.Get(ctx, in.Id)
-}
-
-func setDefaultProjectProperties(in *project.Project) {
-	imageRegistry := "saltbo/"
-	in.ImageRepo = imageRegistry + in.Name
-
-	// todo 从配置中获取镜像仓库地址
-	// in.Images = []*project.Image{
-	// 	{
-	// 		Name:      in.Name,
-	// 		Image:     imageRegistry + in.Name,
-	// 		Latest:    "latest",
-	// 		CreatedAt: timestamppb.Now(),
-	// 		UpdatedAt: timestamppb.Now(),
-	// 	},
-	// }
 }

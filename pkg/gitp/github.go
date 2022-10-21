@@ -25,6 +25,11 @@ func NewGithub(token string) Provider {
 	}
 }
 
+func (g *Github) GetUser(ctx context.Context) (string, error) {
+	u, _, err := g.Users.Get(ctx, "")
+	return u.GetName(), err
+}
+
 func (g *Github) ListRepos(ctx context.Context) ([]*provider.Repo, error) {
 	repos, _, err := g.Repositories.List(ctx, "", &github.RepositoryListOptions{ListOptions: github.ListOptions{PerPage: 100}})
 	if err != nil {

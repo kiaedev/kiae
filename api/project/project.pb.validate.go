@@ -91,7 +91,7 @@ func (m *Project) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	// no validation rules for ImageRepo
+	// no validation rules for GitProvider
 
 	// no validation rules for BuilderId
 

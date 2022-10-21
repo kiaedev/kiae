@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
@@ -23,38 +24,28 @@ func NewImageWatcher(imgSvc *ProjectImageSvc, kClients *klient.LocalClients) *Im
 
 		kpackCs: kClients.KpackCs,
 	}
-	go iw.checkNotDoneStatus(context.Background())
+	// go iw.checkNotDoneStatus(context.Background())
 	return iw
 }
 
 func (i *ImageWatcher) OnAdd(obj interface{}) {
-
+	newImg := obj.(*v1alpha2.Image)
+	ctx := context.Background()
+	i.syncImageStatus(ctx, newImg.Name, newImg.Status.LatestBuildRef)
 }
 
 func (i *ImageWatcher) OnUpdate(oldObj, newObj interface{}) {
 	newImg := newObj.(*v1alpha2.Image)
 	ctx := context.Background()
-	i.syncImageStatus(ctx, newImg.Name)
+	i.syncImageStatus(ctx, newImg.Name, newImg.Status.LatestBuildRef)
 }
 
 func (i *ImageWatcher) OnDelete(obj interface{}) {
 
 }
 
-func (i *ImageWatcher) checkNotDoneStatus(ctx context.Context) {
-	images, err := i.imgSvc.ListNotDoneStatus(ctx)
-	if err != nil {
-		log.Printf("failed get images: %s", err)
-		return
-	}
-
-	for _, img := range images {
-		i.syncImageStatus(ctx, img.Name)
-	}
-}
-
-func (i *ImageWatcher) syncImageStatus(ctx context.Context, imageName string) {
-	build, err := i.kpackCs.KpackV1alpha2().Builds("default").Get(ctx, imageName+"-build-1", metav1.GetOptions{})
+func (i *ImageWatcher) syncImageStatus(ctx context.Context, imageName, buildName string) {
+	build, err := i.kpackCs.KpackV1alpha2().Builds("kiae-builder").Get(ctx, buildName, metav1.GetOptions{})
 	if err != nil {
 		return
 	}
@@ -78,7 +69,7 @@ func (i *ImageWatcher) syncImageStatus(ctx context.Context, imageName string) {
 		status = image.Image_FAILED
 	}
 
-	if _, err := i.imgSvc.UpdateStatus(ctx, imageName, status); err != nil {
+	if _, err := i.imgSvc.UpdateStatus(ctx, strings.TrimPrefix(imageName, "kiae-image-"), status); err != nil {
 		log.Printf("failed to update status: %v", err)
 	}
 }

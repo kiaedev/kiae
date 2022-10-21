@@ -12,7 +12,6 @@ var ProviderSet = wire.NewSet(
 	NewProject,
 	NewProjectImageDao,
 	NewProviderDao,
-	NewProviderTokenDao,
 	NewRouteDao,
 	NewDeploymentDao,
 	NewBuilderDao,

@@ -6,21 +6,16 @@ import (
 	"net/url"
 
 	"github.com/gorilla/mux"
-	"github.com/kiaedev/kiae/api/provider"
-	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"golang.org/x/oauth2"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Oauth2 struct {
 	projSvc *ProjectService
 	pvdSvc  *ProviderService
-
-	daoToken *dao.ProviderTokenDao
 }
 
-func NewOauth2Service(projSvc *ProjectService, pvdSvc *ProviderService, daoToken *dao.ProviderTokenDao) *Oauth2 {
-	return &Oauth2{projSvc: projSvc, pvdSvc: pvdSvc, daoToken: daoToken}
+func NewOauth2Service(projSvc *ProjectService, pvdSvc *ProviderService) *Oauth2 {
+	return &Oauth2{projSvc: projSvc, pvdSvc: pvdSvc}
 }
 
 func (s *Oauth2) SetupHandler(router *mux.Router) {
@@ -32,7 +27,7 @@ func (s *Oauth2) authorize(w http.ResponseWriter, r *http.Request) {
 	providerName := r.FormValue("provider")
 
 	ctx := context.Background()
-	_, cfg, err := s.pvdSvc.GetProvider(ctx, providerName)
+	cfg, err := s.pvdSvc.GetOauth2Config(ctx, providerName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -47,7 +42,7 @@ func (s *Oauth2) callback(w http.ResponseWriter, r *http.Request) {
 	callback := r.FormValue("callback")
 
 	ctx := context.Background()
-	pvd, cfg, err := s.pvdSvc.GetProvider(ctx, providerName)
+	cfg, err := s.pvdSvc.GetOauth2Config(ctx, providerName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -60,17 +55,9 @@ func (s *Oauth2) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// todo remove exist token if it exists
-	pt := &provider.Token{
-		// Userid:       ctx.Value("userid").(string),
-		Provider:     pvd.Name,
-		AccessToken:  token.AccessToken,
-		RefreshToken: token.RefreshToken,
-		ExpiresAt:    timestamppb.New(token.Expiry),
-		CreatedAt:    timestamppb.Now(),
-		UpdatedAt:    timestamppb.Now(),
-	}
-	if _, err := s.daoToken.Upsert(ctx, pt); err != nil {
+	// s.pvdSvc.getProvider()
+	username := "saltbo"
+	if err := s.pvdSvc.saveToken(ctx, providerName, username, token); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

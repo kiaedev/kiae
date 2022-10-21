@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kiaedev/kiae/api/image"
 	"github.com/kiaedev/kiae/api/kiae"
@@ -11,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/protobuf/types/known/emptypb"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/typed/core/v1"
 )
@@ -18,14 +18,14 @@ import (
 type ImageRegistrySvc struct {
 	imageRegistryDao *dao.ImageRegistryDao
 
-	kubeSecret v1.SecretInterface
+	kubeCore v1.CoreV1Interface
 }
 
 func NewImageRegistrySvc(imageRegistryDao *dao.ImageRegistryDao, kClients *klient.LocalClients) *ImageRegistrySvc {
 	return &ImageRegistrySvc{
 		imageRegistryDao: imageRegistryDao,
 
-		kubeSecret: kClients.K8sCs.CoreV1().Secrets("kiae-system"),
+		kubeCore: kClients.K8sCs.CoreV1(),
 	}
 }
 
@@ -37,9 +37,11 @@ func (s *ImageRegistrySvc) List(ctx context.Context, in *image.RegistryListReque
 
 func (s *ImageRegistrySvc) Create(ctx context.Context, in *image.Registry) (*image.Registry, error) {
 	registrySecret := buildRegistrySecret(in)
-	_, err := s.kubeSecret.Create(ctx, registrySecret, metav1.CreateOptions{})
-	if err != nil {
-		return nil, err
+	for _, namespace := range in.Namespaces {
+		registrySecret.SetNamespace(namespace)
+		if err := s.saveSecret(ctx, registrySecret); err != nil {
+			return nil, err
+		}
 	}
 
 	return s.imageRegistryDao.Create(ctx, in)
@@ -47,9 +49,11 @@ func (s *ImageRegistrySvc) Create(ctx context.Context, in *image.Registry) (*ima
 
 func (s *ImageRegistrySvc) Update(ctx context.Context, in *image.Registry) (*image.Registry, error) {
 	registrySecret := buildRegistrySecret(in)
-	_, err := s.kubeSecret.Update(ctx, registrySecret, metav1.UpdateOptions{})
-	if err != nil {
-		return nil, err
+	for _, namespace := range in.Namespaces {
+		registrySecret.SetNamespace(namespace)
+		if err := s.saveSecret(ctx, registrySecret); err != nil {
+			return nil, err
+		}
 	}
 
 	return s.imageRegistryDao.Update(ctx, in)
@@ -64,9 +68,23 @@ func (s *ImageRegistrySvc) Delete(ctx context.Context, in *kiae.IdRequest) (*emp
 	return &emptypb.Empty{}, s.imageRegistryDao.Delete(ctx, in.Id)
 }
 
+func (s *ImageRegistrySvc) saveSecret(ctx context.Context, secret *corev1.Secret) (err error) {
+	cli := s.kubeCore.Secrets(secret.Namespace)
+	_, err = cli.Get(ctx, secret.Name, metav1.GetOptions{})
+	if err != nil && !errors.IsNotFound(err) {
+		return
+	} else if errors.IsNotFound(err) {
+		_, err = cli.Create(ctx, secret, metav1.CreateOptions{})
+		return
+	}
+
+	_, err = cli.Update(ctx, secret, metav1.UpdateOptions{})
+	return
+}
+
 func buildRegistrySecret(in *image.Registry) *corev1.Secret {
 	registrySecret := &corev1.Secret{}
-	registrySecret.SetName(RegistrySecretName(in))
+	registrySecret.SetName(in.GetSecretName())
 	registrySecret.SetAnnotations(map[string]string{
 		"kpack.io/docker": in.Server,
 	})
@@ -76,8 +94,4 @@ func buildRegistrySecret(in *image.Registry) *corev1.Secret {
 		"password": in.Password,
 	}
 	return registrySecret
-}
-
-func RegistrySecretName(reg *image.Registry) string {
-	return fmt.Sprintf("kpack-reg-%s", reg.Name)
 }
