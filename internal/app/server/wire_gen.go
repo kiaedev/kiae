@@ -17,7 +17,7 @@ import (
 	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
-	"github.com/kiaedev/kiae/pkg/oidc"
+	"github.com/kiaedev/kiae/pkg/oauth2"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	versioned2 "github.com/pivotal/kpack/pkg/client/clientset/versioned"
 	"github.com/spf13/viper"
@@ -93,7 +93,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	projectImageSvc := service.NewProjectImageSvc(projectDao, projectImageDao, builderDao, imageRegistrySvc, providerService, localClients)
 	imageWatcher := service.NewImageWatcher(projectImageSvc, localClients)
 	middlewareService := service.NewMiddlewareService(client, clientset, middlewareInstance, middlewareClaim, appService)
-	oauth2 := service.NewProviderOauth2Svc(providerService)
+	serviceOauth2 := service.NewProviderOauth2Svc(providerService)
 	projectService := service.NewProjectService(projectDao)
 	routeService := service.NewRouteService(appService, routeDao)
 	deploymentDao := dao.NewDeploymentDao(database)
@@ -104,10 +104,10 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		return nil, err
 	}
 	oidcConfig := configConfig.OIDC
-	oidcOauth2 := oidc.New(oidcConfig)
+	oidc := oauth2.NewOIDC(oidcConfig)
 	userDao := dao.NewUserDao(database)
 	userSvc := service.NewUserSvc(userDao)
-	session := service.NewSession(oidcOauth2, userSvc)
+	session := service.NewSession(oidc, userSvc)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
@@ -118,7 +118,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		EntryService:      entryService,
 		ImageWatcher:      imageWatcher,
 		MiddlewareService: middlewareService,
-		Oauth2:            oauth2,
+		Oauth2:            serviceOauth2,
 		ProjectService:    projectService,
 		ProjectImageSvc:   projectImageSvc,
 		ProviderService:   providerService,

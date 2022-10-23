@@ -6,10 +6,13 @@ import (
 	"net/url"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/oauth2"
+	"github.com/kiaedev/kiae/pkg/oauth2"
+	oauth22 "golang.org/x/oauth2"
 )
 
 type Oauth2 struct {
+	oauth2.Oauth2
+
 	pvdSvc *ProviderService
 }
 
@@ -18,55 +21,31 @@ func NewProviderOauth2Svc(pvdSvc *ProviderService) *Oauth2 {
 }
 
 func (s *Oauth2) SetupEndpoints(router *mux.Router) {
-	router.HandleFunc("/oauth2/authorize", s.authorize)
-	router.HandleFunc("/oauth2/callback", s.callback)
+	s.SetOauth2ConfigBuilder(func(ctx context.Context, r *http.Request) (*oauth22.Config, error) {
+		o2c, err := s.pvdSvc.GetOauth2Config(ctx, r.FormValue("provider"))
+		if err != nil {
+			return nil, err
+		}
+
+		o2c.RedirectURL = buildRedirectURL(r)
+		return o2c, err
+	})
+	s.SetCallbackHook(func(ctx context.Context, token *oauth22.Token, w http.ResponseWriter, r *http.Request) {
+		if err := s.pvdSvc.saveToken(ctx, r.FormValue("provider"), token); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+	s.Oauth2.Setup(func(path string, h http.HandlerFunc) {
+		router.HandleFunc("/provider"+path, h)
+	})
 }
 
-func (s *Oauth2) authorize(w http.ResponseWriter, r *http.Request) {
-	providerName := r.FormValue("provider")
-
-	ctx := context.Background()
-	cfg, err := s.pvdSvc.GetOauth2Config(ctx, providerName)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s.setupRedirectURL(cfg, r)
-	http.Redirect(w, r, cfg.AuthCodeURL("test", oauth2.AccessTypeOnline), 302)
-}
-
-func (s *Oauth2) callback(w http.ResponseWriter, r *http.Request) {
-	providerName := r.FormValue("provider")
-	callback := r.FormValue("callback")
-
-	ctx := context.Background()
-	cfg, err := s.pvdSvc.GetOauth2Config(ctx, providerName)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s.setupRedirectURL(cfg, r)
-	token, err := cfg.Exchange(ctx, r.URL.Query().Get("code"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err := s.pvdSvc.saveToken(ctx, providerName, token); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, callback, 302)
-}
-
-func (s *Oauth2) setupRedirectURL(cfg *oauth2.Config, r *http.Request) {
+func buildRedirectURL(r *http.Request) string {
 	query := make(url.Values)
 	query.Set("provider", r.URL.Query().Get("provider"))
 	query.Set("callback", r.URL.Query().Get("callback"))
 	u := &url.URL{Scheme: "http", Host: r.Host, RawQuery: query.Encode()}
-	u.Path = "/oauth2/callback"
-	cfg.RedirectURL = u.String()
+	u.Path = "/provider/oauth2/callback"
+	return u.String()
 }

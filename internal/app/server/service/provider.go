@@ -179,22 +179,18 @@ func (s *ProviderService) refreshToken(ctx context.Context, providerName string,
 }
 
 func (s *ProviderService) saveToken(ctx context.Context, providerName string, token *oauth2.Token) (err error) {
-	pvd, err := s.getProvider(ctx, providerName)
+	// fetch the latest username
+	username, err := s.getUsername(ctx, providerName, token)
 	if err != nil {
 		return err
 	}
-
-	username, err := pvd.AuthedUser(ctx)
-	if err != nil {
-		return err
-	}
-
 	secret := token2Secret(username, token)
 	secret.SetName(TokenSecretName(ctx, providerName))
 	secret.Annotations = map[string]string{
 		"kiae.dev/git-provider": providerName,
 	}
 
+	// upsert the secret
 	_, err = s.kubeSecret.Get(ctx, secret.Name, metav1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
 		return
@@ -207,8 +203,17 @@ func (s *ProviderService) saveToken(ctx context.Context, providerName string, to
 	return
 }
 
+func (s *ProviderService) getUsername(ctx context.Context, providerName string, token *oauth2.Token) (string, error) {
+	pvd, err := gitp.Select(providerName, token.AccessToken)
+	if err != nil {
+		return "", err
+	}
+
+	return pvd.AuthedUser(ctx)
+}
+
 func TokenSecretName(ctx context.Context, gitProvider string) string {
-	userid := ctx.Value("userid")
+	userid := MustGetUserid(ctx)
 	if userid == "" {
 		userid = "1000"
 	}

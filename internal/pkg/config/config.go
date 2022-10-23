@@ -1,12 +1,12 @@
 package config
 
 import (
-	"github.com/kiaedev/kiae/pkg/oidc"
+	"github.com/kiaedev/kiae/pkg/oauth2"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	OIDC *oidc.Config `yaml:"oidc"`
+	OIDC *oauth2.OidcConfig `yaml:"oidc"`
 }
 
 func New() (*Config, error) {
