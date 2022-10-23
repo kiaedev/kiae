@@ -10,15 +10,14 @@ import (
 )
 
 type Oauth2 struct {
-	projSvc *ProjectService
-	pvdSvc  *ProviderService
+	pvdSvc *ProviderService
 }
 
-func NewOauth2Service(projSvc *ProjectService, pvdSvc *ProviderService) *Oauth2 {
-	return &Oauth2{projSvc: projSvc, pvdSvc: pvdSvc}
+func NewProviderOauth2Svc(pvdSvc *ProviderService) *Oauth2 {
+	return &Oauth2{pvdSvc: pvdSvc}
 }
 
-func (s *Oauth2) SetupHandler(router *mux.Router) {
+func (s *Oauth2) SetupEndpoints(router *mux.Router) {
 	router.HandleFunc("/oauth2/authorize", s.authorize)
 	router.HandleFunc("/oauth2/callback", s.callback)
 }

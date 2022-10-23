@@ -54,7 +54,7 @@ func (s *Server) Run(ctx context.Context) error {
 	s.watcher.SetupImagesEventHandler(s.svcSets.ImageWatcher)
 	s.watcher.Start(ctx)
 
-	// s.Use(s.svcSets.ClusterService.Middleware)
+	s.Use(s.svcSets.Session.Middleware())
 	s.setupProxiesEndpoints()
 	s.setupGraphQLEndpoints()
 	return s.runHTTPServer(ctx)
@@ -123,6 +123,6 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = image.RegisterRegistryServiceHandlerServer(ctx, mux, s.svcSets.ImageRegistrySvc)
 	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
 
-	s.svcSets.Oauth2.SetupHandler(s.Router)
-
+	s.svcSets.Oauth2.SetupEndpoints(s.Router)
+	s.svcSets.Session.SetupEndpoints(s.Router)
 }

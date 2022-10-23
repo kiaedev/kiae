@@ -12,6 +12,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
+	"github.com/kiaedev/kiae/internal/pkg/config"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
@@ -33,8 +34,9 @@ func lokiConstructor() (*loki.Client, error) {
 	return loki.NewLoki("http://localhost:3100"), nil
 }
 
-func buildInjectors(config *rest.Config) (*Server, error) {
+func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	wire.Build(
+		config.New,
 		dbConstructor,
 		lokiConstructor,
 		klient.ProviderSet,

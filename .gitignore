@@ -16,5 +16,5 @@
 # vendor/
 
 gen
-build
+build/bin
 

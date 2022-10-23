@@ -13,9 +13,11 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
+	"github.com/kiaedev/kiae/internal/pkg/config"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/kiaedev/kiae/pkg/mongoutil"
+	"github.com/kiaedev/kiae/pkg/oidc"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned"
 	versioned2 "github.com/pivotal/kpack/pkg/client/clientset/versioned"
 	"github.com/spf13/viper"
@@ -26,21 +28,21 @@ import (
 
 // Injectors from wire.go:
 
-func buildInjectors(config *rest.Config) (*Server, error) {
+func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	router := mux.NewRouter()
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(kubeconfig)
 	if err != nil {
 		return nil, err
 	}
-	versionedClientset, err := versioned.NewForConfig(config)
+	versionedClientset, err := versioned.NewForConfig(kubeconfig)
 	if err != nil {
 		return nil, err
 	}
-	clientset2, err := versioned2.NewForConfig(config)
+	clientset2, err := versioned2.NewForConfig(kubeconfig)
 	if err != nil {
 		return nil, err
 	}
-	client, err := klient.CtrRuntimeClient(config)
+	client, err := klient.CtrRuntimeClient(kubeconfig)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +52,7 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		KpackCs:       clientset2,
 		RuntimeClient: client,
 	}
-	multiClusterInformers := watch.NewMultiClusterInformers(config)
+	multiClusterInformers := watch.NewMultiClusterInformers(kubeconfig)
 	watcher, err := watch.NewWatcher(localClients, multiClusterInformers)
 	if err != nil {
 		return nil, err
@@ -91,12 +93,21 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 	projectImageSvc := service.NewProjectImageSvc(projectDao, projectImageDao, builderDao, imageRegistrySvc, providerService, localClients)
 	imageWatcher := service.NewImageWatcher(projectImageSvc, localClients)
 	middlewareService := service.NewMiddlewareService(client, clientset, middlewareInstance, middlewareClaim, appService)
+	oauth2 := service.NewProviderOauth2Svc(providerService)
 	projectService := service.NewProjectService(projectDao)
-	oauth2 := service.NewOauth2Service(projectService, providerService)
 	routeService := service.NewRouteService(appService, routeDao)
 	deploymentDao := dao.NewDeploymentDao(database)
 	deploymentService := service.NewDeploymentService(deploymentDao, projectImageSvc, appService)
 	builderSvc := service.NewBuilderSvc(builderDao, imageRegistrySvc, localClients)
+	configConfig, err := config.New()
+	if err != nil {
+		return nil, err
+	}
+	oidcConfig := configConfig.OIDC
+	oidcOauth2 := oidc.New(oidcConfig)
+	userDao := dao.NewUserDao(database)
+	userSvc := service.NewUserSvc(userDao)
+	session := service.NewSession(oidcOauth2, userSvc)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
@@ -115,8 +126,9 @@ func buildInjectors(config *rest.Config) (*Server, error) {
 		DeploymentService: deploymentService,
 		BuilderSvc:        builderSvc,
 		ImageRegistrySvc:  imageRegistrySvc,
+		Session:           session,
 	}
-	proxy := klient.NewProxy(config)
+	proxy := klient.NewProxy(kubeconfig)
 	server := &Server{
 		Router:        router,
 		watcher:       watcher,

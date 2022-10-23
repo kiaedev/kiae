@@ -83,6 +83,14 @@ func (s *ProviderService) Delete(ctx context.Context, in *kiae.IdRequest) (*empt
 	return &emptypb.Empty{}, s.daoProvider.Delete(ctx, in.Id)
 }
 
+func (s *ProviderService) Config(ctx context.Context, providerName string) (*oauth2.Config, error) {
+	return s.GetOauth2Config(ctx, providerName)
+}
+
+func (s *ProviderService) TokenF(ctx context.Context, providerName string, token *oauth2.Token) error {
+	return s.saveToken(ctx, providerName, token)
+}
+
 func (s *ProviderService) GetOauth2Config(ctx context.Context, providerName string) (*oauth2.Config, error) {
 	pvd, err := s.daoProvider.GetByName(ctx, providerName)
 	if err != nil {

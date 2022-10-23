@@ -47,6 +47,9 @@
     },
     {
       "name": "SettingsService"
+    },
+    {
+      "name": "UserService"
     }
   ],
   "consumes": [
@@ -4088,6 +4091,36 @@
           "SettingsService"
         ]
       }
+    },
+    "/api/v1/users": {
+      "get": {
+        "operationId": "UserService_List",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userUserListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -5458,6 +5491,78 @@
     },
     "settingsVolume": {
       "type": "object"
+    },
+    "userUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "outerId": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extra": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        },
+        "provider": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/userUserStatus"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "userUserListResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/userUser"
+          }
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "userUserStatus": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "BUILDING",
+        "PUBLISHED",
+        "EXPIRED",
+        "FAILED"
+      ],
+      "default": "PENDING"
     }
   }
 }

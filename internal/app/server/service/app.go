@@ -73,6 +73,9 @@ func (s *AppService) Create(ctx context.Context, in *app.Application) (*app.Appl
 }
 
 func (s *AppService) List(ctx context.Context, req *app.ListRequest) (*app.ListResponse, error) {
+	userid := MustGetUserid(ctx)
+	fmt.Println(userid)
+
 	query := make(bson.M)
 	if req.Pid != "" {
 		query["pid"] = req.Pid
