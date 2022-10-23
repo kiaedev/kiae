@@ -55,6 +55,7 @@ message Project {
     string run_command = 9; // @gotags: json:"run_command,omitempty"
     string run_args = 10; // @gotags: json:"run_args,omitempty"
 
+    string owner_uid = 100; // @gotags: bson:"owner_uid,omitempty"
     google.protobuf.Timestamp created_at = 101;
     google.protobuf.Timestamp created_by = 102;
     google.protobuf.Timestamp updated_at = 103;

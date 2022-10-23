@@ -1,0 +1,4 @@
+oidc:
+  endpoint: https://accounts.google.com
+  clientID: 4574xxxxxxxxxxxxx.apps.googleusercontent.com
+  clientSecret: GOCSPX-9irAxNOxxxxxxxxxxxxxxxxxxxxxx

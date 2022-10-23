@@ -99,6 +99,8 @@ func (m *Project) validate(all bool) error {
 
 	// no validation rules for RunArgs
 
+	// no validation rules for OwnerUid
+
 	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {
 		case interface{ ValidateAll() error }:

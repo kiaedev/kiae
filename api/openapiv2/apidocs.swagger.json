@@ -2858,6 +2858,9 @@
                 "runArgs": {
                   "type": "string"
                 },
+                "ownerUid": {
+                  "type": "string"
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -2937,6 +2940,9 @@
                   "type": "string"
                 },
                 "runArgs": {
+                  "type": "string"
+                },
+                "ownerUid": {
                   "type": "string"
                 },
                 "createdAt": {
@@ -5055,6 +5061,9 @@
           "type": "string"
         },
         "runArgs": {
+          "type": "string"
+        },
+        "ownerUid": {
           "type": "string"
         },
         "createdAt": {
