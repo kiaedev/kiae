@@ -1,0 +1,46 @@
+site_name: Kiae - The next-generation Application Engine base on the kubernetes and istio
+repo_url: https://github.com/kiaedev/kiae
+docs_dir: en
+site_description: >-
+  A modern layer 7 load balancer
+
+nav:
+  - Overview: index.md
+  - Installation: installation.md
+  - Concepts: concepts.md
+  - Architecture: architecture.md
+  - Getting Started: getting-started.md
+  - FAQ: FAQ.md
+  - Roadmap: roadmap.md
+  - Releases ⧉: https://github.com/kiaedev/kiae/releases
+  - Roadmap ⧉: https://github.com/kiaedev/kiae/milestones
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo.png
+  features:
+    - navigation.indexes
+  font:
+    text: Work Sans
+  palette:
+    - primary: teal
+      scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+extra:
+  version:
+    provider: mike
+  alternate:
+    - name: English
+      link: /en/
+      lang: en
+    - name: 中文
+      link: /zh/
+      lang: zh

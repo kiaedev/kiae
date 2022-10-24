@@ -5,15 +5,17 @@
 [![](https://img.shields.io/github/v/release/kiaedev/kiae.svg)](https://github.com/kiaedev/kiae/releases)
 [![](https://img.shields.io/github/license/kiaedev/kiae.svg)](https://github.com/kiaedev/kiae/blob/master/LICENSE)
 
+## What is Kiae?
 
-## Prerequisites
 
-- Kubernetes 1.22+
-- KubeVela 1.5+
-- Istio 1.15+
-- Kpack 0.7+
-- Loki 2.6+
-- Helm 3+
+## Documentation
+To learn more about Kiae go to the [complete documentation](https://kiaedev.github.io/kiae/).
+
+## Community
+
+You can reach the Kiae community and developers via the following channels:
+
+* Q & A: [Github Discussions](https://github.com/kiaedev/kiae/discussions)
 
 ## Special thanks
 
