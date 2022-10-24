@@ -5,6 +5,16 @@
 [![](https://img.shields.io/github/v/release/kiaedev/kiae.svg)](https://github.com/kiaedev/kiae/releases)
 [![](https://img.shields.io/github/license/kiaedev/kiae.svg)](https://github.com/kiaedev/kiae/blob/master/LICENSE)
 
+
+## Prerequisites
+
+- Kubernetes 1.22+
+- KubeVela 1.5+
+- Istio 1.15+
+- Kpack 0.7+
+- Loki 2.6+
+- Helm 3+
+
 ## Special thanks
 
 [![JetBrains](https://raw.githubusercontent.com/kainonly/ngx-bit/main/resource/jetbrains.svg)](https://www.jetbrains.com/?from=saltbo)

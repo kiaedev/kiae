@@ -2,8 +2,6 @@ package service
 
 import (
 	"github.com/google/wire"
-	"github.com/kiaedev/kiae/internal/pkg/config"
-	"github.com/kiaedev/kiae/pkg/oauth2"
 )
 
 type ServiceSets struct {
@@ -46,8 +44,6 @@ var ProviderSet = wire.NewSet(
 	NewBuilderSvc,
 	NewImageRegistrySvc,
 	NewUserSvc,
-	wire.FieldsOf(new(*config.Config), "OIDC"),
-	oauth2.NewOIDC,
 	NewSession,
 	wire.Struct(new(ServiceSets), "*"),
 )

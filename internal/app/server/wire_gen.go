@@ -142,7 +142,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 // wire.go:
 
 func dbConstructor() (*mongo.Database, error) {
-	dbClient, err := mongoutil.New(viper.GetString("dsn"))
+	dbClient, err := mongoutil.New(viper.GetString("mongodb.dsn"))
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to mysql: %v", err)
 	}
@@ -151,5 +151,5 @@ func dbConstructor() (*mongo.Database, error) {
 }
 
 func lokiConstructor() (*loki.Client, error) {
-	return loki.NewLoki("http://localhost:3100"), nil
+	return loki.NewLoki(viper.GetString("loki.endpoint")), nil
 }
