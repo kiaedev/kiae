@@ -155,6 +155,10 @@ func (s *ProviderService) getProviderToken(ctx context.Context, providerName str
 	}
 
 	token := secret2Token(secret)
+	if token.Expiry.IsZero() {
+		return token, nil
+	}
+
 	if token.Expiry.Before(time.Now()) {
 		if err := s.refreshToken(ctx, providerName, token); err != nil {
 			return nil, err
@@ -232,6 +236,10 @@ func secret2Token(secret *corev1.Secret) *oauth2.Token {
 }
 
 func token2Secret(username string, ot *oauth2.Token) *corev1.Secret {
+	expiresAt := ""
+	if !ot.Expiry.IsZero() {
+		expiresAt = ot.Expiry.Format(time.Layout)
+	}
 	return &corev1.Secret{
 		Type: "kubernetes.io/basic-auth",
 		StringData: map[string]string{
@@ -239,7 +247,7 @@ func token2Secret(username string, ot *oauth2.Token) *corev1.Secret {
 			"password":      ot.AccessToken,
 			"access_token":  ot.AccessToken,
 			"refresh_token": ot.RefreshToken,
-			"expires_at":    ot.Expiry.Format(time.Layout),
+			"expires_at":    expiresAt,
 		},
 	}
 }
