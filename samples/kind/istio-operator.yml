@@ -1,0 +1,24 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  meshConfig:
+    accessLogFile: /dev/stdout
+  components:
+    pilot:
+      k8s:
+        replicaCount: 1
+  values:
+    gateways:
+      istio-ingressgateway:
+        type: NodePort
+        ports:
+          - name: http2
+            nodePort: 30080
+            port: 80
+            protocol: TCP
+            targetPort: 8080
+          - name: https
+            nodePort: 30443
+            port: 443
+            protocol: TCP
+            targetPort: 8443

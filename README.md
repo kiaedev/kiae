@@ -9,7 +9,7 @@
 
 
 ## Documentation
-To learn more about Kiae go to the [complete documentation](https://kiaedev.github.io/kiae/).
+To learn more about Kiae go to the [complete documentation](https://kiae.dev/).
 
 ## Community
 

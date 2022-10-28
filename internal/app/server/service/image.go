@@ -87,7 +87,7 @@ func (s *ProjectImageSvc) buildNewImage(ctx context.Context, in *image.Image, pr
 
 	builder, err := s.daoBuilder.Get(ctx, proj.BuilderId)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get build builder: %v", err)
 	}
 
 	imgReg, err := s.svcRegistry.imageRegistryDao.Get(ctx, builder.RegistryId)
