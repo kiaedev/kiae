@@ -21,20 +21,6 @@ func NewLoki(host string) *Client {
 	}
 }
 
-func (l *Client) Query(query string, limit int, time time.Time, direction string) {
-	if direction == "" {
-		direction = "backward"
-	}
-
-	params := map[string]string{
-		"query":     query,
-		"limit":     strconv.Itoa(limit),
-		"time":      strconv.FormatInt(time.Unix(), 10),
-		"direction": direction,
-	}
-	l.cli.R().SetQueryParams(params).Get(fmt.Sprintf("%s/loki/api/v1/query", l.host))
-}
-
 func (l *Client) QueryRange(query string, limit int64, start, end time.Time, direction string) ([]Result, error) {
 	params := map[string]string{
 		"query":     query,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
@@ -16,6 +17,7 @@ type OidcConfig struct {
 }
 
 type OIDC struct {
+	sync.Map
 	Oauth2
 	cfg *OidcConfig
 
@@ -106,7 +108,19 @@ func (s *OIDC) getUserInfo(ctx context.Context, token *oauth2.Token) (*oidc.User
 }
 
 func (s *OIDC) getProvider(ctx context.Context) (*oidc.Provider, error) {
-	return oidc.NewProvider(ctx, s.cfg.Endpoint)
+	issuer := s.cfg.Endpoint
+	v, ok := s.Load(issuer)
+	if ok {
+		return v.(*oidc.Provider), nil
+	}
+
+	op, err := oidc.NewProvider(ctx, issuer)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Store(issuer, op)
+	return op, nil
 }
 
 func getIdTokenFromOauth2Token(token *oauth2.Token) string {

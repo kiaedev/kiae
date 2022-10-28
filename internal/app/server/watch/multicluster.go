@@ -40,12 +40,13 @@ func NewMultiClusterInformers(kubeconfig *rest.Config) *MultiClusterInformers {
 }
 
 func (w *MultiClusterInformers) ClusterClients(clusterName string) (*klient.ClusterClients, error) {
-	cfg := &(*(w.kubeconfig))
+	cfg := *w.kubeconfig
+	newCfg := &cfg
 	if clusterName != "local" {
-		cfg.Wrap(multicluster.NewProxyPathPrependingClusterGatewayRoundTripper(clusterName).NewRoundTripper)
+		newCfg.Wrap(multicluster.NewProxyPathPrependingClusterGatewayRoundTripper(clusterName).NewRoundTripper)
 	}
 
-	return klient.NewClusterClients(cfg)
+	return klient.NewClusterClients(newCfg)
 }
 
 func (w *MultiClusterInformers) Pods(ns string, matchLabels map[string]string) ([]*corev1.Pod, error) {

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/kiaedev/kiae/pkg/oauth2"
+)
+
+type CtxKey string
+
+const (
+	CtxUserid CtxKey = "kiae-userid"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -69,7 +74,7 @@ func (s *Session) Middleware() mux.MiddlewareFunc {
 			idToken := session.Values["idToken"]
 			if idToken == nil {
 				w.Header().Set("Location", "/oauth2/authorize")
-				http.Error(w, fmt.Sprintf("not login"), http.StatusUnauthorized)
+				http.Error(w, "not login", http.StatusUnauthorized)
 				// http.Redirect(w, r, "/oauth2/authorize", http.StatusFound)
 				return
 			}
@@ -79,7 +84,7 @@ func (s *Session) Middleware() mux.MiddlewareFunc {
 			if err != nil {
 				log.Println("Error verifying token: ", err)
 				w.Header().Set("Location", "/oauth2/authorize")
-				http.Error(w, fmt.Sprintf("not login"), http.StatusUnauthorized)
+				http.Error(w, "not login", http.StatusUnauthorized)
 				// http.Redirect(w, r, "/oauth2/authorize", http.StatusFound)
 				return
 			}
@@ -90,13 +95,13 @@ func (s *Session) Middleware() mux.MiddlewareFunc {
 				return
 			}
 
-			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, "kiae-userid", u.Id)))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, CtxUserid, u.Id)))
 		})
 	}
 }
 
 func MustGetUserid(ctx context.Context) string {
-	userid, ok := ctx.Value("kiae-userid").(string)
+	userid, ok := ctx.Value(CtxUserid).(string)
 	if !ok {
 		panic("not found the userid from context")
 	}
