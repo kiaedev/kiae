@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 FRONT_VERSION="v0.0.1"
 

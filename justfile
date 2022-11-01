@@ -20,8 +20,11 @@ gen-api:
 gen-wire:
 	go generate ./internal/app/server/wire_gen.go
 
-build:
-	go build -v -o build/ .
+gen-front:
+	go generate ./build/front
+
+build: gen-front
+	go build -v -o build/bin/ .
 
 test:
   go test ./...
