@@ -3,7 +3,7 @@ package components
 import (
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/project"
-	"github.com/kiaedev/kiae/internal/pkg/render/utils"
+	"github.com/kiaedev/kiae/internal/pkg/velarender/utils"
 	v1 "k8s.io/api/core/v1"
 )
 

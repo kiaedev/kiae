@@ -9,7 +9,7 @@ import (
 	"github.com/kiaedev/kiae/api/middleware"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	mw_provider "github.com/kiaedev/kiae/internal/pkg/mw-provider"
-	"github.com/kiaedev/kiae/internal/pkg/render/components"
+	"github.com/kiaedev/kiae/internal/pkg/velarender/components"
 	"github.com/saltbo/gopkg/strutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc/codes"

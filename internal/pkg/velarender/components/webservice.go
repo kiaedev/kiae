@@ -5,8 +5,8 @@ import (
 
 	"github.com/kiaedev/kiae/api/app"
 	"github.com/kiaedev/kiae/api/project"
-	"github.com/kiaedev/kiae/internal/pkg/render/traits"
-	"github.com/kiaedev/kiae/internal/pkg/render/utils"
+	"github.com/kiaedev/kiae/internal/pkg/velarender/traits"
+	"github.com/kiaedev/kiae/internal/pkg/velarender/utils"
 	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela-core-api/pkg/oam/util"
 	v1 "k8s.io/api/core/v1"
