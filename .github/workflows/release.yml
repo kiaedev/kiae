@@ -7,9 +7,11 @@ on:
 
 jobs:
   docker:
-    name: Publish to Docker Hub
+    name: Publish image
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to GitHub Container Registry

@@ -1,13 +1,16 @@
-FROM golang:1.18-alpine as builder
+FROM golang:1.18-bullseye as builder
 
-RUN apk update && apk add curl just
+RUN curl -q 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --dearmor | tee /usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg 1> /dev/null \
+    && echo "deb [signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr bullseye" | tee /etc/apt/sources.list.d/prebuilt-mpr.list \
+    && apt-get update \
+    && apt-get install -y just
 
 WORKDIR /kiaedev/kiae
 COPY . .
 RUN just build
 
 
-FROM debian:10
+FROM debian:bullseye
 
 LABEL org.opencontainers.image.source=https://github.com/kiaedev/kiae
 
@@ -17,6 +20,6 @@ RUN apt-get update \
 ENV APP_HOME /srv
 WORKDIR $APP_HOME
 
-COPY --from=builder build/bin $APP_HOME/bin
+COPY --from=builder /kiaedev/kiae/build/bin $APP_HOME/bin
 
 CMD ["./bin/kiae", "server"]
