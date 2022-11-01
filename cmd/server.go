@@ -52,10 +52,7 @@ func init() {
 
 	serverCmd.Flags().Bool("debug", false, "specify the debug")
 	serverCmd.Flags().String("kubeconfig", "", "specify kubeconfig of the kubernetes cluster")
-	serverCmd.Flags().String("dsn", "mongodb://root:admin@localhost:27017", "specify the dsn of the database")
 
 	_ = viper.BindPFlag("debug", serverCmd.Flags().Lookup("debug"))
 	_ = viper.BindPFlag("kubeconfig", serverCmd.Flags().Lookup("kubeconfig"))
-	_ = viper.BindPFlag("dsn", serverCmd.Flags().Lookup("dsn"))
-	viper.MustBindEnv("DSN")
 }

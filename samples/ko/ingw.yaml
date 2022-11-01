@@ -1,0 +1,33 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: default
+  namespace: kiae-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kiae
+  namespace: kiae-system
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - default
+  http:
+    - route:
+        - destination:
+            host: kiae
+            port:
+              number: 8081

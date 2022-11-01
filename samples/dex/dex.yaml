@@ -1,0 +1,150 @@
+#kubectl -n kiae-system create secret \
+#    generic github-client \
+#    --from-literal=client-id=$GITHUB_CLIENT_ID \
+#    --from-literal=client-secret=$GITHUB_CLIENT_SECRET
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dex
+  name: dex
+  namespace: kiae-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dex
+  template:
+    metadata:
+      labels:
+        app: dex
+    spec:
+      serviceAccountName: dex # This is created below
+      containers:
+        - image: ghcr.io/dexidp/dex:v2.30.0
+          name: dex
+          command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
+
+          ports:
+            - name: https
+              containerPort: 5556
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/dex/cfg
+
+          env:
+            - name: GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: github-client
+                  key: client-id
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: github-client
+                  key: client-secret
+
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 5556
+              scheme: HTTP
+      volumes:
+        - name: config
+          configMap:
+            name: dex
+            items:
+              - key: config.yaml
+                path: config.yaml
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dex
+  namespace: kiae-system
+data:
+  config.yaml: |
+    issuer: http://180.76.227.10:32000
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    web:
+      http: 0.0.0.0:5556
+    connectors:
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: $GITHUB_CLIENT_ID
+          clientSecret: $GITHUB_CLIENT_SECRET
+          redirectURI: http://180.76.227.10:32000/callback
+          org: kiaedev
+    oauth2:
+      skipApprovalScreen: true
+
+    staticClients:
+      - id: kiae
+        redirectURIs:
+          - 'http://180.76.227.10:30080/oauth2/callback'
+        name: 'Kiae'
+        secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+    enablePasswordDB: true
+    staticPasswords:
+      - email: "admin@example.com"
+        # bcrypt hash of the string "password": $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+        hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+        username: "admin"
+        userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dex
+  namespace: kiae-system
+spec:
+  type: NodePort
+  ports:
+    - name: dex
+      port: 5556
+      protocol: TCP
+      targetPort: 5556
+      nodePort: 32000
+  selector:
+    app: dex
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: dex
+  name: dex
+  namespace: kiae-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dex
+rules:
+  - apiGroups: ["dex.coreos.com"] # API group created by dex
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["create"] # To manage its own resources, dex must be able to create customresourcedefinitions
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dex
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dex
+subjects:
+  - kind: ServiceAccount
+    name: dex           # Service account assigned to the dex pod, created above
+    namespace: kiae-system

@@ -15,20 +15,20 @@ spec:
       labels:
         app: kiae
     spec:
+      serviceAccountName: kiae
       containers:
         - name: my-app
           image: ko://github.com/kiaedev/kiae
+          imagePullPolicy: Always
           args: [ "server" ]
           ports:
             - containerPort: 8081
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/kiae/"
+              readOnly: true
 
----
-apiVersion: v1
-kind: Service
-spec:
-  selector:
-    app: kiae
-  type: ClusterIP
-  ports:
-    - port: 8081
-      targetPort: 8081
+      volumes:
+        - name: config
+          configMap:
+            name: kiae

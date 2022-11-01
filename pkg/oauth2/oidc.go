@@ -67,7 +67,6 @@ func (s *OIDC) oauth2TokenHandler(ctx context.Context, token *oauth2.Token, w ht
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.hookIDToken(ctx, getIdTokenFromOauth2Token(token)).ServeHTTP(w, r)
 
 	userInfo, err := s.getUserInfo(ctx, token)
 	if err != nil {
@@ -78,6 +77,8 @@ func (s *OIDC) oauth2TokenHandler(ctx context.Context, token *oauth2.Token, w ht
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	s.hookIDToken(ctx, getIdTokenFromOauth2Token(token)).ServeHTTP(w, r)
 }
 
 func (s *OIDC) verifyIDTokenFromOToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {

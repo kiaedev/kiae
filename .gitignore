@@ -16,6 +16,8 @@
 # vendor/
 
 gen
+dist
 build/bin
 config.yaml
+.env.local
 

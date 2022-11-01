@@ -1,0 +1,29 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kiae
+rules:
+  - apiGroups: [ "","core.oam.dev", "kpack.io" ] # API group created by dex
+    resources: [ "*" ]
+    verbs: [ "*" ]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: kiae
+  name: kiae
+  namespace: kiae-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kiae
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kiae
+subjects:
+  - kind: ServiceAccount
+    name: kiae           # Service account assigned to the dex pod, created above
+    namespace: kiae-system

@@ -81,6 +81,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".kiae" (without extension).
 		viper.AddConfigPath(home)
+		viper.AddConfigPath("/etc/kiae/")
 		viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")
 		// viper.SetConfigName(".kiae")

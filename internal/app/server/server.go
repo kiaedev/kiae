@@ -28,6 +28,7 @@ import (
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/api/route"
+	"github.com/kiaedev/kiae/build/front"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
@@ -102,7 +103,8 @@ func (s *Server) runHTTPServer(ctx context.Context) error {
 	}
 	rmux := runtime.NewServeMux(opts...)
 	s.setupEndpoints(ctx, rmux)
-	s.PathPrefix("/").Handler(rmux)
+	s.PathPrefix("/api/").Handler(rmux)
+	s.PathPrefix("/").Handler(http.FileServer(front.NewFS()))
 
 	log.Printf("http server listening at %v", 8081)
 	return http.ListenAndServe(":8081", s)

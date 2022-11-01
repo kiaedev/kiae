@@ -60,9 +60,15 @@ func (s *ImageRegistrySvc) Update(ctx context.Context, in *image.Registry) (*ima
 }
 
 func (s *ImageRegistrySvc) Delete(ctx context.Context, in *kiae.IdRequest) (*emptypb.Empty, error) {
-	_, err := s.imageRegistryDao.Get(ctx, in.Id)
+	reg, err := s.imageRegistryDao.Get(ctx, in.Id)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, namespace := range reg.Namespaces {
+		if err := s.kubeCore.Secrets(namespace).Delete(ctx, reg.GetSecretName(), metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
 	}
 
 	return &emptypb.Empty{}, s.imageRegistryDao.Delete(ctx, in.Id)

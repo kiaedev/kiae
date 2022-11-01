@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kiae
+  namespace: kiae-system
+data:
+  config.yaml: |
+    debug: true
+    
+    server:
+      port: 8024
+    
+    mongodb:
+      dsn: mongodb://root:admin@mongodb:27017
+      database: kiae
+    
+    loki:
+      endpoint: http://localhost:3100
+    
+    oidc:
+      enabled: false
+      endpoint: http://180.76.227.10:32000
+      clientID: kiae
+      clientSecret: ZXhhbXBsZS1hcHAtc2VjcmV0

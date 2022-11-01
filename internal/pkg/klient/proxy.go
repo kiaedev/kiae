@@ -20,11 +20,12 @@ type Proxy struct {
 func NewProxy(cfg *rest.Config) *Proxy {
 	target, _ := url.Parse(cfg.Host)
 	tlsConfig, _ := rest.TLSConfigFor(cfg)
+
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = tlsConfig.Clone()
-
+	wTransport, _ := rest.HTTPWrappersForConfig(cfg, transport)
 	localHpProxy := httputil.NewSingleHostReverseProxy(target)
-	localHpProxy.Transport = transport
+	localHpProxy.Transport = wTransport
 
 	wssScheme := func(u *url.URL) *url.URL { ur := *u; ur.Scheme = "wss"; return &ur }
 	localWsProxy := websocketproxy.NewProxy(wssScheme(target))

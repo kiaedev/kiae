@@ -66,6 +66,11 @@ func (s *Session) Middleware() mux.MiddlewareFunc {
 				return
 			}
 
+			if !strings.Contains(r.URL.Path, "oauth2") && !strings.HasPrefix(r.URL.Path, "/api") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			// Get a session. We're ignoring the error resulted from decoding an
 			// existing session: Get() always returns a session, even if empty.
 			session, _ := store.Get(r, "kiae-session")
