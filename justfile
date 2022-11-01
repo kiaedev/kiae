@@ -26,7 +26,7 @@ gen-front:
 build: gen-front
 	go build -v -o build/bin/ .
 
-test:
+test: gen-front
   go test ./...
 
 install:
