@@ -15,10 +15,10 @@ data:
       database: kiae
     
     loki:
-      endpoint: http://localhost:3100
+      endpoint: http://loki:3100
     
     oidc:
       enabled: false
-      endpoint: http://180.76.227.10:32000
+      endpoint: http://docker.for.mac.localhost/dex
       clientID: kiae
       clientSecret: ZXhhbXBsZS1hcHAtc2VjcmV0

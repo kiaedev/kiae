@@ -26,6 +26,15 @@ spec:
   gateways:
     - default
   http:
+    - name: dex
+      match:
+        - uri:
+            prefix: "/dex/"
+      route:
+        - destination:
+            host: dex
+            port:
+              number: 5556
     - route:
         - destination:
             host: kiae
