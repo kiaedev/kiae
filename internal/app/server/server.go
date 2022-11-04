@@ -33,6 +33,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/watch"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/koding/websocketproxy"
+	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 )
 
@@ -62,7 +63,8 @@ func (s *Server) Run(ctx context.Context) error {
 }
 
 func (s *Server) setupProxiesEndpoints() {
-	u, _ := url.Parse("ws://localhost:3100") // todo get loki url from config
+	u, _ := url.Parse(viper.GetString("loki.endpoint"))
+	u.Scheme = "ws"
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
 	s.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
 
