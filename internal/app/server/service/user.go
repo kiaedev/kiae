@@ -38,6 +38,7 @@ func (s *UserSvc) saveFromOidcUserInfo(ctx context.Context, userInfo *oidc.UserI
 		u := &user.User{
 			Email:   userInfo.Email,
 			OuterId: userInfo.Subject,
+			Roles:   []string{"member"},
 		}
 		_, err = s.userDao.Create(ctx, u)
 		return

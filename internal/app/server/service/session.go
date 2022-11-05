@@ -17,7 +17,8 @@ import (
 type CtxKey string
 
 const (
-	CtxUserid CtxKey = "kiae-userid"
+	CtxUserid    CtxKey = "kiae-userid"
+	CtxUserRoles CtxKey = "kiae-user-roles"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -77,7 +78,9 @@ func (s *Session) Middleware() mux.MiddlewareFunc {
 				return
 			}
 
-			if !strings.Contains(r.URL.Path, "oauth2") && !strings.HasPrefix(r.URL.Path, "/api") {
+			if !strings.Contains(r.URL.Path, "oauth2") &&
+				!strings.HasPrefix(r.URL.Path, "/api") &&
+				!strings.HasPrefix(r.URL.Path, "/proxies") {
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -111,7 +114,8 @@ func (s *Session) Middleware() mux.MiddlewareFunc {
 				return
 			}
 
-			next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, CtxUserid, u.Id)))
+			roleCtx := context.WithValue(ctx, CtxUserRoles, u.Roles)
+			next.ServeHTTP(w, r.WithContext(context.WithValue(roleCtx, CtxUserid, u.Id)))
 		})
 	}
 }

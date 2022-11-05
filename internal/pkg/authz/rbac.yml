@@ -1,0 +1,44 @@
+# 默认注册用户才能访问
+- id: 0
+  host: "*"
+  path: "**"
+  method: "*"
+  authorized_roles:
+    - "admin"
+    - "member"
+
+# 登录接口允许任何人访问
+- id: 11
+  host: "*"
+  path: "/oauth2/**"
+  method: "*"
+  allow_anyone: true
+
+# 以下规则限制只能由管理员请求
+- id: 101
+  host: "*"
+  path: "/api/v1/clusters"
+  method: "*"
+  authorized_roles:
+    - "admin"
+
+- id: 102
+  host: "*"
+  path: "/api/v1/providers"
+  method: "*"
+  authorized_roles:
+    - "admin"
+
+- id: 103
+  host: "*"
+  path: "/api/v1/registries"
+  method: "*"
+  authorized_roles:
+    - "admin"
+
+- id: 104
+  host: "*"
+  path: "/api/v1/builders/**"
+  method: "{PUT,PATCH,DELETE}"
+  authorized_roles:
+    - "admin"
