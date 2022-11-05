@@ -95,7 +95,7 @@ func (s *ProjectImageSvc) buildNewImage(ctx context.Context, in *image.Image, pr
 		return err
 	}
 
-	in.SetImage(imgReg.BuildImageWithTag(proj.Name, in.CommitId[:7]))
+	in.SetImage(imgReg.BuildImageWithTag(proj.NameID(), in.CommitId[:7]))
 	vap, err := s.velaApp.Get(ctx, in.Name, metav1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
 		return err
