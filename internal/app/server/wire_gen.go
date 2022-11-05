@@ -94,11 +94,11 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	imageWatcher := service.NewImageWatcher(projectImageSvc, localClients)
 	middlewareService := service.NewMiddlewareService(client, clientset, middlewareInstance, middlewareClaim, appService)
 	serviceOauth2 := service.NewProviderOauth2Svc(providerService)
-	projectService := service.NewProjectService(projectDao)
+	builderSvc := service.NewBuilderSvc(builderDao, imageRegistrySvc, localClients)
+	projectService := service.NewProjectService(projectDao, builderSvc)
 	routeService := service.NewRouteService(appService, routeDao)
 	deploymentDao := dao.NewDeploymentDao(database)
 	deploymentService := service.NewDeploymentService(deploymentDao, projectImageSvc, appService)
-	builderSvc := service.NewBuilderSvc(builderDao, imageRegistrySvc, localClients)
 	configConfig, err := config.New()
 	if err != nil {
 		return nil, err

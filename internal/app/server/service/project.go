@@ -13,10 +13,12 @@ import (
 
 type ProjectService struct {
 	daoProj *dao.ProjectDao
+
+	builderSvc *BuilderSvc
 }
 
-func NewProjectService(daoProj *dao.ProjectDao) *ProjectService {
-	return &ProjectService{daoProj: daoProj}
+func NewProjectService(daoProj *dao.ProjectDao, builderSvc *BuilderSvc) *ProjectService {
+	return &ProjectService{daoProj: daoProj, builderSvc: builderSvc}
 }
 
 func (p *ProjectService) List(ctx context.Context, in *project.ListRequest) (*project.ListResponse, error) {
@@ -28,7 +30,13 @@ func (p *ProjectService) List(ctx context.Context, in *project.ListRequest) (*pr
 }
 
 func (p *ProjectService) Create(ctx context.Context, in *project.Project) (*project.Project, error) {
+	defaultBuilder, err := p.builderSvc.daoBuilder.GetByName(ctx, "default")
+	if err != nil {
+		return nil, fmt.Errorf("defaultBuilder: %w", err)
+	}
+
 	in.OwnerUid = MustGetUserid(ctx)
+	in.BuilderId = defaultBuilder.Id
 	_, total, err := p.daoProj.List(ctx, bson.M{"owner_uid": in.GetOwnerUid(), "name": in.GetName()})
 	if err == nil && total != 0 {
 		return nil, fmt.Errorf("project %s already exists", in.GetName())
