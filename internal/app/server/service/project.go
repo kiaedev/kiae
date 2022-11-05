@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/api/project"
@@ -28,6 +29,13 @@ func (p *ProjectService) List(ctx context.Context, in *project.ListRequest) (*pr
 
 func (p *ProjectService) Create(ctx context.Context, in *project.Project) (*project.Project, error) {
 	in.OwnerUid = MustGetUserid(ctx)
+	_, total, err := p.daoProj.List(ctx, bson.M{"owner_uid": in.GetOwnerUid(), "name": in.GetName()})
+	if err == nil && total != 0 {
+		return nil, fmt.Errorf("project %s already exists", in.GetName())
+	} else if err != nil {
+		return nil, err
+	}
+
 	return p.daoProj.Create(ctx, in)
 }
 
