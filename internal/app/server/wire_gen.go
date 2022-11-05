@@ -99,14 +99,14 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	routeService := service.NewRouteService(appService, routeDao)
 	deploymentDao := dao.NewDeploymentDao(database)
 	deploymentService := service.NewDeploymentService(deploymentDao, projectImageSvc, appService)
+	userDao := dao.NewUserDao(database)
+	userSvc := service.NewUserSvc(userDao)
 	configConfig, err := config.New()
 	if err != nil {
 		return nil, err
 	}
 	oidcConfig := configConfig.OIDC
 	oidc := oauth2.NewOIDC(oidcConfig)
-	userDao := dao.NewUserDao(database)
-	userSvc := service.NewUserSvc(userDao)
 	session := service.NewSession(oidc, userSvc)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
@@ -126,6 +126,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		DeploymentService: deploymentService,
 		BuilderSvc:        builderSvc,
 		ImageRegistrySvc:  imageRegistrySvc,
+		UserSvc:           userSvc,
 		Session:           session,
 	}
 	proxy := klient.NewProxy(kubeconfig)

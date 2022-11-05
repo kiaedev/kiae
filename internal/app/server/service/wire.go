@@ -22,6 +22,7 @@ type ServiceSets struct {
 	*DeploymentService
 	*BuilderSvc
 	*ImageRegistrySvc
+	*UserSvc
 	*Session
 }
 

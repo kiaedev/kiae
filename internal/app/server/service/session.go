@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/mux"
@@ -41,6 +42,7 @@ func (s *Session) SetupEndpoints(router *mux.Router) {
 	s.oidc.Setup(func(path string, h http.HandlerFunc) {
 		router.HandleFunc(path, h)
 	})
+	router.HandleFunc("/api/v1/session", s.logout)
 }
 
 func (s *Session) idTokenHook(ctx context.Context, idTokenStr string) http.HandlerFunc {
@@ -52,6 +54,15 @@ func (s *Session) idTokenHook(ctx context.Context, idTokenStr string) http.Handl
 			return
 		}
 	}
+}
+
+func (s *Session) logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    "kiae-session",
+		Path:    "/",
+		MaxAge:  -1,
+		Expires: time.Now().Add(-100 * time.Hour),
+	})
 }
 
 func (s *Session) userInfoHook(ctx context.Context, userInfo *oidc.UserInfo) error {

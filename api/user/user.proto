@@ -49,4 +49,9 @@ service UserService {
             get: "/api/v1/users"
         };
     }
+    rpc Info (google.protobuf.Empty) returns (User) {
+        option (google.api.http) = {
+            get: "/api/v1/user"
+        };
+    }
 }

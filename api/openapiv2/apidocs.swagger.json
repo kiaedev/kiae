@@ -4098,6 +4098,28 @@
         ]
       }
     },
+    "/api/v1/user": {
+      "get": {
+        "operationId": "UserService_Info",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userUser"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/googlerpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
     "/api/v1/users": {
       "get": {
         "operationId": "UserService_List",

@@ -28,6 +28,7 @@ import (
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/api/route"
+	"github.com/kiaedev/kiae/api/user"
 	"github.com/kiaedev/kiae/build/front"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
@@ -123,6 +124,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = route.RegisterRouteServiceHandlerServer(ctx, mux, s.svcSets.RouteService)
 	_ = middleware.RegisterMiddlewareServiceHandlerServer(ctx, mux, s.svcSets.MiddlewareService)
 
+	_ = user.RegisterUserServiceHandlerServer(ctx, mux, s.svcSets.UserSvc)
 	_ = cluster.RegisterClusterServiceHandlerServer(ctx, mux, s.svcSets.ClusterService)
 	_ = image.RegisterRegistryServiceHandlerServer(ctx, mux, s.svcSets.ImageRegistrySvc)
 	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
