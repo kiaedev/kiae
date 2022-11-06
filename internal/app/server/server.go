@@ -21,6 +21,7 @@ import (
 	"github.com/kiaedev/kiae/api/deployment"
 	"github.com/kiaedev/kiae/api/egress"
 	"github.com/kiaedev/kiae/api/entry"
+	"github.com/kiaedev/kiae/api/gateway"
 	"github.com/kiaedev/kiae/api/graph"
 	"github.com/kiaedev/kiae/api/graph/generated"
 	"github.com/kiaedev/kiae/api/image"
@@ -128,6 +129,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 
 	_ = user.RegisterUserServiceHandlerServer(ctx, mux, s.svcSets.UserSvc)
 	_ = cluster.RegisterClusterServiceHandlerServer(ctx, mux, s.svcSets.ClusterService)
+	_ = gateway.RegisterGatewayServiceHandlerServer(ctx, mux, s.svcSets.Gateway)
 	_ = image.RegisterRegistryServiceHandlerServer(ctx, mux, s.svcSets.ImageRegistrySvc)
 	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
 

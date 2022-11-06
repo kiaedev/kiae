@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/storyicon/grbac"
 	"github.com/storyicon/grbac/pkg/meta"
 	"gopkg.in/yaml.v3"
@@ -27,7 +28,7 @@ func Middleware() mux.MiddlewareFunc {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			roles, ok := r.Context().Value("roles").([]string)
+			roles, ok := r.Context().Value(service.CtxUserRoles).([]string)
 			if !ok {
 				roles = []string{"anonymous"}
 			}

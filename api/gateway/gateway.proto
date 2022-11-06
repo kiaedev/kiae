@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package gateway;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "kiae/request.proto";
+
+
+option go_package = "github.com/kiaedev/kiae/api/gateway";
+
+service GatewayService {
+    rpc List (ListRequest) returns (ListResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/gateways"
+        };
+    }
+    rpc Create (Gateway) returns (Gateway) {
+        option (google.api.http) = {
+            post: "/api/v1/gateways"
+            body: "*"
+        };
+    }
+    rpc Update (UpdateRequest) returns (Gateway) {
+        option (google.api.http) = {
+            put: "/api/v1/gateways/{payload.id}",
+            body: "payload",
+            additional_bindings: {
+                patch: "/api/v1/gateways/{payload.id}"
+                body: "payload"
+            }
+        };
+    }
+    rpc Delete (kiae.IdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/api/v1/gateways/{id}"
+        };
+    }
+}
+
+message ListRequest {
+    string name = 1;
+}
+
+message ListResponse {
+    repeated Gateway items = 1;
+    int64 total = 2;
+}
+
+message UpdateRequest {
+    Gateway payload = 1;
+    google.protobuf.FieldMask update_mask = 2;
+}
+
+message Gateway {
+    string id = 1; // @gotags: bson:"_id,omitempty"
+    string name = 2;
+    string intro = 3;
+
+    repeated string hosts = 5;
+    bool https_enabled = 6; // @gotags: bson:"https_enabled,omitempty"
+    bool https_redirect = 7; // @gotags: bson:"https_redirect,omitempty"
+    string cert_issuer = 8; // @gotags: bson:"cert_issuer,omitempty"
+    Port custom_ports = 11; // @gotags: bson:"custom_ports,omitempty"
+
+    google.protobuf.Timestamp created_at = 101;
+    google.protobuf.Timestamp updated_at = 103;
+}
+
+message Port {
+    int32 port = 1;
+    string protocol = 2;
+}

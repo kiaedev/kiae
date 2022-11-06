@@ -24,6 +24,7 @@ type ServiceSets struct {
 	*ImageRegistrySvc
 	*UserSvc
 	*Session
+	*Gateway
 }
 
 var ProviderSet = wire.NewSet(
@@ -46,5 +47,6 @@ var ProviderSet = wire.NewSet(
 	NewImageRegistrySvc,
 	NewUserSvc,
 	NewSession,
+	NewGateway,
 	wire.Struct(new(ServiceSets), "*"),
 )

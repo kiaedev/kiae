@@ -17,4 +17,5 @@ var ProviderSet = wire.NewSet(
 	NewBuilderDao,
 	NewRegistryDao,
 	NewUserDao,
+	NewGateway,
 )

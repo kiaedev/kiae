@@ -108,6 +108,8 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	oidcConfig := configConfig.OIDC
 	oidc := oauth2.NewOIDC(oidcConfig)
 	session := service.NewSession(oidc, userSvc)
+	gateway := dao.NewGateway(database)
+	serviceGateway := service.NewGateway(gateway)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
@@ -128,6 +130,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		ImageRegistrySvc:  imageRegistrySvc,
 		UserSvc:           userSvc,
 		Session:           session,
+		Gateway:           serviceGateway,
 	}
 	proxy := klient.NewProxy(kubeconfig)
 	server := &Server{
