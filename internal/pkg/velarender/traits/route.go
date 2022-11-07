@@ -16,7 +16,7 @@ type RouteTrait struct {
 func NewRouteTrait(name string, entries []*entry.Entry, rs []*route.Route) *RouteTrait {
 	gateways := make([]Gateway, 0, len(entries))
 	for _, e := range entries {
-		gateways = append(gateways, Gateway{e.Gateway, e.Host})
+		gateways = append(gateways, Gateway{"kiae-system/" + e.Gateway, e.Host})
 	}
 
 	routes := make([]Route, 0, len(rs))

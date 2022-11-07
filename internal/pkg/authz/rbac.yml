@@ -25,14 +25,14 @@
 - id: 102
   host: "*"
   path: "/api/v1/providers"
-  method: "*"
+  method: "{PUT,PATCH,DELETE}"
   authorized_roles:
     - "admin"
 
 - id: 103
   host: "*"
   path: "/api/v1/registries"
-  method: "*"
+  method: "{PUT,PATCH,DELETE}"
   authorized_roles:
     - "admin"
 
