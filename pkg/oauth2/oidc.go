@@ -115,7 +115,7 @@ func (s *OIDC) getProvider(ctx context.Context) (*oidc.Provider, error) {
 		return v.(*oidc.Provider), nil
 	}
 
-	op, err := oidc.NewProvider(ctx, issuer)
+	op, err := oidc.NewProvider(oidc.InsecureIssuerURLContext(ctx, issuer), "http://kiae-dex:5556/dex")
 	if err != nil {
 		return nil, err
 	}
