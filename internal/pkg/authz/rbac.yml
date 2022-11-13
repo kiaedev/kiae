@@ -3,6 +3,11 @@
   host: "*"
   path: "**"
   method: "*"
+  allow_anyone: true
+- id: 1
+  host: "*"
+  path: "/api/**"
+  method: "*"
   authorized_roles:
     - "admin"
     - "member"
