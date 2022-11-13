@@ -11,7 +11,7 @@ import (
 )
 
 type OidcConfig struct {
-	Endpoint     string `yaml:"endpoint"`
+	Issuer       string `yaml:"issuer"`
 	ClientID     string `yaml:"client_id"`
 	ClientSecret string `yaml:"client_secret"`
 }
@@ -109,13 +109,13 @@ func (s *OIDC) getUserInfo(ctx context.Context, token *oauth2.Token) (*oidc.User
 }
 
 func (s *OIDC) getProvider(ctx context.Context) (*oidc.Provider, error) {
-	issuer := s.cfg.Endpoint
+	issuer := s.cfg.Issuer
 	v, ok := s.Load(issuer)
 	if ok {
 		return v.(*oidc.Provider), nil
 	}
 
-	op, err := oidc.NewProvider(oidc.InsecureIssuerURLContext(ctx, issuer), "http://kiae-dex:5556/dex")
+	op, err := oidc.NewProvider(ctx, issuer)
 	if err != nil {
 		return nil, err
 	}

@@ -73,7 +73,7 @@ func (s *Session) userInfoHook(ctx context.Context, userInfo *oidc.UserInfo) err
 func (s *Session) Middleware() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, "/oauth2") {
+			if strings.HasPrefix(r.URL.Path, "/oauth2") || strings.HasPrefix(r.URL.Path, "/proxies/dex") {
 				next.ServeHTTP(w, r)
 				return
 			}

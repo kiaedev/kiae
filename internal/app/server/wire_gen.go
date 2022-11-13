@@ -105,7 +105,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	oidcConfig := configConfig.OIDC
+	oidcConfig := configConfig.Oidc
 	oidc := oauth2.NewOIDC(oidcConfig)
 	session := service.NewSession(oidc, userSvc)
 	gateway := dao.NewGateway(database)
@@ -138,6 +138,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		watcher:       watcher,
 		graphResolver: resolver,
 		svcSets:       serviceSets,
+		lokiClient:    lokiClient,
 		proxy:         proxy,
 	}
 	return server, nil

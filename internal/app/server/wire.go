@@ -41,7 +41,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		dbConstructor,
 		lokiConstructor,
 		klient.ProviderSet,
-		wire.FieldsOf(new(*config.Config), "OIDC"),
+		wire.FieldsOf(new(*config.Config), "Oidc"),
 		oauth2.NewOIDC,
 		mux.NewRouter,
 		dao.ProviderSet,

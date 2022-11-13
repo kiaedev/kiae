@@ -1,14 +1,19 @@
 debug: false
 
+server:
+  port: 8024
+
 mongodb:
   dsn: mongodb://root:admin@localhost:27017
   database: kiae
 
+oidc:
+  issuer: http://localhost:8081/proxies/dex
+  clientID: kiae-1hcHAtc2Vj
+  clientSecret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+dex:
+  endpoint: http://localhost:5556
+
 loki:
   endpoint: http://localhost:3100
-
-oidc:
-  enabled: false
-  endpoint: https://accounts.google.com
-  clientID: 4574xxxxxxxxxxxxx.apps.googleusercontent.com
-  clientSecret: GOCSPX-9irAxNOxxxxxxxxxxxxxxxxxxxxxx

@@ -2,10 +2,13 @@ package loki
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/koding/websocketproxy"
 )
 
 type Client struct {
@@ -37,4 +40,10 @@ func (l *Client) QueryRange(query string, limit int64, start, end time.Time, dir
 	}
 
 	return resp.Data.Result, err
+}
+
+func (l *Client) WsProxy() *websocketproxy.WebsocketProxy {
+	u, _ := url.Parse(l.host)
+	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
+	return websocketproxy.NewProxy(u)
 }

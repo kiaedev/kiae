@@ -22,6 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/kiaedev/kiae/internal/app/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -51,7 +54,7 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 
 	serverCmd.Flags().Bool("debug", false, "specify the debug")
-	serverCmd.Flags().String("kubeconfig", "", "specify kubeconfig of the kubernetes cluster")
+	serverCmd.Flags().String("kubeconfig", filepath.Join(os.Getenv("HOME"), ".kube/config"), "specify kubeconfig of the kubernetes cluster")
 
 	_ = viper.BindPFlag("debug", serverCmd.Flags().Lookup("debug"))
 	_ = viper.BindPFlag("kubeconfig", serverCmd.Flags().Lookup("kubeconfig"))

@@ -6,7 +6,7 @@ import (
 )
 
 type Config struct {
-	OIDC *oauth2.OidcConfig `yaml:"oidc"`
+	Oidc *oauth2.OidcConfig `yaml:"oidc"`
 }
 
 func New() (*Config, error) {

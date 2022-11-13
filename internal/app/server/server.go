@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"time"
 
@@ -35,7 +36,7 @@ import (
 	"github.com/kiaedev/kiae/internal/app/server/watch"
 	"github.com/kiaedev/kiae/internal/pkg/authz"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
-	"github.com/koding/websocketproxy"
+	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 )
@@ -46,6 +47,7 @@ type Server struct {
 	watcher       *watch.Watcher
 	graphResolver *graph.Resolver
 	svcSets       *service.ServiceSets
+	lokiClient    *loki.Client
 	proxy         *klient.Proxy
 }
 
@@ -67,13 +69,14 @@ func (s *Server) Run(ctx context.Context) error {
 }
 
 func (s *Server) setupProxiesEndpoints() {
-	u, _ := url.Parse(viper.GetString("loki.endpoint"))
-	u.Scheme = "ws"
-	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
-	s.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", websocketproxy.NewProxy(u)))
+	s.Handle("/proxies/loki/api/v1/tail", http.StripPrefix("/proxies", s.lokiClient.WsProxy()))
 
-	// proxy for k8s api
+	// proxy for k8s
 	s.PathPrefix("/proxies/kube/").Handler(http.StripPrefix("/proxies/kube", s.proxy))
+
+	// proxy for dex
+	u, _ := url.Parse(viper.GetString("dex.endpoint"))
+	s.PathPrefix("/proxies/dex/").Handler(httputil.NewSingleHostReverseProxy(u))
 }
 
 func (s *Server) setupGraphQLEndpoints() {
