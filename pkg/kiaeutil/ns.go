@@ -25,5 +25,5 @@ func BuildAppNs(env string) string {
 		env = "custom"
 	}
 
-	return fmt.Sprintf("%sapp-%s", NsPrefix, env)
+	return fmt.Sprintf("%sapp%s", NsPrefix, env)
 }
