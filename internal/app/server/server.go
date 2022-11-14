@@ -30,6 +30,7 @@ import (
 	"github.com/kiaedev/kiae/api/project"
 	"github.com/kiaedev/kiae/api/provider"
 	"github.com/kiaedev/kiae/api/route"
+	"github.com/kiaedev/kiae/api/system"
 	"github.com/kiaedev/kiae/api/user"
 	"github.com/kiaedev/kiae/build/front"
 	"github.com/kiaedev/kiae/internal/app/server/service"
@@ -134,6 +135,7 @@ func (s *Server) setupEndpoints(ctx context.Context, mux *runtime.ServeMux) {
 	_ = gateway.RegisterGatewayServiceHandlerServer(ctx, mux, s.svcSets.Gateway)
 	_ = image.RegisterRegistryServiceHandlerServer(ctx, mux, s.svcSets.ImageRegistrySvc)
 	_ = builder.RegisterBuilderServiceHandlerServer(ctx, mux, s.svcSets.BuilderSvc)
+	_ = system.RegisterSystemServiceHandlerServer(ctx, mux, s.svcSets.System)
 
 	s.svcSets.Oauth2.SetupEndpoints(s.Router)
 	s.svcSets.Session.SetupEndpoints(s.Router)

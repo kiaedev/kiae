@@ -49,7 +49,7 @@
       "name": "RouteService"
     },
     {
-      "name": "SettingsService"
+      "name": "SystemService"
     },
     {
       "name": "UserService"
@@ -4324,14 +4324,14 @@
         ]
       }
     },
-    "/api/v1/settings": {
+    "/api/v1/system/status": {
       "get": {
-        "operationId": "SettingsService_List",
+        "operationId": "SystemService_GetStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/settingsListReply"
+              "$ref": "#/definitions/systemSystemStatus"
             }
           },
           "default": {
@@ -4342,7 +4342,7 @@
           }
         },
         "tags": [
-          "SettingsService"
+          "SystemService"
         ]
       }
     },
@@ -5816,27 +5816,13 @@
       ],
       "default": "FORWARD"
     },
-    "settingsListReply": {
+    "systemSystemStatus": {
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string"
+        "ready": {
+          "type": "boolean"
         }
       }
-    },
-    "settingsSystem": {
-      "type": "object"
-    },
-    "settingsUpdateReply": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        }
-      }
-    },
-    "settingsVolume": {
-      "type": "object"
     },
     "userUser": {
       "type": "object",

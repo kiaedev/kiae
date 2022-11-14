@@ -110,6 +110,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 	session := service.NewSession(oidc, userSvc)
 	gateway := dao.NewGateway(database)
 	serviceGateway := service.NewGateway(gateway, localClients)
+	system := service.NewSystem(providerDao, imageRegistryDao, builderDao)
 	serviceSets := &service.ServiceSets{
 		AppService:        appService,
 		AppPodsService:    appPodsService,
@@ -131,6 +132,7 @@ func buildInjectors(kubeconfig *rest.Config) (*Server, error) {
 		UserSvc:           userSvc,
 		Session:           session,
 		Gateway:           serviceGateway,
+		System:            system,
 	}
 	proxy := klient.NewProxy(kubeconfig)
 	server := &Server{

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/kiaeudev/kiae/api/system";
+
+package system;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service SystemService {
+    rpc GetStatus (google.protobuf.Empty) returns (SystemStatus) {
+        option (google.api.http) = {
+            get: "/api/v1/system/status"
+        };
+    }
+}
+
+message SystemStatus {
+    bool ready = 1;
+
+}
