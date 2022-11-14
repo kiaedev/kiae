@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/kiaedev/kiae/api/user"
@@ -31,34 +30,34 @@ func (s *UserSvc) Info(ctx context.Context, empty *emptypb.Empty) (*user.User, e
 }
 
 func (s *UserSvc) saveFromOidcUserInfo(ctx context.Context, userInfo *oidc.UserInfo) (err error) {
-	u, err := s.userDao.GetByOuterId(ctx, userInfo.Subject)
-	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
-		return err
-	} else if err != nil {
-		u := &user.User{
-			Email:   userInfo.Email,
-			OuterId: userInfo.Subject,
-			Roles:   []string{"member"},
-		}
-		_, err = s.userDao.Create(ctx, u)
-		return
-	}
-
 	extra := make(map[string]any)
 	if err := userInfo.Claims(&extra); err != nil {
 		return err
 	}
 
-	u.Email = userInfo.Email
-	u.Nickname = u.Email[:strings.Index(u.Email, "@")]
-	avatar, ok := extra["picture"].(string)
-	if ok {
-		u.Avatar = avatar
+	u := &user.User{
+		Email:   userInfo.Email,
+		OuterId: userInfo.Subject,
+		Roles:   []string{"member"},
 	}
 	username, ok := extra["name"].(string)
 	if ok {
 		u.Nickname = username
 	}
+	avatar, ok := extra["picture"].(string)
+	if ok {
+		u.Avatar = avatar
+	}
+
+	eu, err := s.userDao.GetByOuterId(ctx, userInfo.Subject)
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		return err
+	} else if err != nil {
+		_, err = s.userDao.Create(ctx, u)
+		return
+	}
+
+	u.Id = eu.Id
 	_, err = s.userDao.Update(ctx, u)
 	return
 }
