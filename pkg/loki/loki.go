@@ -44,6 +44,10 @@ func (l *Client) QueryRange(query string, limit int64, start, end time.Time, dir
 
 func (l *Client) WsProxy() *websocketproxy.WebsocketProxy {
 	u, _ := url.Parse(l.host)
+	u.Scheme = "ws"
+	if u.Scheme == "https" {
+		u.Scheme = "wss"
+	}
 	websocketproxy.DefaultUpgrader.CheckOrigin = func(req *http.Request) bool { return true }
 	return websocketproxy.NewProxy(u)
 }
