@@ -34,7 +34,6 @@ import (
 	"github.com/kiaedev/kiae/build/front"
 	"github.com/kiaedev/kiae/internal/app/server/service"
 	"github.com/kiaedev/kiae/internal/app/server/watch"
-	"github.com/kiaedev/kiae/internal/pkg/authz"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
 	"github.com/kiaedev/kiae/pkg/loki"
 	"github.com/spf13/viper"
@@ -62,7 +61,7 @@ func (s *Server) Run(ctx context.Context) error {
 	s.watcher.Start(ctx)
 
 	s.Use(s.svcSets.Session.Middleware())
-	s.Use(authz.Middleware())
+	// s.Use(authz.Middleware()) // todo how to create the first admin user
 	s.setupProxiesEndpoints()
 	s.setupGraphQLEndpoints()
 	return s.runHTTPServer(ctx)
