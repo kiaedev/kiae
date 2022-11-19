@@ -2476,6 +2476,9 @@
                 "status": {
                   "$ref": "#/definitions/imageImageStatus"
                 },
+                "builderId": {
+                  "type": "string"
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -3638,6 +3641,9 @@
                 "status": {
                   "$ref": "#/definitions/imageImageStatus"
                 },
+                "builderId": {
+                  "type": "string"
+                },
                 "createdAt": {
                   "type": "string",
                   "format": "date-time"
@@ -3712,6 +3718,9 @@
                 },
                 "status": {
                   "$ref": "#/definitions/imageImageStatus"
+                },
+                "builderId": {
+                  "type": "string"
                 },
                 "createdAt": {
                   "type": "string",
@@ -5122,6 +5131,9 @@
         },
         "status": {
           "$ref": "#/definitions/imageImageStatus"
+        },
+        "builderId": {
+          "type": "string"
         },
         "createdAt": {
           "type": "string",

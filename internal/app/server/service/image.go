@@ -68,7 +68,8 @@ func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 	// for import a image from external hub
 	if in.Image != "" {
 		in.SetImage(in.Image)
-		goto DIRECT
+		in.Status = image.Image_PUBLISHED
+		goto DIRECT_CREATE
 	}
 
 	// create a new image from the git source repository
@@ -76,7 +77,7 @@ func (s *ProjectImageSvc) Create(ctx context.Context, in *image.Image) (*image.I
 		return nil, err
 	}
 
-DIRECT:
+DIRECT_CREATE:
 	return s.daoProjImg.Create(ctx, in)
 }
 
@@ -95,6 +96,7 @@ func (s *ProjectImageSvc) buildNewImage(ctx context.Context, in *image.Image, pr
 		return err
 	}
 
+	in.BuilderId = proj.BuilderId
 	in.SetImage(imgReg.BuildImageWithTag(proj.NameID(), in.CommitId[:7]))
 	vap, err := s.velaApp.Get(ctx, in.Name, metav1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
@@ -126,10 +128,15 @@ func (s *ProjectImageSvc) Delete(ctx context.Context, in *kiae.IdRequest) (*empt
 		return nil, err
 	}
 
+	if img.BuilderId == "" {
+		goto DIRECT_DELETE
+	}
+
 	if err := s.velaApp.Delete(ctx, img.Name, metav1.DeleteOptions{}); err != nil {
 		return nil, err
 	}
 
+DIRECT_DELETE:
 	return &emptypb.Empty{}, s.daoProjImg.Delete(ctx, in.Id)
 }
 

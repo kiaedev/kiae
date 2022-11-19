@@ -29,6 +29,7 @@ message Image {
         FAILED = 5;
     }
     Status status = 9;
+    string builder_id = 10;
 
     google.protobuf.Timestamp created_at = 101; // @gotags: bson:"created_at,omitempty"
     google.protobuf.Timestamp updated_at = 103; // @gotags: bson:"updated_at,omitempty"

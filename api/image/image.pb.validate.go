@@ -72,6 +72,8 @@ func (m *Image) validate(all bool) error {
 
 	// no validation rules for Status
 
+	// no validation rules for BuilderId
+
 	if all {
 		switch v := interface{}(m.GetCreatedAt()).(type) {
 		case interface{ ValidateAll() error }:
