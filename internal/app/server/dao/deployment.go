@@ -17,7 +17,7 @@ type DeploymentDao struct {
 
 func NewDeploymentDao(db *mongo.Database) *DeploymentDao {
 	return &DeploymentDao{
-		Dao: NewDao(db.Collection("deployments")),
+		Dao: NewDao(db.Collection("deployment")),
 	}
 }
 

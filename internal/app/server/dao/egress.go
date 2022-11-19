@@ -17,7 +17,7 @@ type EgressDao struct {
 
 func NewEgressDao(db *mongo.Database) *EgressDao {
 	return &EgressDao{
-		Dao: NewDao(db.Collection("depends")),
+		Dao: NewDao(db.Collection("dependent")),
 	}
 }
 

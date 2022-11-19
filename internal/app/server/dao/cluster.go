@@ -17,7 +17,7 @@ type ClusterDao struct {
 
 func NewClusterDao(db *mongo.Database) *ClusterDao {
 	return &ClusterDao{
-		Dao: NewDao(db.Collection("clusters")),
+		Dao: NewDao(db.Collection("cluster")),
 	}
 }
 

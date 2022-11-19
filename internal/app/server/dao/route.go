@@ -17,7 +17,7 @@ type RouteDao struct {
 
 func NewRouteDao(db *mongo.Database) *RouteDao {
 	return &RouteDao{
-		Dao: NewDao(db.Collection("routes")),
+		Dao: NewDao(db.Collection("route")),
 	}
 }
 

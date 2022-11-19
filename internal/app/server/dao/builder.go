@@ -17,7 +17,7 @@ type BuilderDao struct {
 
 func NewBuilderDao(db *mongo.Database) *BuilderDao {
 	return &BuilderDao{
-		Dao: NewDao(db.Collection("builders")),
+		Dao: NewDao(db.Collection("builder")),
 	}
 }
 

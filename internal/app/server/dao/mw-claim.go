@@ -17,7 +17,7 @@ type MiddlewareClaim struct {
 
 func NewMiddlewareClaimDao(db *mongo.Database) *MiddlewareClaim {
 	return &MiddlewareClaim{
-		Dao: NewDao(db.Collection("middleware-claims")),
+		Dao: NewDao(db.Collection("middleware-claim")),
 	}
 }
 

@@ -17,7 +17,7 @@ type Gateway struct {
 
 func NewGateway(db *mongo.Database) *Gateway {
 	return &Gateway{
-		Dao: NewDao(db.Collection("gateways")),
+		Dao: NewDao(db.Collection("gateway")),
 	}
 }
 

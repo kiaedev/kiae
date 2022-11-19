@@ -18,7 +18,7 @@ type MiddlewareInstance struct {
 
 func NewMiddlewareInstanceDao(db *mongo.Database) *MiddlewareInstance {
 	return &MiddlewareInstance{
-		Dao: NewDao(db.Collection("middleware-instances")),
+		Dao: NewDao(db.Collection("middleware-instance")),
 	}
 }
 

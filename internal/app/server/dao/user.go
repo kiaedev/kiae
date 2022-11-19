@@ -17,7 +17,7 @@ type UserDao struct {
 
 func NewUserDao(db *mongo.Database) *UserDao {
 	return &UserDao{
-		Dao: NewDao(db.Collection("users")),
+		Dao: NewDao(db.Collection("user")),
 	}
 }
 

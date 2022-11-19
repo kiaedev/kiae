@@ -17,7 +17,7 @@ type ImageRegistryDao struct {
 
 func NewRegistryDao(db *mongo.Database) *ImageRegistryDao {
 	return &ImageRegistryDao{
-		Dao: NewDao(db.Collection("registries")),
+		Dao: NewDao(db.Collection("registry")),
 	}
 }
 

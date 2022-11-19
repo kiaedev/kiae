@@ -17,7 +17,7 @@ type EntryDao struct {
 
 func NewEntryDao(db *mongo.Database) *EntryDao {
 	return &EntryDao{
-		Dao: NewDao(db.Collection("entries")),
+		Dao: NewDao(db.Collection("entrypoint")),
 	}
 }
 

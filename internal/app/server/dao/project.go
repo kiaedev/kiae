@@ -17,7 +17,7 @@ type ProjectDao struct {
 
 func NewProject(db *mongo.Database) *ProjectDao {
 	return &ProjectDao{
-		Dao: NewDao(db.Collection("projects")),
+		Dao: NewDao(db.Collection("project")),
 	}
 }
 

@@ -17,7 +17,7 @@ type ProviderDao struct {
 
 func NewProviderDao(db *mongo.Database) *ProviderDao {
 	return &ProviderDao{
-		Dao: NewDao(db.Collection("providers")),
+		Dao: NewDao(db.Collection("provider")),
 	}
 }
 

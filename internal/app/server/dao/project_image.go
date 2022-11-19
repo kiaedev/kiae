@@ -17,7 +17,7 @@ type ProjectImageDao struct {
 
 func NewProjectImageDao(db *mongo.Database) *ProjectImageDao {
 	return &ProjectImageDao{
-		Dao: NewDao(db.Collection("project-images")),
+		Dao: NewDao(db.Collection("image")),
 	}
 }
 

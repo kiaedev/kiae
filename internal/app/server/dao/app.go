@@ -17,7 +17,7 @@ type AppDao struct {
 
 func NewApp(db *mongo.Database) *AppDao {
 	return &AppDao{
-		Dao: NewDao(db.Collection("apps")),
+		Dao: NewDao(db.Collection("app")),
 	}
 }
 
