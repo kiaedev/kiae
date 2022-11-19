@@ -7,6 +7,7 @@ import (
 	"github.com/kiaedev/kiae/api/kiae"
 	"github.com/kiaedev/kiae/internal/app/server/dao"
 	"github.com/kiaedev/kiae/internal/pkg/klient"
+	"github.com/kiaedev/kiae/internal/pkg/velarender/components"
 	"github.com/oam-dev/kubevela-core-api/apis/core.oam.dev/common"
 	"github.com/oam-dev/kubevela-core-api/pkg/generated/client/clientset/versioned/typed/core.oam.dev/v1beta1"
 	"github.com/oam-dev/kubevela-core-api/pkg/oam/util"
@@ -42,10 +43,11 @@ func (s *Gateway) Create(ctx context.Context, in *gateway.Gateway) (*gateway.Gat
 	}
 
 	vap.SetName(in.Name)
+	istioGateway := components.NewIstioGateway(in)
 	vap.Spec.Components = append(vap.Spec.Components, common.ApplicationComponent{
-		Name:       in.Name,
-		Type:       "k-istio-gateway",
-		Properties: util.Object2RawExtension(in),
+		Name:       istioGateway.GetName(),
+		Type:       istioGateway.GetType(),
+		Properties: util.Object2RawExtension(istioGateway),
 	})
 
 	if _, err := s.velaApp.Create(ctx, vap, metav1.CreateOptions{}); err != nil {
