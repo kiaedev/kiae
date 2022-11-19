@@ -27,8 +27,7 @@ func NewProxy(cfg *rest.Config) *Proxy {
 	localHpProxy := httputil.NewSingleHostReverseProxy(target)
 	localHpProxy.Transport = wTransport
 
-	wssScheme := func(u *url.URL) *url.URL { ur := *u; ur.Scheme = "wss"; return &ur }
-	localWsProxy := websocketproxy.NewProxy(wssScheme(target))
+	localWsProxy := websocketproxy.NewProxy(replaceWsScheme(target))
 	localWsProxy.Dialer = &websocket.Dialer{
 		Proxy:            http.ProxyFromEnvironment,
 		HandshakeTimeout: 45 * time.Second,
@@ -54,4 +53,14 @@ func (p *Proxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	// fixme: debug why not support websocket, can be replace the localWsProxy?
 	p.localHpProxy.ServeHTTP(rw, req)
+}
+
+func replaceWsScheme(u *url.URL) *url.URL {
+	ur := *u
+	ur.Scheme = "ws"
+	if u.Scheme == "https" {
+		ur.Scheme = "wss"
+	}
+
+	return &ur
 }
