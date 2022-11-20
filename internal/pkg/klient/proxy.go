@@ -28,6 +28,11 @@ func NewProxy(cfg *rest.Config) *Proxy {
 	localHpProxy.Transport = wTransport
 
 	localWsProxy := websocketproxy.NewProxy(replaceWsScheme(target))
+	localWsProxy.Director = func(req *http.Request, out http.Header) {
+		if cfg.BearerToken != "" {
+			out.Set("Authorization", fmt.Sprintf("Bearer %s", cfg.BearerToken))
+		}
+	}
 	localWsProxy.Dialer = &websocket.Dialer{
 		Proxy:            http.ProxyFromEnvironment,
 		HandshakeTimeout: 45 * time.Second,
