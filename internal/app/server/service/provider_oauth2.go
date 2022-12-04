@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kiaedev/kiae/pkg/oauth2"
+	"github.com/saltbo/gopkg/httputil"
 	oauth22 "golang.org/x/oauth2"
 )
 
@@ -45,7 +46,7 @@ func buildRedirectURL(r *http.Request) string {
 	query := make(url.Values)
 	query.Set("provider", r.URL.Query().Get("provider"))
 	query.Set("callback", r.URL.Query().Get("callback"))
-	u := &url.URL{Scheme: "http", Host: r.Host, RawQuery: query.Encode()}
+	u := &url.URL{Scheme: httputil.GetScheme(r), Host: r.Host, RawQuery: query.Encode()}
 	u.Path = "/provider/oauth2/callback"
 	return u.String()
 }

@@ -9,7 +9,7 @@ require (
 	github.com/crossplane/crossplane-runtime v0.14.1-0.20210722005935-0b469fcc77cd
 	github.com/envoyproxy/protoc-gen-validate v0.6.2
 	github.com/favadi/protoc-go-inject-tag v1.4.0
-	github.com/go-resty/resty/v2 v2.3.0
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/wire v0.5.0
 	github.com/gorilla/mux v1.8.0
@@ -21,7 +21,8 @@ require (
 	github.com/oam-dev/cluster-gateway v1.5.0
 	github.com/oam-dev/kubevela-core-api v1.2.6
 	github.com/pivotal/kpack v0.7.1
-	github.com/saltbo/gopkg v0.0.0-20210820093533-07a5e6511706
+	github.com/saltbo/gopkg/httputil v0.0.0-20221204054910-9488fb446c4b
+	github.com/saltbo/gopkg/strutil v0.0.0-20221204054910-9488fb446c4b
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.12.0
 	github.com/storyicon/grbac v0.0.0-20200224041032-a0461737df7e
@@ -93,6 +94,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/saltbo/gopkg/sliceutil v0.0.0-20221024031008-7af9787873bd // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect

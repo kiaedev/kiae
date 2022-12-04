@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/saltbo/gopkg/httputil"
 	"golang.org/x/oauth2"
 )
 
@@ -76,7 +77,7 @@ func (s *Oauth2) callback(w http.ResponseWriter, r *http.Request) {
 }
 
 func buildDefaultRedirectURL(r *http.Request) string {
-	u := &url.URL{Scheme: "http", Host: r.Host}
+	u := &url.URL{Scheme: httputil.GetScheme(r), Host: r.Host}
 	u.Path = "/oauth2/callback"
 	return u.String()
 }
